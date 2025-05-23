@@ -6,14 +6,14 @@ import Footer from './layout/Footer';
 import EmergencyBanner from './layout/EmergencyBanner';
 
 // Homepage Sections
-import HeroSection from './homepage/HeroSection';
-import StatisticsSection from './homepage/StatisticsSection';
-import DonationProcess from './homepage/DonationProcess';
-import BloodTypesSection from './homepage/BloodTypesSection';
-import LocationsSection from './homepage/LocationsSection';
-import AboutSection from './homepage/AboutSection';
-import TestimonialsSection from './homepage/TestimonialsSection';
-import NewsSection from './homepage/NewsSection';
+import HeroSection from '../page/homepage/HeroSection';
+import StatisticsSection from '../page/homepage/StatisticsSection';
+import DonationProcess from '../page/homepage/DonationProcess';
+import BloodTypesSection from '../page/homepage/BloodTypesSection';
+import LocationsSection from '../page/homepage/LocationsSection';
+import AboutSection from '../page/homepage/AboutSection';
+import TestimonialsSection from '../page/homepage/TestimonialsSection';
+import NewsSection from '../page/homepage/NewsSection';
 
 // Forms
 import QuickDonationForm from './forms/QuickDonationForm';
