@@ -16,7 +16,7 @@ function Footer() {
               <span className="fw-bold fs-4">Blood Donation Center</span>
             </div>
             <p className="text-muted">
-              Cùng nhau xây dựng cộng đồng hiến máu tình nguyện, mang lại hy vọng cho những người cần máu.
+              Cùng nhau xây dựng cộng đồng hiến máu tình nguyện, mang lại hy vọng cho những người cần máu...
             </p>
           </div>
           <div className="col-lg-2 col-md-6 mb-4">
