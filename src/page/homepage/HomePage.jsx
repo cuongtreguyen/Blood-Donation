@@ -1,7 +1,6 @@
 import React from 'react';
 
 // Layout Components
-import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import EmergencyBanner from '../../components/layout/EmergencyBanner';
 

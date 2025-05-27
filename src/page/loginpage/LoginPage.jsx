@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Form, Input, Checkbox, Button } from "antd";
 import { FaGoogle, FaFacebook, FaApple, FaMoon, FaSun } from "react-icons/fa";
 import { IoLanguage } from "react-icons/io5";
+import { Link } from "react-router-dom";
 
 const LoginPage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -26,7 +27,7 @@ const LoginPage = () => {
               alt="Logo"
               className="w-10 h-10 rounded-full"
             />
-            <h1 className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+            <h1 style={{color : "red"}} className={`text-2xl font-bold ${isDarkMode ? "text-red-500" : "text-gray-800"}`}>
               Blood Donation Support
             </h1>
           </div>
@@ -67,23 +68,26 @@ const LoginPage = () => {
 
           <div className="flex items-center justify-between">
             <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox className={isDarkMode ? "text-white" : "text-gray-700"}>Remember me</Checkbox>
+              <Checkbox style={{color:"red"}} className={isDarkMode ? "text-red-500" : "text-gray-700"}>Remember me</Checkbox>
             </Form.Item>
-            <a href="#" className="text-sm font-medium text-red-600 hover:text-red-500">
+            <a href="#" style={{ color: "red", textDecoration: "none" }}
+            className="text-sm font-medium text-red-600 hover:text-red-500">
               Forgot password?
             </a>
           </div>
 
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={isLoading}
-              className="w-full bg-red-600 hover:bg-red-700"
-            >
-              Sign in
-            </Button>
-          </Form.Item>
+      <Form.Item>
+
+<Button
+  style={{ backgroundColor: "red" }}
+  type="primary"
+  htmlType="submit"
+  loading={isLoading}
+  className="w-full bg-red-200 hover:bg-red-700 text-white border-none"
+>
+  Sign in
+</Button>
+</Form.Item>
 
           <div className="mt-6">
             <div className="relative">
@@ -98,18 +102,19 @@ const LoginPage = () => {
             </div>
 
             <div className="mt-6 grid grid-cols-3 gap-3">
-              <Button icon={<FaGoogle className="text-red-500" />} className="w-full bg-white border hover:bg-gray-50" />
-              <Button icon={<FaFacebook className="text-blue-600" />} className="w-full bg-white border hover:bg-gray-50" />
-              <Button icon={<FaApple className="text-gray-800" />} className="w-full bg-white border hover:bg-gray-50" />
             </div>
           </div>
         </Form>
 
         <p className={`mt-10 text-center text-sm ${isDarkMode ? "text-white" : "text-gray-500"}`}>
           Not a member?{" "}
-          <a href="#" className="font-medium text-red-600 hover:text-red-500">
+          {/* <a href="#" className="font-medium text-red-600 hover:text-red-500">
             Register now
-          </a>
+          </a> */}
+          <Link to="/register" style={{ color: "red", textDecoration: "none" }}
+          className="font-medium text-red-300 hover:text-red-500">
+            Register now
+          </Link>
         </p>
       </div>
 
