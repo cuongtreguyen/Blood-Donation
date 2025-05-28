@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Form, Input, Checkbox, Button } from "antd";
-import { FaGoogle, FaFacebook, FaApple, FaMoon, FaSun } from "react-icons/fa";
+import { FaMoon, FaSun } from "react-icons/fa";
 import { IoLanguage } from "react-icons/io5";
+import { Link } from "react-router-dom";
 
 const LoginPage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -69,7 +70,7 @@ const LoginPage = () => {
             <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox className={isDarkMode ? "text-white" : "text-gray-700"}>Remember me</Checkbox>
             </Form.Item>
-            <a href="#" className="text-sm font-medium text-red-600 hover:text-red-500">
+            <a href="#"  style={{ color: "red" }} className="text-sm font-medium text-red-600 hover:text-red-500">
               Forgot password?
             </a>
           </div>
@@ -85,31 +86,17 @@ const LoginPage = () => {
             </Button>
           </Form.Item>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className={`px-2 ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-500"}`}>
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-3 gap-3">
-              <Button icon={<FaGoogle className="text-red-500" />} className="w-full bg-white border hover:bg-gray-50" />
-              <Button icon={<FaFacebook className="text-blue-600" />} className="w-full bg-white border hover:bg-gray-50" />
-              <Button icon={<FaApple className="text-gray-800" />} className="w-full bg-white border hover:bg-gray-50" />
-            </div>
-          </div>
+          
         </Form>
 
         <p className={`mt-10 text-center text-sm ${isDarkMode ? "text-white" : "text-gray-500"}`}>
           Not a member?{" "}
-          <a href="#" className="font-medium text-red-600 hover:text-red-500">
+          {/* <a href="#" className="font-medium text-red-600 hover:text-red-500">
             Register now
-          </a>
+          </a> */}
+          <Link to="/register" style={{ color: "red", textDecoration: "none" }} className="font-medium text-red-600 hover:text-red-500">
+          Register now</Link>
+          
         </p>
       </div>
 
