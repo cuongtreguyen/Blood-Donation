@@ -7,6 +7,7 @@ import LoginPage from "./page/loginpage/LoginPage";
 import MainLayout from "./components/layout/MainLayout";
 import RegisterPage from "./page/loginpage/RegisterPage";
 import DonateUser from "./page/userpage/donateuser";
+import ForgotPassword from "./page/loginpage/ForgotPassword";
 
 
 
@@ -31,6 +32,9 @@ function App() {
 },{
   path: "/user",
   element: <DonateUser />,
+},{
+  path: "/ResetPassword",
+  element: <ForgotPassword/>,
 }
 
   ])
