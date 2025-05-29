@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Blood Donation Process
 function DonationProcess() {
   const steps = [
     {
@@ -30,7 +29,7 @@ function DonationProcess() {
   ];
 
   return (
-    <section id="donate" className="py-5">
+    <section id="donation-process" className="py-5 scroll-mt-24">
       <div className="container">
         <div className="text-center mb-5">
           <h2 className="fw-bold text-danger mb-3">Quy Trình Hiến Máu</h2>
@@ -57,4 +56,4 @@ function DonationProcess() {
   );
 }
 
-export default DonationProcess; 
+export default DonationProcess;

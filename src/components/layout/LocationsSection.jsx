@@ -24,7 +24,7 @@ function LocationsSection() {
   ];
 
   return (
-    <section id="locations" className="py-5">
+    <section id="donation-centers" className="py-5">
       <div className="container">
         <div className="text-center mb-5">
           <h2 className="fw-bold text-danger mb-3">Địa Điểm Hiến Máu</h2>

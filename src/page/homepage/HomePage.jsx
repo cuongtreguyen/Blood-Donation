@@ -1,6 +1,7 @@
 import React from 'react';
 
-
+// Layout Components
+import Footer from '../../components/layout/Footer';
 import EmergencyBanner from '../../components/layout/EmergencyBanner';
 
 // Homepage Sections
@@ -12,6 +13,9 @@ import LocationsSection from '../../components/layout/LocationsSection';
 import AboutSection from '../../components/layout/AboutSection';
 import TestimonialsSection from '../../components/layout/TestimonialsSection';
 import NewsSection from '../../components/layout/NewsSection';
+
+// Forms
+import QuickDonationForm from '../../components/forms/QuickDonationForm';
 
 // Forms
 import QuickDonationForm from '../../components/forms/QuickDonationForm';

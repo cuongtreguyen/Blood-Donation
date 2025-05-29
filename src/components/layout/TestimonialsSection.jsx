@@ -24,7 +24,7 @@ function TestimonialsSection() {
   ];
 
   return (
-    <section className="py-5">
+    <section id="blog-customer" className="py-5">
       <div className="container">
         <div className="text-center mb-5">
           <h2 className="fw-bold text-danger mb-3">Câu Chuyện Chia Sẻ</h2>

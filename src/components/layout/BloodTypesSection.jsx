@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Blood Types Information
 function BloodTypesSection() {
   const bloodTypes = [
     { type: 'O-', compatibility: 'Người cho máu toàn năng', color: 'success' },
@@ -14,7 +13,7 @@ function BloodTypesSection() {
   ];
 
   return (
-    <section className="py-5 bg-light">
+    <section  className="py-5 bg-light scroll-mt-24">
       <div className="container">
         <div className="text-center mb-5">
           <h2 className="fw-bold text-danger mb-3">Thông Tin Nhóm Máu</h2>
@@ -37,4 +36,4 @@ function BloodTypesSection() {
   );
 }
 
-export default BloodTypesSection; 
+export default BloodTypesSection;
