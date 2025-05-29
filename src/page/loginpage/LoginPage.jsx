@@ -23,14 +23,15 @@ const LoginPage = () => {
         <div className="flex justify-between items-center mb-8">
           <div className="flex  items-center space-x-2">
             <img
-              src="https://images.unsplash.com/photo-1615461066841-6116e61058f4"
+              src="https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain"
               alt="Logo"
               className="w-10 h-10 rounded-full"
             />
             <h1 className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}>
-              Blood Donation Support
+              Dòng Máu Việt
             </h1>
           </div>
+          
           <div className="flex space-x-4">
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
@@ -38,9 +39,7 @@ const LoginPage = () => {
             >
               {isDarkMode ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-gray-600" />}
             </button>
-            <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-              <IoLanguage className={`${isDarkMode ? "text-white" : "text-gray-600"}`} />
-            </button>
+            
           </div>
         </div>
 
@@ -70,9 +69,12 @@ const LoginPage = () => {
             <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox className={isDarkMode ? "text-white" : "text-gray-700"}>Remember me</Checkbox>
             </Form.Item>
-            <a href="#"  style={{ color: "red" }} className="text-sm font-medium text-red-600 hover:text-red-500">
+            {/* <a href="#"  style={{ color: "red" }} className="text-sm font-medium text-red-600 hover:text-red-500">
               Forgot password?
-            </a>
+            </a> */}
+            <Link to="/ResetPassword" className="text-sm font-medium text-red-600 hover:text-red-500 no-underline">
+              Forgot password?
+            </Link>
           </div>
 
           <Form.Item>
@@ -86,7 +88,7 @@ const LoginPage = () => {
             </Button>
           </Form.Item>
 
-          
+
         </Form>
 
         <p className={`mt-10 text-center text-sm ${isDarkMode ? "text-white" : "text-gray-500"}`}>
@@ -95,16 +97,24 @@ const LoginPage = () => {
             Register now
           </a> */}
           <Link to="/register" style={{ color: "red", textDecoration: "none" }} className="font-medium text-red-600 hover:text-red-500">
-          Register now</Link>
-          
+            Register now</Link>
+
         </p>
+
+        <Link to="/">
+  <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded">
+    ← Back to Home
+  </button>
+</Link>
+
       </div>
+      
 
       {/* Right Column - Image */}
       <div className="hidden md:block w-1/2 relative">
         <img
           src="https://images.unsplash.com/photo-1615461066841-6116e61058f4"
-          alt="Blood Donation"
+          alt="Dòng Máu Việt"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0  opacity-[0.5] bg-red-600 bg-opacity-40 flex items-center justify-center">
