@@ -2,17 +2,22 @@ import { useState } from "react";
 import { Form, Input, Checkbox, Button } from "antd";
 import { FaGoogle, FaFacebook, FaApple, FaMoon, FaSun } from "react-icons/fa";
 import { IoLanguage } from "react-icons/io5";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const onFinish = (values) => {
     setIsLoading(true);
     console.log("Form Values:", values);
+    
+    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
+      // Redirect to dashboard after successful login
+      navigate('/dashboard');
     }, 2000);
   };
 
@@ -77,17 +82,16 @@ const LoginPage = () => {
           </div>
 
       <Form.Item>
-
-<Button
-  style={{ backgroundColor: "red" }}
-  type="primary"
-  htmlType="submit"
-  loading={isLoading}
-  className="w-full bg-red-200 hover:bg-red-700 text-white border-none"
->
-  Sign in
-</Button>
-</Form.Item>
+        <Button
+          style={{ backgroundColor: "red" }}
+          type="primary"
+          htmlType="submit"
+          loading={isLoading}
+          className="w-full bg-red-200 hover:bg-red-700 text-white border-none"
+        >
+          Sign in
+        </Button>
+      </Form.Item>
 
           <div className="mt-6">
             <div className="relative">

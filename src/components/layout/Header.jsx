@@ -38,7 +38,7 @@ const Header = () => {
           {/* Logo Section */}
           <div className="flex-shrink-0 flex items-center">
             <FaHeart className="h-8 w-8 text-red-100 animate-pulse" />
-            <span className="ml-2 text-2xl font-bold text-white">LifeFlow</span>
+            <span className="ml-2 text-2xl font-bold text-white">Dòng Máu Việt</span>
           </div>
 
           {/* Desktop Navigation */}

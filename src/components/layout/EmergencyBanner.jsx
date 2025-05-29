@@ -7,7 +7,7 @@ function EmergencyBanner() {
   if (!showBanner) return null;
 
   return (
-    <div className="alert alert-warning alert-dismissible fade show mb-0 text-center" style={{ borderRadius: 0 }}>
+    <div  className="alert alert-warning alert-dismissible fade show mb-0 text-center" style={{ borderRadius: 0 }}>
       <strong>🚨 KHẨN CẤP:</strong> Cần gấp nhóm máu O- và AB+. 
       <a href="#donate" className="alert-link fw-bold ms-2">Đăng ký ngay!</a>
       <button 

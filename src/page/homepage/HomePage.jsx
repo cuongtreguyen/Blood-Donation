@@ -23,7 +23,7 @@ import QuickDonationForm from '../../components/forms/QuickDonationForm';
 function HomePage() {
   return (
     <div>
-      {/* External CSS Links */}
+      {/* CSS */}
       <link 
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" 
         rel="stylesheet" 
@@ -32,9 +32,15 @@ function HomePage() {
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
         rel="stylesheet" 
       />
-      
+
+      {/* Banner cảnh báo */}
       <EmergencyBanner />
-      <HeroSection />
+
+      {/* Trang chủ - đặt ID tại đây */}
+      <section id="home">
+        <HeroSection />
+      </section>
+
       <StatisticsSection />
       <DonationProcess />
       <BloodTypesSection />
@@ -43,8 +49,6 @@ function HomePage() {
       <TestimonialsSection />
       <NewsSection />
       <AboutSection />
-      
-      {/* Custom Styles */}
     </div>
   );
 }
