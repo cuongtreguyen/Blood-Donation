@@ -15,12 +15,21 @@ const Header = () => {
   }, []);
 
   const navItems = [
-    { name: "Home", href: "#" },
-    { name: "Donate Blood", href: "#" },
-    { name: "Find Donation Centers", href: "#" },
-    { name: "About Us", href: "#" },
-    { name: "Login", href: "/login" }
-  ];
+  { name: "Trang chủ", href: "#Home" },
+  { name: "Hiến máu", href: "#donation-process" },
+  { name: "Tìm điểm hiến máu", href: "#donation-centers" },
+  { name: "Đánh Giá", href: "#blog-customer" },
+  { name: "Đăng nhập", href: "/login" }
+];
+
+
+  const handleScrollToSection = (id) => {
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+    setIsOpen(false); // đóng menu mobile nếu đang mở
+  };
 
   return (
     <header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? "bg-red-700 shadow-lg" : "bg-red-600"}`}>
@@ -34,22 +43,43 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            {navItems.map((item) => (
-            //   <a
-            //     key={item.name}
-            //     href={item.href}
-            //     style={{ color: "white", textDecoration: "none" }}
-            //     className="no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-            //     aria-label={item.name}
-            //   >
-            //     {item.name}
-            //   </a>
-            <Link key={item.name}
-              
-                style={{ color: "white", textDecoration: "none" }}
-                className="no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                aria-label={item.name} to={item.href} >{item.name}</Link>
-            ))}
+            {navItems.map((item) =>
+              item.name === "Hiến máu" ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleScrollToSection("donation-process")}
+                  className="no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
+                  {item.name}
+                </button>
+              ) : item.name === "Tìm điểm hiến máu" ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleScrollToSection("donation-centers")}
+                  className="no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
+                  {item.name}
+                </button>
+                ) : item.name === "Đánh Giá" ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleScrollToSection("blog-customer")}
+                  className="no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
+                  {item.name}
+                </button>
+              ) : (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  style={{ color: "white", textDecoration: "none" }}
+                  className="no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  aria-label={item.name}
+                >
+                  {item.name}
+                </Link>
+              )
+            )}
           </nav>
 
           {/* CTA Button */}
@@ -79,22 +109,36 @@ const Header = () => {
         </div>
 
         {/* Mobile Menu */}
-        <div
-          className={`${
-            isOpen ? "block" : "hidden"
-          } md:hidden transition-all duration-300 ease-in-out`}
-        >
+        <div className={`${isOpen ? "block" : "hidden"} md:hidden transition-all duration-300 ease-in-out`}>
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {navItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className="text-red-100 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-                aria-label={item.name}
-              >
-                {item.name}
-              </a>
-            ))}
+            {navItems.map((item) =>
+              item.name === "Donate Blood" ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleScrollToSection("donation-process")}
+                  className="text-red-100 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  {item.name}
+                </button>
+              ) : item.name === "Find Donation Centers" ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleScrollToSection("donation-centers")}
+                  className="text-red-100 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  {item.name}
+                </button>
+              ) : (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className="text-red-100 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                  aria-label={item.name}
+                >
+                  {item.name}
+                </Link>
+              )
+            )}
             <button
               className="w-full bg-white text-red-600 hover:bg-red-50 hover:text-red-700 px-6 py-2 rounded-full font-bold shadow-md transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 mt-4"
               aria-label="Donate Now"
