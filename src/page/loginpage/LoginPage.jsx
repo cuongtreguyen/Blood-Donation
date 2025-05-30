@@ -51,17 +51,17 @@ const LoginPage = () => {
           className="space-y-6"
         >
           <Form.Item
-            label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Email Address</span>}
+            label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Đăng Nhập Email</span>}
             name="email"
-            rules={[{ required: true, message: "Email is required" }]}
+            rules={[{ required: true, message: "Vui Lòng Nhập Email" }]}
           >
             <Input className="dark:bg-gray-800 dark:text-white" />
           </Form.Item>
 
           <Form.Item
-            label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Password</span>}
+            label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Nhập Mặt Khẩu</span>}
             name="password"
-            rules={[{ required: true, message: "Password is required" }]}
+            rules={[{ required: true, message: "Vui Lòng Nhập Mật Khẩu" }]}
           >
             <Input.Password className="dark:bg-gray-800 dark:text-white" />
           </Form.Item>
