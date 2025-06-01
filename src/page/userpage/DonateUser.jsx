@@ -1,25 +1,38 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Thêm import
-import { FaUser, FaCalendar, FaHistory, FaHeart, FaSignOutAlt, FaTint, FaClock, FaMapMarkerAlt, FaCheckCircle, FaEdit, FaCamera } from "react-icons/fa";
+
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaUser, FaCalendar, FaHistory, FaSignOutAlt, FaTint, FaClock, FaMapMarkerAlt, FaCheckCircle, FaEdit } from "react-icons/fa";
+import { toast } from "react-toastify";
+import api from "../../config/api";
 
 const DonateUser = () => {
     const [activeTab, setActiveTab] = useState("profile");
     const [isEditing, setIsEditing] = useState(false);
-    const navigate = useNavigate(); // Khởi tạo useNavigate
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
-    const donorData = {
-        name: "Nguyễn Văn A",
-        bloodType: "O+",
-        totalDonations: 8,
-        lastDonation: "15-01-2024",
-        isEligible: true,
-        profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    };
+    const [userData, setUserData] = useState(() => {
+        const savedUser = localStorage.getItem("user");
+        return savedUser 
+            ? JSON.parse(savedUser) 
+            : { 
+                id: null, 
+                full_name: "Người dùng", 
+                email: "Chưa có thông tin", 
+                phone: "Chưa có thông tin", 
+                address: "Chưa có thông tin", 
+                blood_type: "Chưa xác định", 
+                totalDonations: 0, 
+                lastDonation: "Chưa có", 
+                isEligible: false, 
+                profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+            };
+    });
 
     const donationHistory = [
         { date: "15-01-2024", location: "Bệnh Viện Đa Khoa Trung Ương", amount: "250ml" },
         { date: "10-10-2023", location: "Trung Tâm Huyết Học Quốc Gia", amount: "450ml" },
-        { date: "05-07-2023", location: "Bệnh Viện Chợ Rẫy", amount: "210ml" }
+        { date: "05-07-2023", location: "Bệnh Viện Chợ Rẫy", amount: "210ml" },
     ];
 
     const [appointments, setAppointments] = useState([
@@ -27,50 +40,103 @@ const DonateUser = () => {
             date: "20-03-2024",
             time: "10:00 Sáng",
             location: "Bệnh Viện Chợ Rẫy",
-            status: "Đã Xác Nhận"
-        }
+            status: "Đã Xác Nhận",
+        },
     ]);
-
-    const [userData, setUserData] = useState({
-        name: "Nguyễn Văn A",
-        bloodType: "O+",
-        totalDonations: 8,
-        lastDonation: "15-01-2024",
-        isEligible: true,
-        profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        email: "nguyenvana@example.com",
-        phone: "+84 123 456 789",
-        address: "123 Đường Chính, Thành Phố"
-    });
 
     const [newAppointment, setNewAppointment] = useState({
         date: "",
         time: "",
-        location: ""
+        location: "",
     });
 
-    const handleProfileUpdate = (e) => {
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const savedUser = localStorage.getItem("user");
+            if (savedUser) {
+                const parsedUser = JSON.parse(savedUser);
+                setUserData(prev => ({ ...prev, ...parsedUser }));
+            } else {
+                try {
+                    const response = await api.get(`/17`); // Lấy dữ liệu dựa trên user_id
+                    const user = response.data;
+                    const formattedUser = {
+                        id: user.user_id || user.id,
+                        full_name: user.full_name || "Người dùng",
+                        email: user.email || "Chưa có thông tin",
+                        phone: user.phone || "Chưa có thông tin",
+                        address: user.address || "Chưa có thông tin",
+                        blood_type: user.blood_type || "Chưa xác định",
+                        totalDonations: user.totalDonations || 0,
+                        lastDonation: user.last_donation || "Chưa có",
+                        isEligible: !!user.last_donation && parseInt(user.last_donation) > 0,
+                        profileImage: user.profileImage || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                    };
+                    localStorage.setItem("user", JSON.stringify(formattedUser));
+                    setUserData(formattedUser);
+                } catch (error) {
+                    console.error("Lỗi khi lấy dữ liệu người dùng:", error);
+                    toast.error("Không thể tải thông tin người dùng. Vui lòng đăng nhập lại!");
+                    navigate("/login");
+                }
+            }
+        };
+        fetchUserData();
+    }, [navigate]);
+
+    const handleProfileUpdate = async (e) => {
         e.preventDefault();
-        setIsEditing(false);
+        setIsLoading(true);
+
+        if (!userData.id) {
+            toast.error("Không thể xác định ID người dùng. Vui lòng đăng nhập lại!");
+            setIsLoading(false);
+            navigate("/login");
+            return;
+        }
+
+        try {
+            const response = await api.put(`/${userData.id}`, {
+                full_name: userData.full_name,
+                email: userData.email,
+                phone: userData.phone,
+                address: userData.address,
+                blood_type: userData.blood_type,
+            });
+
+            const updatedUser = { ...userData, ...response.data };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            setUserData(updatedUser);
+            toast.success("Cập nhật thông tin thành công!");
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Lỗi khi cập nhật thông tin:", error);
+            if (error.response?.status === 404) {
+                toast.error("Không tìm thấy người dùng. Vui lòng kiểm tra lại!");
+            } else {
+                toast.error("Cập nhật thông tin thất bại. Vui lòng thử lại!");
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleScheduleAppointment = (e) => {
         e.preventDefault();
         const appointment = {
             ...newAppointment,
-            status: "Đã Xác Nhận"
+            status: "Đã Xác Nhận",
         };
-        console.log("Lịch hẹn mới:", appointment); // In object ra console
         setAppointments([...appointments, appointment]);
         setNewAppointment({ date: "", time: "", location: "" });
+        toast.success("Đặt lịch hẹn thành công!");
     };
 
-    // Thêm hàm xử lý đăng xuất
     const handleLogout = () => {
-        // Xóa thông tin đăng nhập nếu có (ví dụ: localStorage)
-        localStorage.removeItem("userToken"); // Thay "userToken" bằng key thực tế nếu có
-        // Điều hướng về HomePage
-        navigate("/");
+        localStorage.removeItem("userToken");
+        localStorage.removeItem("user");
+        navigate("/login");
+        toast.info("Đã đăng xuất!");
     };
 
     const renderProfile = () => (
@@ -87,24 +153,27 @@ const DonateUser = () => {
                                 />
                             </div>
                             <div>
-                                <h2 className="text-3xl font-bold text-gray-800 mb-2">{userData.name}</h2>
+                                <h2 className="text-3xl font-bold text-gray-800 mb-2">{userData.full_name}</h2>
                                 <div className="flex items-center bg-red-50 px-4 py-2 rounded-full">
                                     <FaTint className="text-red-600 mr-2 animate-pulse" />
-                                    <span className="text-xl font-semibold text-red-600">{userData.bloodType}</span>
+                                    <span className="text-xl font-semibold text-red-600">{userData.blood_type}</span>
                                 </div>
                             </div>
                         </div>
                         <button
                             onClick={() => setIsEditing(true)}
                             className="bg-red-100 p-2 rounded-full hover:bg-red-200 transition-colors"
+                            disabled={isLoading}
                         >
                             <FaEdit className="text-red-600 text-xl" />
                         </button>
                     </div>
                     <div className="space-y-4 mb-8">
+                        <p className="text-gray-600"><strong>Tên:</strong> {userData.full_name}</p>
                         <p className="text-gray-600"><strong>Email:</strong> {userData.email}</p>
                         <p className="text-gray-600"><strong>Điện thoại:</strong> {userData.phone}</p>
                         <p className="text-gray-600"><strong>Địa chỉ:</strong> {userData.address}</p>
+                        <p className="text-gray-600"><strong>Nhóm máu:</strong> {userData.blood_type}</p>
                     </div>
                 </>
             ) : (
@@ -114,46 +183,65 @@ const DonateUser = () => {
                             <label className="block text-gray-700 mb-2">Tên</label>
                             <input
                                 type="text"
-                                value={userData.name}
-                                onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+                                value={userData.full_name || ""}
+                                onChange={(e) => setUserData({ ...userData, full_name: e.target.value })}
                                 className="w-full p-3 border rounded-lg"
+                                disabled={isLoading}
                             />
                         </div>
                         <div>
                             <label className="block text-gray-700 mb-2">Email</label>
                             <input
                                 type="email"
-                                value={userData.email}
+                                value={userData.email || ""}
                                 onChange={(e) => setUserData({ ...userData, email: e.target.value })}
                                 className="w-full p-3 border rounded-lg"
+                                disabled={isLoading}
                             />
                         </div>
                         <div>
                             <label className="block text-gray-700 mb-2">Điện thoại</label>
                             <input
                                 type="tel"
-                                value={userData.phone}
+                                value={userData.phone || ""}
                                 onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
                                 className="w-full p-3 border rounded-lg"
+                                disabled={isLoading}
                             />
                         </div>
                         <div>
                             <label className="block text-gray-700 mb-2">Địa chỉ</label>
                             <textarea
-                                value={userData.address}
+                                value={userData.address || ""}
                                 onChange={(e) => setUserData({ ...userData, address: e.target.value })}
                                 className="w-full p-3 border rounded-lg"
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 mb-2">Nhóm máu</label>
+                            <input
+                                type="text"
+                                value={userData.blood_type || ""}
+                                onChange={(e) => setUserData({ ...userData, blood_type: e.target.value })}
+                                className="w-full p-3 border rounded-lg"
+                                disabled={isLoading}
                             />
                         </div>
                     </div>
                     <div className="flex space-x-4">
-                        <button type="submit" className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700">
-                            Lưu Thay Đổi
+                        <button
+                            type="submit"
+                            className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 disabled:bg-red-400"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Đang lưu..." : "Lưu Thay Đổi"}
                         </button>
                         <button
                             type="button"
                             onClick={() => setIsEditing(false)}
-                            className="border-2 border-red-600 text-red-600 px-6 py-3 rounded-lg hover:bg-red-50"
+                            className="border-2 border-red-600 text-red-600 px-6 py-3 rounded-lg hover:bg-red-50 disabled:border-red-400 disabled:text-red-400"
+                            disabled={isLoading}
                         >
                             Hủy
                         </button>
@@ -165,13 +253,13 @@ const DonateUser = () => {
                 <div className="p-6 bg-gradient-to-br from-red-50 to-white rounded-xl shadow-sm">
                     <div className="flex items-center justify-between">
                         <span className="text-gray-700 font-medium">Tổng Lần Hiến</span>
-                        <span className="text-3xl font-bold text-red-600">{donorData.totalDonations}</span>
+                        <span className="text-3xl font-bold text-red-600">{userData.totalDonations}</span>
                     </div>
                 </div>
                 <div className="p-6 bg-gradient-to-br from-red-50 to-white rounded-xl shadow-sm">
                     <div className="flex items-center justify-between">
                         <span className="text-gray-700 font-medium">Lần Hiến Cuối</span>
-                        <span className="text-xl font-semibold text-red-600">{donorData.lastDonation}</span>
+                        <span className="text-xl font-semibold text-red-600">{userData.lastDonation}</span>
                     </div>
                 </div>
             </div>
@@ -179,7 +267,9 @@ const DonateUser = () => {
             <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-green-100 rounded-xl shadow-sm">
                 <div className="flex items-center">
                     <FaCheckCircle className="text-green-500 text-xl mr-3" />
-                    <span className="text-green-700 font-semibold text-lg">Đủ điều kiện cho lần hiến tiếp theo</span>
+                    <span className="text-green-700 font-semibold text-lg">
+                        {userData.isEligible ? "Đủ điều kiện cho lần hiến tiếp theo" : "Chưa đủ điều kiện hiến máu"}
+                    </span>
                 </div>
             </div>
         </div>
@@ -248,6 +338,7 @@ const DonateUser = () => {
                     <button
                         type="submit"
                         className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors duration-300 font-semibold"
+                        disabled={isLoading}
                     >
                         Đặt Lịch Hẹn
                     </button>
@@ -289,6 +380,10 @@ const DonateUser = () => {
         </div>
     );
 
+    if (!userData) {
+        return <div>Đang chuyển hướng...</div>;
+    }
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">
@@ -303,7 +398,7 @@ const DonateUser = () => {
                             <span className="ml-2 text-2xl font-bold text-white">Dòng Máu Việt</span>
                         </div>
                         <button
-                            onClick={handleLogout} // Thêm sự kiện onClick
+                            onClick={handleLogout}
                             className="flex items-center gap-2 text-white font-semibold px-4 py-2 border border-white rounded-lg hover:bg-white hover:text-red-700 transition-all duration-300"
                         >
                             <FaSignOutAlt />
@@ -319,10 +414,11 @@ const DonateUser = () => {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-300 ${activeTab === tab
+                            className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-300 ${
+                                activeTab === tab
                                     ? "bg-red-600 text-white shadow-lg transform scale-105"
                                     : "bg-white text-gray-600 hover:bg-red-50 hover:scale-102"
-                                }`}
+                            }`}
                         >
                             {tab === "profile" && <FaUser />}
                             {tab === "history" && <FaHistory />}

@@ -1,0 +1,112 @@
+
+
+.button-container {
+  position: relative;
+}
+
+.glow-button {
+  position: relative;
+  padding: 5px 48px;
+  background: #e5e5e5;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.glow-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle 100px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 107, 107, 0.8) 0%,
+    rgba(255, 165, 0, 0.6) 30%,
+    rgba(255, 69, 0, 0.4) 50%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 50px;
+  pointer-events: none;
+}
+
+.glow-button:hover::before {
+  opacity: 1;
+}
+
+.glow-button::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: radial-gradient(
+    circle 120px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 107, 107, 0.9) 0%,
+    rgba(255, 165, 0, 0.7) 25%,
+    rgba(255, 69, 0, 0.5) 40%,
+    rgba(255, 20, 147, 0.3) 60%,
+    transparent 80%
+  );
+  border-radius: 52px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.glow-button:hover::after {
+  opacity: 1;
+  animation: pulse 2s infinite;
+}
+
+.button-text {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.3s ease;
+}
+
+.glow-button:hover .button-text {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.arrow {
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+
+.glow-button:hover .arrow {
+  transform: translateX(4px);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+.glow-button:hover {
+  box-shadow: 
+    0 0 20px rgba(255, 107, 107, 0.3),
+    0 0 40px rgba(255, 165, 0, 0.2),
+    0 0 60px rgba(255, 69, 0, 0.1);
+}

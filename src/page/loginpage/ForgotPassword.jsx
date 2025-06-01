@@ -18,12 +18,12 @@ const ForgotPassword = () => {
     setError("");
 
     if (attempts >= 3) {
-      setError("Too many attempts. Please try again later.");
+      setError("Quá nhiều lần thử. Vui lòng thử lại sau.");
       return;
     }
 
     if (!validateEmail(email)) {
-      setError("Please enter a valid email address");
+      setError("Vui lòng nhập địa chỉ email hợp lệ");
       return;
     }
 
@@ -65,10 +65,10 @@ const ForgotPassword = () => {
             <Heart className="h-16 w-16 text-red-800" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Forgot Password
+            Quên Mật Khẩu
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your email address and we'll send you instructions to reset your password.
+            Nhập địa chỉ email của bạn và chúng tôi sẽ gửi cho bạn hướng dẫn đặt lại mật khẩu.
           </p>
         </div>
 
@@ -78,10 +78,10 @@ const ForgotPassword = () => {
               <Mail className="h-8 w-8 text-green-600" />
             </div>
             <h3 className="mt-4 text-lg font-medium text-gray-900">
-              Check your email
+              Kiểm tra email của bạn
             </h3>
             <p className="mt-2 text-sm text-gray-600">
-              We've sent password reset instructions to your email address.
+              Chúng tôi đã gửi hướng dẫn đặt lại mật khẩu tới địa chỉ email của bạn.
             </p>
           </div>
         ) : (
@@ -98,7 +98,7 @@ const ForgotPassword = () => {
                   autoComplete="email"
                   required
                   className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter your registered email"
+                  placeholder="Nhập email đã đăng ký của bạn"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -119,7 +119,7 @@ const ForgotPassword = () => {
                 {isLoading ? (
                   <Loader2 className="animate-spin h-5 w-5" />
                 ) : (
-                  "Reset Password"
+                  "Đặt lại mật khẩu"
                 )}
               </button>
             </div>
@@ -135,14 +135,12 @@ const ForgotPassword = () => {
             Back to Login
           </button> */}
           <Link to="/login" className="flex items-center justify-center text-sm font-medium text-red-800 hover:text-red-900 transition-colors duration-200">
-  <ArrowLeft className="mr-2 h-4 w-4" />
-  Back to Login
-</Link>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Vể Trang Đăng Nhập
+          </Link>
         </div>
 
-        <div className="mt-4 text-center text-xs text-gray-500">
-          Need help? <button className="text-red-800 hover:text-red-900 bg-transparent border-none cursor-pointer">Contact Support</button>
-        </div>
+       
       </div>
     </div>
   );

@@ -13,13 +13,13 @@ function TestimonialsSection() {
       name: "Trần Thị Hoa",
       role: "Bệnh nhân được cứu sống",
       content: "Nhờ có máu hiến tặng, tôi đã vượt qua ca phẫu thuật khó khăn. Tôi vô cùng biết ơn những người hiến máu tình nguyện.",
-      avatar: "https://scontent.fsgn5-12.fna.fbcdn.net/v/t39.30808-1/341128599_549182920623736_5160836108154107558_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=103&ccb=1-7&_nc_sid=e99d92&_nc_eui2=AeEknzkRuSxgrZxfLYUzAnpZ_MkcllvSTG78yRyWW9JMblk_PFgScOv3WiaXGF8zk-ofVPrwu8zMnBC_DXGZ6qPu&_nc_ohc=EPVvZ2UbEUMQ7kNvwFwqDvZ&_nc_oc=AdmnwBDe3SfqpXzJDok5-dQphnPKa118tx7I1iPEk2rSpUn8cnXJZzLoxFbAIM_yciY&_nc_zt=24&_nc_ht=scontent.fsgn5-12.fna&_nc_gid=cEbalZlFjntB32r0i-mGsA&oh=00_AfLwp30xyslpjLN5pdB1xYFzm6VPR-4hW4WYYALB0Sh2jQ&oe=68360E7B"
+      avatar: "https://scontent.fsgn5-12.fna.fbcdn.net/v/t39.30808-1/341128599_54918292062373...68360E7B"
     },
     {
       name: "Lê Hoàng Nam",
       role: "Bác sĩ điều trị",
       content: "Chất lượng máu từ trung tâm luôn đảm bảo tiêu chuẩn cao nhất. Điều này rất quan trọng trong việc điều trị bệnh nhân.",
-      avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face"
+      avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=c...rop=face"
     }
   ];
 
@@ -42,7 +42,7 @@ function TestimonialsSection() {
                     <i className="fas fa-star"></i>
                     <i className="fas fa-star"></i>
                   </div>
-                  <p className="mb-4 fst-italic">"{testimonial.content}"</p>
+<p className="mb-4 fst-italic">"{testimonial.content}"</p>
                   <div className="d-flex align-items-center">
                     <img 
                       src={testimonial.avatar} 
@@ -65,4 +65,4 @@ function TestimonialsSection() {
   );
 }
 
-export default TestimonialsSection; 
+export default TestimonialsSection;
