@@ -39,6 +39,7 @@ const RegisterPage = () => {
         phone: values.phone,
         address: values.address,
         blood_type: values.blood_type,
+        role: "user",
         profileImage: profileImage || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
       };
 

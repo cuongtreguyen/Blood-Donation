@@ -42,8 +42,14 @@ function QuickDonationForm() {
             </p>
             <div className="d-flex align-items-center">
               <div className="bg-white bg-opacity-20 rounded-circle p-3 me-3">
-                <i className="fas fa-shield-alt fa-2x"></i>
+                <img
+                  src="https://th.bing.com/th/id/OIP.BI9Xvs0SqPBFOiSbpL4vBQHaHa?rs=1&pid=ImgDetMain"
+                  alt="Icon"
+                  className="rounded-circle"
+                  style={{ width: "32px", height: "32px" }}
+                />
               </div>
+
               <div>
                 <h5 className="fw-bold mb-1">An Toàn 100%</h5>
                 <p className="mb-0">Quy trình hiến máu đạt tiêu chuẩn quốc tế</p>
