@@ -36,10 +36,20 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo Section */}
-          <div className="flex-shrink-0 flex items-center">
+          {/* <div className="flex-shrink-0 flex items-center">
             <FaHeart className="h-8 w-8 text-red-100 animate-pulse" />
-            <span className="ml-2 text-2xl font-bold text-white">LifeFlow</span>
-          </div>
+            <span className="ml-2 text-2xl font-bold text-white">Dòng Máu Việt</span>
+          </div> */}
+
+          <div className="flex-shrink-0 flex items-center">
+  <img
+    src="https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain"
+    alt="Logo"
+    className="h-8 w-8 rounded-full"
+  />
+  <span className="ml-2 text-2xl font-bold text-white">Dòng Máu Việt</span>
+</div>
+
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">

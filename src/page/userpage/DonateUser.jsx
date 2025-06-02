@@ -264,10 +264,10 @@ const DonateUser = () => {
                 </div>
             </div>
 
-            <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-green-100 rounded-xl shadow-sm">
+            <div className="mt-8 p-6 bg-gradient-to-r from-red-50 to-red-100 rounded-xl shadow-sm">
                 <div className="flex items-center">
-                    <FaCheckCircle className="text-green-500 text-xl mr-3" />
-                    <span className="text-green-700 font-semibold text-lg">
+                    <FaCheckCircle className="text-red-500 text-xl mr-3" />
+                    <span className="text-red-700 font-semibold text-lg">
                         {userData.isEligible ? "Đủ điều kiện cho lần hiến tiếp theo" : "Chưa đủ điều kiện hiến máu"}
                     </span>
                 </div>
