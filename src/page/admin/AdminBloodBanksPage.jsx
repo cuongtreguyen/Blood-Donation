@@ -145,17 +145,22 @@ function AdminBloodBanksPage() {
   };
 
   const handleDelete = (key) => {
-    Modal.confirm({
-      title: 'Xác nhận xóa',
-      content: 'Bạn có chắc chắn muốn xóa ngân hàng máu này?',
-      okText: 'Xóa',
-      okType: 'danger',
-      cancelText: 'Hủy',
-      onOk() {
-        setBloodBanks(bloodBanks.filter(bloodBank => bloodBank.key !== key));
-        message.success('Xóa ngân hàng máu thành công!');
-      },
-    });
+    try {
+      // Tìm blood bank cần xóa từ danh sách
+      const bloodBankToDelete = bloodBanks.find(bank => bank.key === key);
+      if (!bloodBankToDelete) {
+        message.error('Không tìm thấy ngân hàng máu!');
+        return;
+      }
+
+      // Cập nhật state để xóa blood bank
+      const updatedBloodBanks = bloodBanks.filter(bank => bank.key !== key);
+      setBloodBanks(updatedBloodBanks);
+      message.success('Xóa ngân hàng máu thành công!');
+    } catch (error) {
+      console.error('Lỗi khi xóa ngân hàng máu:', error);
+      message.error('Xóa ngân hàng máu thất bại. Vui lòng thử lại!');
+    }
   };
 
   const handleSearch = (e) => {
@@ -244,12 +249,20 @@ function AdminBloodBanksPage() {
             size="small"
             onClick={() => showModal('edit', record)}
           />
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            size="small"
-            onClick={() => handleDelete(record.key)}
-          />
+          <Popconfirm
+            title="Xác nhận xóa"
+            description="Bạn có chắc chắn muốn xóa ngân hàng máu này?"
+            onConfirm={() => handleDelete(record.key)}
+            okText="Xóa"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+          >
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              size="small"
+            />
+          </Popconfirm>
         </Space>
       ),
     },

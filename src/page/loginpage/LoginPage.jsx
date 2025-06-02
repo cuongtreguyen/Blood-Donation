@@ -49,6 +49,7 @@ const LoginPage = () => {
           role: user.role || "user" // Lưu role, mặc định là "user" nếu không có
         }));
 
+
         // Kiểm tra role và chuyển hướng tương ứng
         const userRole = user.role || "user";
         
@@ -64,6 +65,7 @@ const LoginPage = () => {
           console.log("Redirecting to user dashboard");
           navigate("/user");
         }
+
       } else {
         toast.error("Email hoặc mật khẩu không đúng!");
       }

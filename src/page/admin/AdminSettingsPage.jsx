@@ -1,6 +1,7 @@
-import React from 'react';
-import { Card, Form, Input, Button, Typography, Space, Divider } from 'antd';
+import React, { useState } from 'react';
+import { Card, Form, Input, Button, Typography, Space, Divider, message } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
+import api from '../../config/api';
 
 const { Title } = Typography;
 
@@ -8,20 +9,56 @@ const AdminSettingsPage = () => {
   const [generalForm] = Form.useForm();
   const [passwordForm] = Form.useForm();
   const [emailForm] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
-  const handleGeneralSubmit = (values) => {
-    console.log('General Settings Submit:', values);
-    // Add logic to save general settings
+  const handleGeneralSubmit = async (values) => {
+    try {
+      setLoading(true);
+      // Gọi API lưu cài đặt chung
+      await api.put('/settings/general', values);
+      message.success('Lưu cài đặt chung thành công!');
+    } catch (error) {
+      console.error('Lỗi khi lưu cài đặt chung:', error);
+      message.error('Lưu cài đặt chung thất bại. Vui lòng thử lại!');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePasswordSubmit = (values) => {
-    console.log('Password Settings Submit:', values);
-    // Add logic to save password settings
+  const handlePasswordSubmit = async (values) => {
+    try {
+      setLoading(true);
+      // Gọi API đổi mật khẩu
+      await api.put('/settings/password', {
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword
+      });
+      message.success('Đổi mật khẩu thành công!');
+      passwordForm.resetFields(); // Reset form sau khi đổi mật khẩu thành công
+    } catch (error) {
+      console.error('Lỗi khi đổi mật khẩu:', error);
+      if (error.response?.status === 401) {
+        message.error('Mật khẩu hiện tại không đúng!');
+      } else {
+        message.error('Đổi mật khẩu thất bại. Vui lòng thử lại!');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEmailSubmit = (values) => {
-    console.log('Email Settings Submit:', values);
-    // Add logic to save email settings
+  const handleEmailSubmit = async (values) => {
+    try {
+      setLoading(true);
+      // Gọi API lưu cài đặt email
+      await api.put('/settings/email', values);
+      message.success('Lưu cài đặt email thành công!');
+    } catch (error) {
+      console.error('Lỗi khi lưu cài đặt email:', error);
+      message.error('Lưu cài đặt email thất bại. Vui lòng thử lại!');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,7 +91,12 @@ const AdminSettingsPage = () => {
             <Input prefix={<MailOutlined />} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ background: '#d32f2f', borderColor: '#d32f2f' }}>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
+              loading={loading}
+            >
               Lưu cài đặt chung
             </Button>
           </Form.Item>
@@ -78,7 +120,10 @@ const AdminSettingsPage = () => {
           <Form.Item
             name="newPassword"
             label="Mật khẩu mới"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu mới' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập mật khẩu mới' },
+              { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' }
+            ]}
           >
             <Input.Password prefix={<LockOutlined />} />
           </Form.Item>
@@ -101,7 +146,12 @@ const AdminSettingsPage = () => {
             <Input.Password prefix={<LockOutlined />} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ background: '#d32f2f', borderColor: '#d32f2f' }}>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
+              loading={loading}
+            >
               Đổi mật khẩu
             </Button>
           </Form.Item>
@@ -125,15 +175,18 @@ const AdminSettingsPage = () => {
           >
             <Input prefix={<MailOutlined />} />
           </Form.Item>
-          {/* Thêm các cài đặt email khác nếu cần */}
           <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ background: '#d32f2f', borderColor: '#d32f2f' }}>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
+              loading={loading}
+            >
               Lưu cài đặt Email
             </Button>
           </Form.Item>
         </Form>
       </Card>
-
     </div>
   );
 };
