@@ -48,7 +48,7 @@ const LoginPage = () => {
         }));
 
         // Chuyển hướng tới trang user
-        navigate("/user");
+        navigate("/admin");
       } else {
         toast.error("Email hoặc mật khẩu không đúng!");
       }

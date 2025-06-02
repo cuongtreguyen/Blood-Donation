@@ -8,6 +8,7 @@ import PlusOutlined from '@ant-design/icons/lib/icons/PlusOutlined';
 import LockOutlined from '@ant-design/icons/lib/icons/LockOutlined';
 import MailOutlined from '@ant-design/icons/lib/icons/MailOutlined';
 import PhoneOutlined from '@ant-design/icons/lib/icons/PhoneOutlined';
+import api from '../../config/api';
 
 const { Option } = Select;
 
@@ -22,7 +23,7 @@ function AdminUsersPage() {
   const [users, setUsers] = useState([
     {
       key: '1',
-      id: 'U001',
+      id: '1',
       name: 'Nguyễn Văn A',
       email: 'nguyenvana@example.com',
       phone: '0901234567',
@@ -33,7 +34,7 @@ function AdminUsersPage() {
     },
     {
       key: '2',
-      id: 'U002',
+      id: '2',
       name: 'Trần Thị B',
       email: 'tranthib@example.com',
       phone: '0909876543',
@@ -44,7 +45,7 @@ function AdminUsersPage() {
     },
     {
       key: '3',
-      id: 'U003',
+      id: '3',
       name: 'Lê Văn C',
       email: 'levanc@example.com',
       phone: '0912345678',
@@ -55,7 +56,7 @@ function AdminUsersPage() {
     },
     {
       key: '4',
-      id: 'U004',
+      id: '4',
       name: 'Phạm Thị D',
       email: 'phamthid@example.com',
       phone: '0987654321',
@@ -115,17 +116,22 @@ function AdminUsersPage() {
   };
 
   const handleDelete = (key) => {
-    Modal.confirm({
-      title: 'Xác nhận xóa',
-      content: 'Bạn có chắc chắn muốn xóa người dùng này?',
-      okText: 'Xóa',
-      okType: 'danger',
-      cancelText: 'Hủy',
-      onOk() {
-        setUsers(users.filter(user => user.key !== key));
-        message.success('Xóa người dùng thành công!');
-      },
-    });
+    try {
+      // Tìm user cần xóa từ danh sách users
+      const userToDelete = users.find(user => user.key === key);
+      if (!userToDelete) {
+        message.error('Không tìm thấy người dùng!');
+        return;
+      }
+
+      // Cập nhật state để xóa user
+      const updatedUsers = users.filter(user => user.key !== key);
+      setUsers(updatedUsers);
+      message.success('Xóa người dùng thành công!');
+    } catch (error) {
+      console.error('Lỗi khi xóa người dùng:', error);
+      message.error('Xóa người dùng thất bại. Vui lòng thử lại!');
+    }
   };
 
   // Hàm xử lý tìm kiếm
@@ -232,12 +238,20 @@ function AdminUsersPage() {
             size="small"
             onClick={() => showModal('edit', record)}
           />
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            size="small"
-            onClick={() => handleDelete(record.key)}
-          />
+          <Popconfirm
+            title="Xác nhận xóa"
+            description="Bạn có chắc chắn muốn xóa người dùng này?"
+            onConfirm={() => handleDelete(record.key)}
+            okText="Xóa"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+          >
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              size="small"
+            />
+          </Popconfirm>
         </Space>
       ),
     },
