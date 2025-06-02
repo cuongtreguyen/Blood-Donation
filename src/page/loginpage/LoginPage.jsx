@@ -1,4 +1,5 @@
 // 
+// 
 import { useState } from "react";
 import { Form, Input, Checkbox, Button } from "antd";
 import { FaMoon, FaSun } from "react-icons/fa";
@@ -36,7 +37,7 @@ const LoginPage = () => {
         // Tạo token giả
         const fakeToken = btoa(JSON.stringify({ userId: user.user_id || user.id, email: user.email, timestamp: Date.now() }));
 
-        // Lưu thông tin user và token, sử dụng full_name và blood_type
+        // Lưu thông tin user và token, bao gồm cả role
         localStorage.setItem('token', fakeToken);
         localStorage.setItem('user', JSON.stringify({
           id: user.user_id || user.id,
@@ -44,11 +45,25 @@ const LoginPage = () => {
           email: user.email,
           phone: user.phone,
           blood_type: user.blood_type || user.bloodGroup || "Chưa xác định",
-          address: user.address
+          address: user.address,
+          role: user.role || "user" // Lưu role, mặc định là "user" nếu không có
         }));
 
-        // Chuyển hướng tới trang user
-        navigate("/user");
+        // Kiểm tra role và chuyển hướng tương ứng
+        const userRole = user.role || "user";
+        
+        console.log("User role detected:", userRole); // Debug log
+        
+        if (userRole === "admin") {
+          console.log("Redirecting to admin dashboard");
+          navigate("/admin");
+        } else if (userRole === "doctor") {
+          console.log("Redirecting to doctor dashboard");
+          navigate("/dashboard");
+        } else {
+          console.log("Redirecting to user dashboard");
+          navigate("/user");
+        }
       } else {
         toast.error("Email hoặc mật khẩu không đúng!");
       }
