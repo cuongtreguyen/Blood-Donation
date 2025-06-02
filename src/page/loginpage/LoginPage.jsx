@@ -1,19 +1,69 @@
+// 
 import { useState } from "react";
 import { Form, Input, Checkbox, Button } from "antd";
-import { FaGoogle, FaFacebook, FaApple, FaMoon, FaSun } from "react-icons/fa";
-import { IoLanguage } from "react-icons/io5";
-import { Link } from "react-router-dom";
+import { FaMoon, FaSun } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import MouseFollowButton from "../../components/forms/MouseFollowButton";
+import api from "../../config/api";
 
 const LoginPage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     setIsLoading(true);
-    console.log("Form Values:", values);
-    setTimeout(() => {
+    console.log("Login attempt:", values);
+
+    try {
+      // Lấy tất cả users từ API
+      const response = await api.get("");
+      const users = response.data;
+
+      console.log("All users:", users);
+
+      // Tìm user có email và password phù hợp
+      const user = users.find(u => 
+        u.email === values.email && 
+        u.password === values.password
+      );
+
+      if (user) {
+        // Đăng nhập thành công
+        toast.success("Đăng Nhập Thành Công!");
+
+        // Tạo token giả
+        const fakeToken = btoa(JSON.stringify({ userId: user.user_id || user.id, email: user.email, timestamp: Date.now() }));
+
+        // Lưu thông tin user và token, sử dụng full_name và blood_type
+        localStorage.setItem('token', fakeToken);
+        localStorage.setItem('user', JSON.stringify({
+          id: user.user_id || user.id,
+          full_name: user.full_name || user.fullname || "Người dùng",
+          email: user.email,
+          phone: user.phone,
+          blood_type: user.blood_type || user.bloodGroup || "Chưa xác định",
+          address: user.address
+        }));
+
+        // Chuyển hướng tới trang user
+        navigate("/user");
+      } else {
+        toast.error("Email hoặc mật khẩu không đúng!");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      if (error.response?.status === 404) {
+        toast.error("Không tìm thấy thông tin người dùng!");
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Đăng nhập thất bại. Vui lòng thử lại!");
+      }
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -21,14 +71,14 @@ const LoginPage = () => {
       {/* Left Column - Login Form */}
       <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
         <div className="flex justify-between items-center mb-8">
-          <div className="flex  items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <img
-              src="https://images.unsplash.com/photo-1615461066841-6116e61058f4"
+              src="https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain"
               alt="Logo"
               className="w-10 h-10 rounded-full"
             />
-            <h1 style={{color : "red"}} className={`text-2xl font-bold ${isDarkMode ? "text-red-500" : "text-gray-800"}`}>
-              Blood Donation Support
+            <h1 style={{ color: "red" }} className={`text-2xl font-bold ${isDarkMode ? "text-red-500" : "text-gray-800"}`}>
+              Dòng Máu Việt
             </h1>
           </div>
           <div className="flex space-x-4">
@@ -37,9 +87,6 @@ const LoginPage = () => {
               className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
             >
               {isDarkMode ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-gray-600" />}
-            </button>
-            <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-              <IoLanguage className={`${isDarkMode ? "text-white" : "text-gray-600"}`} />
             </button>
           </div>
         </div>
@@ -53,41 +100,61 @@ const LoginPage = () => {
           <Form.Item
             label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Đăng Nhập Email</span>}
             name="email"
-            rules={[{ required: true, message: "Vui Lòng Nhập Email" }]}
+            rules={[
+              { required: true, message: "Vui Lòng Nhập Email" },
+              { type: 'email', message: 'Email không hợp lệ!' }
+            ]}
           >
-            <Input className="dark:bg-gray-800 dark:text-white" />
+            <Input 
+              className="dark:bg-gray-800 dark:text-white" 
+              placeholder="example@email.com"
+            />
           </Form.Item>
 
           <Form.Item
-            label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Nhập Mặt Khẩu</span>}
+            label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Nhập Mật Khẩu</span>}
             name="password"
-            rules={[{ required: true, message: "Vui Lòng Nhập Mật Khẩu" }]}
+            rules={[
+              { required: true, message: "Vui Lòng Nhập Mật Khẩu" },
+              { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' }
+            ]}
           >
-            <Input.Password className="dark:bg-gray-800 dark:text-white" />
+            <Input.Password 
+              className="dark:bg-gray-800 dark:text-white" 
+              placeholder="Nhập mật khẩu"
+            />
           </Form.Item>
 
           <div className="flex items-center justify-between">
             <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox style={{color:"red"}} className={isDarkMode ? "text-red-500" : "text-gray-700"}>Remember me</Checkbox>
+              <Checkbox 
+                style={{ color: "red" }} 
+                className={isDarkMode ? "text-red-500" : "text-gray-700"}
+              >
+                Ghi Nhớ Cho Lần Đăng Nhập Sau
+              </Checkbox>
             </Form.Item>
-            <a href="#" style={{ color: "red", textDecoration: "none" }}
-            className="text-sm font-medium text-red-600 hover:text-red-500">
-              Forgot password?
-            </a>
+            
+            <Link 
+              to="/ResetPassword" 
+              style={{ color: "red", textDecoration: "none" }}
+              className="text-sm font-medium text-red-600 hover:text-red-500"
+            >
+              Quên Mật Khẩu?
+            </Link>
           </div>
 
-      <Form.Item>
-
-<Button
-  style={{ backgroundColor: "red" }}
-  type="primary"
-  htmlType="submit"
-  loading={isLoading}
-  className="w-full bg-red-200 hover:bg-red-700 text-white border-none"
->
-  Sign in
-</Button>
-</Form.Item>
+          <Form.Item>
+            <Button
+              style={{ backgroundColor: "red" }}
+              type="primary"
+              htmlType="submit"
+              loading={isLoading}
+              className="w-full bg-red-200 hover:bg-red-700 text-white border-none"
+            >
+              Đăng Nhập
+            </Button>
+          </Form.Item>
 
           <div className="mt-6">
             <div className="relative">
@@ -96,25 +163,29 @@ const LoginPage = () => {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className={`px-2 ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-500"}`}>
-                  Or continue with
+                  Hoặc tiếp tục với
                 </span>
               </div>
             </div>
 
             <div className="mt-6 grid grid-cols-3 gap-3">
+              {/* Có thể thêm social login buttons ở đây */}
             </div>
           </div>
         </Form>
 
         <p className={`mt-10 text-center text-sm ${isDarkMode ? "text-white" : "text-gray-500"}`}>
-          Not a member?{" "}
-          {/* <a href="#" className="font-medium text-red-600 hover:text-red-500">
-            Register now
-          </a> */}
-          <Link to="/register" style={{ color: "red", textDecoration: "none" }}
-          className="font-medium text-red-300 hover:text-red-500">
-            Register now
+          Chưa Có Tài Khoản?{" "}
+          <Link 
+            to="/register" 
+            style={{ color: "red", textDecoration: "none" }}
+            className="font-medium text-red-300 hover:text-red-500"
+          >
+            Đăng Ký Ngay
           </Link>
+          <div className="mt-4 flex justify-center">
+            <MouseFollowButton />
+          </div>
         </p>
       </div>
 
@@ -125,7 +196,7 @@ const LoginPage = () => {
           alt="Blood Donation"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0  opacity-[0.5] bg-red-600 bg-opacity-40 flex items-center justify-center">
+        <div className="absolute inset-0 opacity-[0.5] bg-red-600 bg-opacity-40 flex items-center justify-center">
           <div className="text-center p-8">
             <h2 className="text-4xl font-bold text-white mb-4">
               Give the Gift of Life
