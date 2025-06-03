@@ -14,73 +14,6 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
-    setIsLoading(true);
-    console.log("Login attempt:", values);
-
-    try {
-      // Lấy tất cả users từ API
-      const response = await api.get("");
-      const users = response.data;
-
-      console.log("All users:", users);
-
-      // Tìm user có email và password phù hợp
-      const user = users.find(u => 
-        u.email === values.email && 
-        u.password === values.password
-      );
-
-      if (user) {
-        // Đăng nhập thành công
-        toast.success("Đăng Nhập Thành Công!");
-
-        // Tạo token giả
-        const fakeToken = btoa(JSON.stringify({ userId: user.user_id || user.id, email: user.email, timestamp: Date.now() }));
-
-        // Lưu thông tin user và token, bao gồm cả role
-        localStorage.setItem('token', fakeToken);
-        localStorage.setItem('user', JSON.stringify({
-          id: user.user_id || user.id,
-          full_name: user.full_name || user.fullname || "Người dùng",
-          email: user.email,
-          phone: user.phone,
-          blood_type: user.blood_type || user.bloodGroup || "Chưa xác định",
-          address: user.address,
-          role: user.role || "user" // Lưu role, mặc định là "user" nếu không có
-        }));
-
-
-        // Kiểm tra role và chuyển hướng tương ứng
-        const userRole = user.role || "user";
-        
-        console.log("User role detected:", userRole); // Debug log
-        
-        if (userRole === "admin") {
-          console.log("Redirecting to admin dashboard");
-          navigate("/admin");
-        } else if (userRole === "doctor") {
-          console.log("Redirecting to doctor dashboard");
-          navigate("/dashboard");
-        } else {
-          console.log("Redirecting to user dashboard");
-          navigate("/user");
-        }
-
-      } else {
-        toast.error("Email hoặc mật khẩu không đúng!");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      if (error.response?.status === 404) {
-        toast.error("Không tìm thấy thông tin người dùng!");
-      } else if (error.message) {
-        toast.error(error.message);
-      } else {
-        toast.error("Đăng nhập thất bại. Vui lòng thử lại!");
-      }
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -216,10 +149,10 @@ const LoginPage = () => {
         <div className="absolute inset-0 opacity-[0.5] bg-red-600 bg-opacity-40 flex items-center justify-center">
           <div className="text-center p-8">
             <h2 className="text-4xl font-bold text-white mb-4">
-              Give the Gift of Life
+              Chào Mừng Trở Lại!
             </h2>
-            <p className="text-xl text-white">
-              "Your donation can save up to three lives. Be a hero today."
+            <p className="text-white text-lg">
+              Cùng chung tay vì một cộng đồng khỏe mạnh
             </p>
           </div>
         </div>
