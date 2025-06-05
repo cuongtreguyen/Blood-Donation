@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaCalendar, FaHistory, FaSignOutAlt, FaTint, FaClock, FaMapMarkerAlt, FaCheckCircle, FaEdit } from "react-icons/fa";
@@ -11,22 +12,46 @@ const DonateUser = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
+    // Định nghĩa mảng bloodGroups
+    const bloodGroups = [
+        { label: "A+", value: "A_POSITIVE" },
+        { label: "A-", value: "A_NEGATIVE" },
+        { label: "B+", value: "B_POSITIVE" },
+        { label: "B-", value: "B_NEGATIVE" },
+        { label: "AB+", value: "AB_POSITIVE" },
+        { label: "AB-", value: "AB_NEGATIVE" },
+        { label: "O+", value: "O_POSITIVE" },
+        { label: "O-", value: "O_NEGATIVE" }, // Sửa lỗi typo O_NEGATIVE-
+    ];
+
+    // Hàm chuyển đổi từ value (API) sang label (hiển thị)
+    const getBloodTypeLabel = (value) => {
+        const group = bloodGroups.find((group) => group.value === value);
+        return group ? group.label : "Chưa xác định";
+    };
+
+    // // Hàm chuyển đổi từ label (hiển thị) sang value (API) nếu cần
+    // const getBloodTypeValue = (label) => {
+    //     const group = bloodGroups.find((group) => group.label === label);
+    //     return group ? group.value : null;
+    // };
+
     const [userData, setUserData] = useState(() => {
         const savedUser = localStorage.getItem("user");
-        return savedUser 
-            ? JSON.parse(savedUser) 
-            : { 
-                id: null, 
-                full_name: "Người dùng", 
-                email: "Chưa có thông tin", 
-                phone: "Chưa có thông tin", 
-                address: "Chưa có thông tin", 
-                blood_type: "Chưa xác định", 
-                totalDonations: 0, 
-                lastDonation: "Chưa có", 
-                isEligible: false, 
-                profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-            };
+        return savedUser
+            ? JSON.parse(savedUser)
+            : {
+                  id: null,
+                  full_name: "Người dùng",
+                  email: "Chưa có thông tin",
+                  phone: "Chưa có thông tin",
+                  address: "Chưa có thông tin",
+                  blood_type: "Chưa xác định",
+                  totalDonations: 0,
+                  lastDonation: "Chưa có",
+                  isEligible: false,
+                  profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+              };
     });
 
     const donationHistory = [
@@ -55,10 +80,10 @@ const DonateUser = () => {
             const savedUser = localStorage.getItem("user");
             if (savedUser) {
                 const parsedUser = JSON.parse(savedUser);
-                setUserData(prev => ({ ...prev, ...parsedUser }));
+                setUserData((prev) => ({ ...prev, ...parsedUser }));
             } else {
                 try {
-                    const response = await api.get(`/17`); // Lấy dữ liệu dựa trên user_id
+                    const response = await api.get(`/${userData.id}`); // Giả định API lấy dữ liệu người dùng
                     const user = response.data;
                     const formattedUser = {
                         id: user.user_id || user.id,
@@ -66,11 +91,13 @@ const DonateUser = () => {
                         email: user.email || "Chưa có thông tin",
                         phone: user.phone || "Chưa có thông tin",
                         address: user.address || "Chưa có thông tin",
-                        blood_type: user.blood_type || "Chưa xác định",
+                        blood_type: user.blood_type || "Chưa xác định", // Lưu dạng A_POSITIVE
                         totalDonations: user.totalDonations || 0,
                         lastDonation: user.last_donation || "Chưa có",
                         isEligible: !!user.last_donation && parseInt(user.last_donation) > 0,
-                        profileImage: user.profileImage || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                        profileImage:
+                            user.profileImage ||
+                            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
                     };
                     localStorage.setItem("user", JSON.stringify(formattedUser));
                     setUserData(formattedUser);
@@ -101,7 +128,7 @@ const DonateUser = () => {
                 email: userData.email,
                 phone: userData.phone,
                 address: userData.address,
-                blood_type: userData.blood_type,
+                blood_type: userData.blood_type, // Gửi dạng A_POSITIVE
             });
 
             const updatedUser = { ...userData, ...response.data };
@@ -156,7 +183,7 @@ const DonateUser = () => {
                                 <h2 className="text-3xl font-bold text-gray-800 mb-2">{userData.full_name}</h2>
                                 <div className="flex items-center bg-red-50 px-4 py-2 rounded-full">
                                     <FaTint className="text-red-600 mr-2 animate-pulse" />
-                                    <span className="text-xl font-semibold text-red-600">{userData.blood_type}</span>
+                                    <span className="text-xl font-semibold text-red-600">{getBloodTypeLabel(userData.blood_type)}</span>
                                 </div>
                             </div>
                         </div>
@@ -173,7 +200,7 @@ const DonateUser = () => {
                         <p className="text-gray-600"><strong>Email:</strong> {userData.email}</p>
                         <p className="text-gray-600"><strong>Điện thoại:</strong> {userData.phone}</p>
                         <p className="text-gray-600"><strong>Địa chỉ:</strong> {userData.address}</p>
-                        <p className="text-gray-600"><strong>Nhóm máu:</strong> {userData.blood_type}</p>
+                        <p className="text-gray-600"><strong>Nhóm máu:</strong> {getBloodTypeLabel(userData.blood_type)}</p>
                     </div>
                 </>
             ) : (
@@ -220,13 +247,19 @@ const DonateUser = () => {
                         </div>
                         <div>
                             <label className="block text-gray-700 mb-2">Nhóm máu</label>
-                            <input
-                                type="text"
+                            <select
                                 value={userData.blood_type || ""}
                                 onChange={(e) => setUserData({ ...userData, blood_type: e.target.value })}
                                 className="w-full p-3 border rounded-lg"
                                 disabled={isLoading}
-                            />
+                            >
+                                <option value="">Chưa xác định</option>
+                                {bloodGroups.map((group) => (
+                                    <option key={group.value} value={group.value}>
+                                        {group.label}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                     <div className="flex space-x-4">
@@ -280,7 +313,10 @@ const DonateUser = () => {
             <h3 className="text-2xl font-bold mb-6 text-gray-800">Lịch Sử Hiến Máu</h3>
             <div className="space-y-6">
                 {donationHistory.map((donation, index) => (
-                    <div key={index} className="bg-gradient-to-r from-red-50 to-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <div
+                        key={index}
+                        className="bg-gradient-to-r from-red-50 to-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
+                    >
                         <div className="flex justify-between items-center">
                             <div>
                                 <p className="font-semibold text-lg text-gray-800">{donation.location}</p>
@@ -439,3 +475,9 @@ const DonateUser = () => {
 };
 
 export default DonateUser;
+
+
+
+
+
+
