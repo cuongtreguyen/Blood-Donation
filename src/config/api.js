@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   // baseURL: "http://103.200.20.149/:8080/api/",
-  baseURL: "https://6837f5e12c55e01d184b5c20.mockapi.io/api/v1/users",
+  baseURL: "http://14.225.205.143:8080/api/",
 });
 
 api.interceptors.request.use(

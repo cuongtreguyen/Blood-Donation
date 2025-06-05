@@ -8,14 +8,14 @@ import api from "../../config/api";
 const { Title, Text, Link: AntdLink } = Typography;
 
 const bloodGroups = [
-  { label: "A+", value: "A+" },
-  { label: "A-", value: "A-" },
-  { label: "B+", value: "B+" },
-  { label: "B-", value: "B-" },
-  { label: "AB+", value: "AB+" },
-  { label: "AB-", value: "AB-" },
-  { label: "O+", value: "O+" },
-  { label: "O-", value: "O-" },
+  { label: "A+", value: "A_POSITIVE" },
+  { label: "A-", value: "A_NEGATIVE" },
+  { label: "B+", value: "B_POSITIVE" },
+  { label: "B-", value: "B_NEGATIVE" },
+  { label: "AB+", value: "AB_POSITIVE" },
+  { label: "AB-", value: "AB_NEGATIVE" },
+  { label: "O+", value: "O_POSITIVE" },
+  { label: "O-", value: "O_NEGATIVE-" },
 ];
 
 const RegisterPage = () => {
@@ -23,7 +23,7 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [profileImage, setProfileImage] = useState(null);
+ 
   
   
 
@@ -39,18 +39,15 @@ const RegisterPage = () => {
         phone: values.phone,
         address: values.address,
         blood_type: values.blood_type,
-        role: "user",
-        profileImage: profileImage || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
       };
 
       console.log("Data to send:", userData);
 
-      const response = await api.post("", userData);
+      const response = await api.post("register", userData);
 
       if (response.status === 201) {
         toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
         form.resetFields();
-        setProfileImage(null);
         setTimeout(() => {
           navigate("/login");
         }, 1500);
@@ -92,7 +89,7 @@ const RegisterPage = () => {
               onClick={() => setIsDarkMode(!isDarkMode)}
               className={`p-2 rounded-full transition-colors ${isDarkMode
                   ? "hover:bg-gray-700 text-yellow-400"
-                  : "hover:bg-gray-200 text-gray-600"
+                  : " hover:bg-gray-200 text-gray-600"
                 }`}
             >
               {isDarkMode ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-gray-600" />}
@@ -269,7 +266,6 @@ const RegisterPage = () => {
                 }}
                 onClick={() => {
                   form.resetFields();
-                  setProfileImage(null);
                   navigate('/login');
                 }}
                 disabled={isLoading}
