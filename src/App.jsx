@@ -24,6 +24,7 @@ import AdminDonationsPage from './page/admin/AdminDonationsPage';
 import AdminStatisticsPage from './page/admin/AdminStatisticsPage';
 import AdminSettingsPage from './page/admin/AdminSettingsPage';
 import AdminProfilePage from './page/admin/AdminProfilePage';
+import AdminNotificationsPage from './page/admin/AdminNotificationsPage';
 
 // Doctor Pages
 import DoctorDashboardPage from './pages/doctor/DashboardPage';
@@ -168,6 +169,10 @@ const router = createBrowserRouter([
       {
         path: "statistics",
         element: <AdminStatisticsPage />,
+      },
+      {
+        path: "notifications",
+        element: <AdminNotificationsPage />,
       },
       {
         path: "settings",
