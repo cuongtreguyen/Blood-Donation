@@ -15,7 +15,7 @@ const bloodGroups = [
   { label: "AB+", value: "AB_POSITIVE" },
   { label: "AB-", value: "AB_NEGATIVE" },
   { label: "O+", value: "O_POSITIVE" },
-  { label: "O-", value: "O_NEGATIVE-" },
+  { label: "O-", value: "O_NEGATIVE" },
 ];
 
 const RegisterPage = () => {
@@ -23,9 +23,9 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
- 
-  
-  
+
+
+
 
   const onFinish = async (values) => {
     setIsLoading(true);
@@ -45,7 +45,7 @@ const RegisterPage = () => {
 
       const response = await api.post("register", userData);
 
-      if (response.status === 201) {
+      if (response.status === 200) {
         toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
         form.resetFields();
         setTimeout(() => {
@@ -88,8 +88,8 @@ const RegisterPage = () => {
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
               className={`p-2 rounded-full transition-colors ${isDarkMode
-                  ? "hover:bg-gray-700 text-yellow-400"
-                  : " hover:bg-gray-200 text-gray-600"
+                ? "hover:bg-gray-700 text-yellow-400"
+                : " hover:bg-gray-200 text-gray-600"
                 }`}
             >
               {isDarkMode ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-gray-600" />}
@@ -121,7 +121,7 @@ const RegisterPage = () => {
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
-                <Form.Item
+                {/* <Form.Item
                   label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Email *</span>}
                   name="email"
                   rules={[
@@ -133,12 +133,29 @@ const RegisterPage = () => {
                     placeholder="example@email.com"
                     className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
                   />
+                </Form.Item> */}
+                <Form.Item
+                  label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Email *</span>}
+                  name="email"
+                  rules={[
+                    { required: true, message: "Vui lòng nhập email" },
+                    {
+                      pattern: /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$/,
+                      message: "Email không hợp lệ"
+                    }
+                  ]}
+                >
+                  <Input
+                    placeholder="example@email.com"
+                    className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
+                  />
                 </Form.Item>
+
               </Col>
             </Row>
             <Row gutter={16}>
               <Col xs={24} md={12}>
-                <Form.Item
+                {/* <Form.Item
                   label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Mật khẩu *</span>}
                   name="password"
                   rules={[
@@ -150,9 +167,48 @@ const RegisterPage = () => {
                     placeholder="Nhập mật khẩu"
                     className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
                   />
+                </Form.Item> */}
+                <Form.Item
+                  label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Mật khẩu *</span>}
+                  name="password"
+                  rules={[
+                    { required: true, message: "Vui lòng nhập mật khẩu" },
+                    {
+                      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,20}$/,
+                      message: "Mật khẩu phải từ 8-20 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
+                    }
+                  ]}
+                >
+                  <Input.Password
+                    placeholder="Nhập mật khẩu"
+                    className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
+                  />
                 </Form.Item>
+
+
               </Col>
               <Col xs={24} md={12}>
+                {/* <Form.Item
+                  label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Xác nhận mật khẩu *</span>}
+                  name="confirmPassword"
+                  dependencies={['password']}
+                  rules={[
+                    { required: true, message: "Vui lòng xác nhận mật khẩu" },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue('password') === value) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(new Error('Mật khẩu không khớp!'));
+                      },
+                    }),
+                  ]}
+                >
+                  <Input.Password
+                    placeholder="Nhập lại mật khẩu"
+                    className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
+                  />
+                </Form.Item> */}
                 <Form.Item
                   label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Xác nhận mật khẩu *</span>}
                   name="confirmPassword"
@@ -174,6 +230,7 @@ const RegisterPage = () => {
                     className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
                   />
                 </Form.Item>
+
               </Col>
             </Row>
             <Row gutter={16}>
@@ -220,7 +277,7 @@ const RegisterPage = () => {
                 className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
               />
             </Form.Item>
-            
+
 
             <Form.Item
               name="agreement"
