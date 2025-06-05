@@ -14,6 +14,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
+
     setIsLoading(true);
     console.log("Login attempt:", values);
 
@@ -55,6 +56,7 @@ const LoginPage = () => {
     } finally {
       setIsLoading(false);
     }
+
   };
 
   return (
@@ -190,10 +192,10 @@ const LoginPage = () => {
         <div className="absolute inset-0 opacity-[0.5] bg-red-600 bg-opacity-40 flex items-center justify-center">
           <div className="text-center p-8">
             <h2 className="text-4xl font-bold text-white mb-4">
-              Give the Gift of Life
+              Chào Mừng Trở Lại!
             </h2>
-            <p className="text-xl text-white">
-              "Your donation can save up to three lives. Be a hero today."
+            <p className="text-white text-lg">
+              Cùng chung tay vì một cộng đồng khỏe mạnh
             </p>
           </div>
         </div>

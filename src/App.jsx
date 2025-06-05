@@ -1,19 +1,22 @@
 import React from 'react';
+import './index.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import viVN from 'antd/locale/vi_VN';
-import './index.css';
+import { UserProvider } from './contexts/UserContext';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
-import DashboardLayout from './components/layout/DashboardLayout';
+import DoctorDashboardLayout from './components/layout/DoctorDashboardLayout';
+import NurseDashboardLayout from './components/layout/NurseDashboardLayout';
 import AdminLayout from './components/layout/AdminLayout';
 
 // Pages
 import HomePage from './page/homepage/HomePage';
 import LoginPage from './page/loginpage/LoginPage';
 import RegisterPage from './page/loginpage/RegisterPage';
-import DashboardPage from './page/dashboard/DashboardPage';
+
+// Admin Pages
 import AdminDashboard from './page/admin/AdminDashboard';
 import AdminUsersPage from './page/admin/AdminUsersPage';
 import AdminBloodBanksPage from './page/admin/AdminBloodBanksPage';
@@ -22,11 +25,26 @@ import AdminStatisticsPage from './page/admin/AdminStatisticsPage';
 import AdminSettingsPage from './page/admin/AdminSettingsPage';
 import AdminProfilePage from './page/admin/AdminProfilePage';
 
-// New imports based on the provided image structure
-import DonorsPage from './page/dashboard/DonorsPage';
-import MedicalRecordsPage from './page/dashboard/MedicalRecordsPage';
-import DonateUser from './page/userpage/DonateUser';
-import ForgotPassword from './page/loginpage/ForgotPassword';
+// Doctor Pages
+import DoctorDashboardPage from './pages/doctor/DashboardPage';
+import DoctorDonorsPage from './pages/doctor/DonorsPage';
+import DoctorMedicalRecordsPage from './pages/doctor/MedicalRecordsPage';
+import DoctorBloodInventoryPage from './pages/doctor/BloodInventoryPage';
+import DoctorReportsPage from './pages/doctor/ReportsPage';
+import DoctorProfilePage from './pages/doctor/ProfilePage';
+
+// Nurse Pages
+import NurseDashboardPage from './pages/nurse/DashboardPage';
+import ScreeningPage from './pages/nurse/ScreeningPage';
+import RegisterDonorPage from './pages/nurse/RegisterDonorPage';
+import AppointmentsPage from './pages/nurse/AppointmentsPage';
+import PostDonationCarePage from './pages/nurse/PostDonationCarePage';
+import NurseDonorsPage from './pages/nurse/DonorsPage';
+import NurseMedicalRecordsPage from './pages/nurse/MedicalRecordsPage';
+import NurseBloodInventoryPage from './pages/nurse/BloodInventoryPage';
+import NurseReportsPage from './pages/nurse/ReportsPage';
+import NurseCampaignsPage from './pages/nurse/CampaignsPage';
+import NurseProfilePage from './pages/nurse/ProfilePage';
 
 const router = createBrowserRouter([
   {
@@ -48,20 +66,82 @@ const router = createBrowserRouter([
     element: <RegisterPage />,
   },
   {
-    path: "/dashboard",
-    element: <DashboardLayout />,
+    path: "/nurse",
+    element: <NurseDashboardLayout />,
     children: [
       {
         path: "",
-        element: <DashboardPage />,
+        element: <NurseDashboardPage />,
+      },
+      {
+        path: "screening",
+        element: <ScreeningPage />,
+      },
+      {
+        path: "register-donor",
+        element: <RegisterDonorPage />,
+      },
+      {
+        path: "appointments",
+        element: <AppointmentsPage />,
       },
       {
         path: "donors",
-        element: <DonorsPage />,
+        element: <NurseDonorsPage />,
+      },
+      {
+        path: "post-donation",
+        element: <PostDonationCarePage />,
       },
       {
         path: "medical-records",
-        element: <MedicalRecordsPage />,
+        element: <NurseMedicalRecordsPage />,
+      },
+      {
+        path: "blood-inventory",
+        element: <NurseBloodInventoryPage />,
+      },
+      {
+        path: "reports",
+        element: <NurseReportsPage />,
+      },
+      {
+        path: "campaigns",
+        element: <NurseCampaignsPage />,
+      },
+      {
+        path: "profile",
+        element: <NurseProfilePage />,
+      },
+    ],
+  },
+  {
+    path: "/doctor",
+    element: <DoctorDashboardLayout />,
+    children: [
+      {
+        path: "",
+        element: <DoctorDashboardPage />,
+      },
+      {
+        path: "donors",
+        element: <DoctorDonorsPage />,
+      },
+      {
+        path: "medical-records",
+        element: <DoctorMedicalRecordsPage />,
+      },
+      {
+        path: "blood-inventory",
+        element: <DoctorBloodInventoryPage />,
+      },
+      {
+        path: "reports",
+        element: <DoctorReportsPage />,
+      },
+      {
+        path: "profile",
+        element: <DoctorProfilePage />,
       },
     ],
   },
@@ -71,10 +151,6 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <AdminDashboard />,
-      },
-      {
-        path: "dashboard",
         element: <AdminDashboard />,
       },
       {
@@ -103,28 +179,24 @@ const router = createBrowserRouter([
       },
     ],
   },
-  {
-    path: "/user",
-    element: <DonateUser />,
-  },
-  {
-    path: "/ResetPassword",
-    element: <ForgotPassword />,
-  },
 ]);
 
 function App() {
   return (
-    <ConfigProvider
-      locale={viVN}
-      theme={{
-        token: {
-          colorPrimary: '#d32f2f',
-        },
-      }}
-    >
-      <RouterProvider router={router} />
-    </ConfigProvider>
+   
+      <ConfigProvider
+        locale={viVN}
+        theme={{
+          token: {
+            colorPrimary: '#d32f2f',
+          },
+        }}
+      >
+         <UserProvider>
+        <RouterProvider router={router} />
+        </UserProvider>
+      </ConfigProvider>
+    
   );
 }
 

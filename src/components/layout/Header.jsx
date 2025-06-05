@@ -15,7 +15,7 @@ const Header = () => {
   }, []);
 
   const navItems = [
-  { name: "Trang chủ", href: "#Home" },
+  { name: "Đăng Ký Nhanh", href: "#donate" },
   { name: "Hiến máu", href: "#donation-process" },
   { name: "Tìm điểm hiến máu", href: "#donation-centers" },
   { name: "Đánh Giá", href: "#blog-customer" },
@@ -62,6 +62,14 @@ const Header = () => {
                 >
                   {item.name}
                 </button>
+                ) : item.name === "Đăng Ký Nhanh" ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleScrollToSection("donate")}
+                  className="no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
+                  {item.name}
+                </button>
               ) : item.name === "Tìm điểm hiến máu" ? (
                 <button
                   key={item.name}
@@ -98,7 +106,7 @@ const Header = () => {
               className="bg-white text-red-600 hover:bg-red-50 hover:text-red-700 px-6 py-2 rounded-full font-bold shadow-md transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 animate-bounce"
               aria-label="Donate Now"
             >
-              Donate Now
+              Hiến Máu Ngay
             </button>
           </div>
 
@@ -153,7 +161,7 @@ const Header = () => {
               className="w-full bg-white text-red-600 hover:bg-red-50 hover:text-red-700 px-6 py-2 rounded-full font-bold shadow-md transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 mt-4"
               aria-label="Donate Now"
             >
-              Donate Now
+              Hiến Máu Ngay
             </button>
           </div>
         </div>

@@ -11,7 +11,6 @@ import {
   BankOutlined,
   SettingOutlined,
   LogoutOutlined,
-  HeartOutlined,
   BarChartOutlined
 } from '@ant-design/icons';
 
@@ -28,14 +27,6 @@ function AdminLayout() {
     { id: 2, message: 'Ngân hàng máu mới được thêm', read: false },
     { id: 3, message: 'Báo cáo mới đã được tạo', read: true },
   ];
-
-  const handleNotificationClick = (id) => {
-    // Keep this if you want to mark as read when clicked, even without adding new notifications
-    // setNotifications(notifications.map(notification =>
-    //   notification.id === id ? { ...notification, read: true } : notification
-    // ));
-    console.log(`Notification clicked: ${id}`); // Or just log for now
-  };
 
   // Menu items for admin
   const menuItems = [
@@ -101,8 +92,12 @@ function AdminLayout() {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider trigger={null} collapsible collapsed={collapsed} theme="light">
         <div className="logo" style={{ height: '64px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <HeartOutlined style={{ fontSize: '24px', color: '#d32f2f' }} />
-          {!collapsed && <span style={{ marginLeft: '8px', fontSize: '18px', fontWeight: 'bold', color: '#d32f2f' }}>Admin Panel</span>}
+          <img
+            src="https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain"
+            alt="Logo"
+            style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+          />
+          {!collapsed && <span style={{ marginLeft: '8px', fontSize: '18px', fontWeight: 'bold', color: '#d32f2f' }}>Dòng Máu Việt</span>}
         </div>
         <Menu
           theme="light"
