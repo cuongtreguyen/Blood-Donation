@@ -14,6 +14,49 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
+
+    setIsLoading(true);
+    console.log("Login attempt:", values);
+
+    try {
+      // Lấy tất cả users từ API
+      const response = await api.post("login",values);
+      const user = response.data;
+
+    
+        // Đăng nhập thành công
+        toast.success("Đăng Nhập Thành Công!");
+
+        // Tạo token giả
+        // Kiểm tra role và chuyển hướng tương ứng
+        const userRole = user.role ;
+        
+        console.log("User role detected:", userRole); // Debug log
+        
+        if (userRole === "ADMIN") {
+          console.log("Redirecting to admin dashboard");
+          navigate("/admin");
+        } else if (userRole === "STAFF") {
+          console.log("Redirecting to doctor dashboard");
+          navigate("/dashboard");
+        } else {
+          console.log("Redirecting to user dashboard");
+          navigate("/user");
+        }
+      
+    } catch (error) {
+      console.error("Login error:", error);
+      if (error.response?.status === 404) {
+        toast.error("Không tìm thấy thông tin người dùng!");
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Đăng nhập thất bại. Vui lòng thử lại!");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+
   };
 
   return (
