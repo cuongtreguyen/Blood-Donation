@@ -45,6 +45,7 @@ import NurseBloodInventoryPage from './pages/nurse/BloodInventoryPage';
 import NurseReportsPage from './pages/nurse/ReportsPage';
 import NurseCampaignsPage from './pages/nurse/CampaignsPage';
 import NurseProfilePage from './pages/nurse/ProfilePage';
+import DonateUser from './page/userpage/DonateUser';
 
 const router = createBrowserRouter([
   {
@@ -66,6 +67,9 @@ const router = createBrowserRouter([
     element: <RegisterPage />,
   },
   {
+    path: "/user",
+    element: <DonateUser />,
+  },{
     path: "/nurse",
     element: <NurseDashboardLayout />,
     children: [
