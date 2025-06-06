@@ -28,33 +28,6 @@ export const doctors = [
   }
 ];
 
-export const nurses = [
-  {
-    id: "N1",
-    name: "Phạm Thị Hương",
-    department: "Khoa Huyết học",
-    experience: "8 năm",
-    avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-    status: "active",
-    phone: "0901234569",
-    email: "huong.nurse@hospital.com",
-    shift: "Sáng",
-    assistedDonations: 250
-  },
-  {
-    id: "N2",
-    name: "Lê Văn Dũng",
-    department: "Khoa Truyền máu",
-    experience: "5 năm",
-    avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-    status: "active",
-    phone: "0901234570",
-    email: "dung.nurse@hospital.com",
-    shift: "Chiều",
-    assistedDonations: 180
-  }
-];
-
 export const bloodInventory = {
   "A+": { amount: 85, status: "high", lastUpdated: "2024-03-20" },
   "A-": { amount: 45, status: "normal", lastUpdated: "2024-03-20" },
@@ -137,7 +110,6 @@ export const notifications = [
 export const fetchData = (dataType, delay = 1000) => {
   const dataMap = {
     doctors,
-    nurses,
     bloodInventory,
     appointments,
     donations,

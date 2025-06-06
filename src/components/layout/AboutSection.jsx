@@ -7,10 +7,6 @@ function AboutSection() {
       <div className="container">
         <div className="row align-items-center">          
           <div className="col-lg-6">
-
-            <button className="btn btn-danger btn-lg">
-              Liên Hệ Chúng Tôi
-            </button>
           </div>
         </div>
       </div>

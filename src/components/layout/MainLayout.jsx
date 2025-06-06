@@ -1,8 +1,8 @@
-
 import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
 import { Outlet } from 'react-router-dom';
+import ContactButton from './ContactButton';
 
 function MainLayout() {
   return (
@@ -11,6 +11,7 @@ function MainLayout() {
     <main className='min-h-screen pt-[100px] bg-gray-100'>
     <Outlet/>
     </main>
+    <ContactButton />
     <Footer/>
    </>
   );
