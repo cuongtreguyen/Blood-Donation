@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Card, Form, Input, Button, Typography, Space, Divider, message } from 'antd';
+import { Card, Form, Input, Button, Typography, Space, Divider } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
 import api from '../../config/api';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const { Title } = Typography;
 
@@ -16,10 +18,12 @@ const AdminSettingsPage = () => {
       setLoading(true);
       // Gọi API lưu cài đặt chung
       await api.put('/settings/general', values);
-      message.success('Lưu cài đặt chung thành công!');
+      toast.success('Lưu cài đặt chung thành công!');
     } catch (error) {
       console.error('Lỗi khi lưu cài đặt chung:', error);
-      message.error('Lưu cài đặt chung thất bại. Vui lòng thử lại!');
+      // Thử hiển thị thông báo lỗi chi tiết từ server nếu có
+      const errorMessage = error.response?.data?.message || 'Lưu cài đặt chung thất bại. Vui lòng thử lại!';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -33,14 +37,16 @@ const AdminSettingsPage = () => {
         currentPassword: values.currentPassword,
         newPassword: values.newPassword
       });
-      message.success('Đổi mật khẩu thành công!');
+      toast.success('Đổi mật khẩu thành công!');
       passwordForm.resetFields(); // Reset form sau khi đổi mật khẩu thành công
     } catch (error) {
       console.error('Lỗi khi đổi mật khẩu:', error);
+       // Thử hiển thị thông báo lỗi chi tiết từ server nếu có
+      const errorMessage = error.response?.data?.message || 'Đổi mật khẩu thất bại. Vui lòng thử lại!';
       if (error.response?.status === 401) {
-        message.error('Mật khẩu hiện tại không đúng!');
+         toast.error('Mật khẩu hiện tại không đúng!');
       } else {
-        message.error('Đổi mật khẩu thất bại. Vui lòng thử lại!');
+         toast.error(errorMessage);
       }
     } finally {
       setLoading(false);
@@ -52,10 +58,12 @@ const AdminSettingsPage = () => {
       setLoading(true);
       // Gọi API lưu cài đặt email
       await api.put('/settings/email', values);
-      message.success('Lưu cài đặt email thành công!');
+      toast.success('Lưu cài đặt email thành công!');
     } catch (error) {
       console.error('Lỗi khi lưu cài đặt email:', error);
-      message.error('Lưu cài đặt email thất bại. Vui lòng thử lại!');
+       // Thử hiển thị thông báo lỗi chi tiết từ server nếu có
+      const errorMessage = error.response?.data?.message || 'Lưu cài đặt email thất bại. Vui lòng thử lại!';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
