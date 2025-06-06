@@ -1,5 +1,3 @@
-// 
-// 
 import { useState } from "react";
 import { Form, Input, Checkbox, Button } from "antd";
 import { FaMoon, FaSun } from "react-icons/fa";
@@ -7,46 +5,50 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import MouseFollowButton from "../../components/forms/MouseFollowButton";
 import api from "../../config/api";
+import { login } from "../../redux/features/userSlice";
+import { useDispatch } from "react-redux";
 
 const LoginPage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const onFinish = async (values) => {
-
     setIsLoading(true);
     console.log("Login attempt:", values);
 
     try {
-      // Lấy tất cả users từ API
-      const response = await api.post("login",values);
+      const response = await api.post("login", values);
       const user = response.data;
 
-    
-        // Đăng nhập thành công
-        toast.success("Đăng Nhập Thành Công!");
 
-        // Kiểm tra role và chuyển hướng tương ứng
-        const userRole = user.role;
-        
-        console.log("User role detected:", userRole); // Debug log
-        
-        if (userRole === "ADMIN") {
-          console.log("Redirecting to admin dashboard");
-          navigate("/admin");
-        } else if (userRole === "DOCTOR") {
-          console.log("Redirecting to doctor dashboard");
-          navigate("/doctor");
-        } else {
-          console.log("Redirecting to user dashboard");
-          navigate("/user");
-        }
+      // Đăng nhập thành công
+      toast.success("Đăng Nhập Thành Công!");
+      dispatch(login(response.data)); // Giả sử bạn đã tạo action login trong userSlice
+      localStorage.setItem("token",response.data.token); // Lưu token vào localStorage
+      localStorage.setItem("user", JSON.stringify(user));
+      // Kiểm tra role và chuyển hướng
+      const userRole = user.role;
+      console.log("User role detected:", userRole);
+      
+      if (userRole === "ADMIN") {
+        console.log("Redirecting to admin dashboard");
+        navigate("/admin");
+      } else if (userRole === "STAFF") {
+        console.log("Redirecting to doctor dashboard");
+        navigate("/doctor");
+      } else {
+        console.log("Redirecting to user dashboard");
+        navigate("/user");
+      }
       
     } catch (error) {
       console.error("Login error:", error);
       if (error.response?.status === 404) {
         toast.error("Không tìm thấy thông tin người dùng!");
+      } else if (error.response?.status === 401) {
+        toast.error("Email hoặc mật khẩu không đúng!");
       } else if (error.message) {
         toast.error(error.message);
       } else {
@@ -55,9 +57,9 @@ const LoginPage = () => {
     } finally {
       setIsLoading(false);
     }
-
   };
 
+  // Rest of the component remains the same...
   return (
     <div className={`min-h-screen flex flex-col md:flex-row ${isDarkMode ? "dark bg-gray-900" : "bg-gray-50"}`}>
       {/* Left Column - Login Form */}
@@ -204,3 +206,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
