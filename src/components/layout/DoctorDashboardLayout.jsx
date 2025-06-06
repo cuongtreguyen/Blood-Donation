@@ -26,7 +26,7 @@ function DoctorDashboardLayout() {
 
   useEffect(() => {
     // Redirect if not logged in or not a doctor
-    if (!user || user.role !== 'doctor') {
+    if (!user || user.role !== 'DOCTOR') {
       navigate('/login');
     }
   }, [user, navigate]);

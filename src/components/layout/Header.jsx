@@ -15,13 +15,12 @@ const Header = () => {
   }, []);
 
   const navItems = [
-  { name: "Đăng Ký Nhanh", href: "#donate" },
-  { name: "Hiến máu", href: "#donation-process" },
-  { name: "Tìm điểm hiến máu", href: "#donation-centers" },
-  { name: "Đánh Giá", href: "#blog-customer" },
-  { name: "Đăng nhập", href: "/login" }
-];
-
+    { name: "Đăng Ký Nhanh", href: "#donate" },
+    { name: "Tài liệu về máu", href: "#document-blood" },
+    { name: "Hiến máu", href: "#donation-process" },
+    { name: "Tìm điểm hiến máu", href: "#donation-centers" },
+    { name: "Đánh Giá", href: "#blog-customer" }
+  ];
 
   const handleScrollToSection = (id) => {
     const section = document.getElementById(id);
@@ -70,6 +69,14 @@ const Header = () => {
                 >
                   {item.name}
                 </button>
+                 ) : item.name === "Tài liệu về máu" ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleScrollToSection("document-blood")}
+                  className="no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
+                  {item.name}
+                </button>
               ) : item.name === "Tìm điểm hiến máu" ? (
                 <button
                   key={item.name}
@@ -102,12 +109,12 @@ const Header = () => {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center">
-            <button
-              className="bg-white text-red-600 hover:bg-red-50 hover:text-red-700 px-6 py-2 rounded-full font-bold shadow-md transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 animate-bounce"
-              aria-label="Donate Now"
+            <Link
+              to="/login"
+              className="bg-white-600 text-white hover:bg-white-700 hover:text-white px-6 py-2 rounded-full font-bold shadow-md transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 animate-bounce"
             >
-              Hiến Máu Ngay
-            </button>
+              Đăng Nhập
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -157,12 +164,12 @@ const Header = () => {
                 </Link>
               )
             )}
-            <button
-              className="w-full bg-white text-red-600 hover:bg-red-50 hover:text-red-700 px-6 py-2 rounded-full font-bold shadow-md transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 mt-4"
-              aria-label="Donate Now"
+            <Link
+              to="/login"
+              className="w-full bg-white-600 text-white hover:bg-white-700 hover:text-white px-6 py-2 rounded-full font-bold shadow-md transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 mt-4"
             >
-              Hiến Máu Ngay
-            </button>
+              Đăng Nhập
+            </Link>
           </div>
         </div>
       </div>

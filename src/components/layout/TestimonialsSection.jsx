@@ -7,13 +7,13 @@ function TestimonialsSection() {
       name: "Nguyễn Văn Minh",
       role: "Người hiến máu thường xuyên",
       content: "Tôi đã hiến máu hơn 20 lần tại đây. Dịch vụ chuyên nghiệp, nhân viên tận tâm. Cảm ơn vì đã tạo điều kiện cho chúng tôi làm việc tốt.",
-      avatar: "https://scontent.fsgn5-3.fna.fbcdn.net/v/t39.30808-1/483609406_1142898187535579_4808174474482755062_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=104&ccb=1-7&_nc_sid=e99d92&_nc_eui2=AeHcOOMUn8nhWp1PP6kwXXTIgu4RDltIgp6C7hEOW0iCnjhWeeY93953S3FgGlNFpAtobRB5YNJMom8jcydTZDCq&_nc_ohc=gcuRl70mkRUQ7kNvwFCn576&_nc_oc=AdnqevnH2m3zdGiu6UUfG3xduuOl4nqiygc8NY2ziyC_GiFb8BCTd9U14-8MtIOSBt0&_nc_zt=24&_nc_ht=scontent.fsgn5-3.fna&_nc_gid=-0oAMehw0f5wkXr-X3O6Hg&oh=00_AfIc2-n2_Ow3-J3tjDz6o0XvtgeQdeVoK86Y7eu0UM8jQg&oe=68362069"
+      avatar: "https://scontent.fsgn2-5.fna.fbcdn.net/v/t39.30808-1/483609406_1142898187535579_4808174474482755062_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=104&ccb=1-7&_nc_sid=e99d92&_nc_ohc=kcDF5vgCjEkQ7kNvwEW4k5o&_nc_oc=AdkGd_ZZEZFHlh9_GkopF_nZODRSEjc-HBtKey5oNZ5jSSUzXwZEHc8BxUKXgXwHbJw&_nc_zt=24&_nc_ht=scontent.fsgn2-5.fna&_nc_gid=CnVDV64TulEANggbCpP2tQ&oh=00_AfO8iCV1owm66gFqvQEdgqtFYR-byGtysRbq6D45o7D2Lg&oe=684743E9"
     },
     {
       name: "Trần Thị Hoa",
       role: "Bệnh nhân được cứu sống",
       content: "Nhờ có máu hiến tặng, tôi đã vượt qua ca phẫu thuật khó khăn. Tôi vô cùng biết ơn những người hiến máu tình nguyện.",
-      avatar: "https://scontent.fsgn5-12.fna.fbcdn.net/v/t39.30808-1/341128599_54918292062373...68360E7B"
+      avatar: "https://scontent.fsgn2-9.fna.fbcdn.net/v/t39.30808-1/341128599_549182920623736_5160836108154107558_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=103&ccb=1-7&_nc_sid=e99d92&_nc_ohc=Q7a6rZZIKMIQ7kNvwFCU_gQ&_nc_oc=AdkVo0MSYMzIJO_sWQapw2TGeCu-CcAV1T315y4zkDlALIo2x4Htial16Y9lMG2_TEE&_nc_zt=24&_nc_ht=scontent.fsgn2-9.fna&_nc_gid=aoZSch1q6oUD4AoPHd9P1Q&oh=00_AfNdi4Y8U16IJsMKJEDWtL4iF5tiIJyxzOzdtzzJXBWB-A&oe=684731FB"
     },
     {
       name: "Lê Hoàng Nam",

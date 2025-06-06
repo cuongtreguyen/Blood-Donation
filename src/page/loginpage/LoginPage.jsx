@@ -27,18 +27,17 @@ const LoginPage = () => {
         // Đăng nhập thành công
         toast.success("Đăng Nhập Thành Công!");
 
-        // Tạo token giả
         // Kiểm tra role và chuyển hướng tương ứng
-        const userRole = user.role ;
+        const userRole = user.role;
         
         console.log("User role detected:", userRole); // Debug log
         
         if (userRole === "ADMIN") {
           console.log("Redirecting to admin dashboard");
           navigate("/admin");
-        } else if (userRole === "STAFF") {
+        } else if (userRole === "DOCTOR") {
           console.log("Redirecting to doctor dashboard");
-          navigate("/dashboard");
+          navigate("/doctor");
         } else {
           console.log("Redirecting to user dashboard");
           navigate("/user");
