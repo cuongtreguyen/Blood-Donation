@@ -47,7 +47,12 @@ import NurseReportsPage from './pages/nurse/ReportsPage';
 import NurseCampaignsPage from './pages/nurse/CampaignsPage';
 import NurseProfilePage from './pages/nurse/ProfilePage';
 import DonateUser from './page/userpage/DonateUser';
+import ForgotPassword from './page/loginpage/ForgotPassword';
 
+
+import { Provider } from "react-redux";
+import { persistor, store } from "./redux/store";
+import { PersistGate } from "redux-persist/integration/react";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -66,6 +71,10 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <RegisterPage />,
+  },
+  {
+    path: "/ResetPassword",
+    element: <ForgotPassword/>,
   },
   {
     path: "/user",
@@ -192,7 +201,8 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-   
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
       <ConfigProvider
         locale={viVN}
         theme={{
@@ -201,12 +211,14 @@ function App() {
           },
         }}
       >
-         <UserProvider>
-        <RouterProvider router={router} />
+        <UserProvider>
+          <RouterProvider router={router} />
         </UserProvider>
       </ConfigProvider>
-    
-  );
+    </PersistGate>
+  </Provider>
+);
+
 }
 
 export default App;

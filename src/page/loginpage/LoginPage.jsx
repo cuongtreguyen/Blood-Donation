@@ -5,11 +5,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import MouseFollowButton from "../../components/forms/MouseFollowButton";
 import api from "../../config/api";
+import { login } from "../../redux/features/userSlice";
+import { useDispatch } from "react-redux";
 
 const LoginPage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const onFinish = async (values) => {
     setIsLoading(true);
@@ -21,11 +24,9 @@ const LoginPage = () => {
 
       // Đăng nhập thành công
       toast.success("Đăng Nhập Thành Công!");
-
-      // LƯU THÔNG TIN USER VÀO LOCALSTORAGE - QUAN TRỌNG!
+      dispatch(login(response.data)); // Giả sử bạn đã tạo action login trong userSlice
+      localStorage.setItem("token",response.data.token); // Lưu token vào localStorage
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("userToken", user.token || "authenticated"); // Nếu có token từ server
-
       // Kiểm tra role và chuyển hướng
       const userRole = user.role;
       console.log("User role detected:", userRole);
@@ -40,6 +41,8 @@ const LoginPage = () => {
         console.log("Redirecting to user dashboard");
         navigate("/user");
       }
+
+       
       
     } catch (error) {
       console.error("Login error:", error);
