@@ -4,6 +4,8 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import viVN from 'antd/locale/vi_VN';
 import { UserProvider } from './contexts/UserContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -25,6 +27,7 @@ import AdminStatisticsPage from './page/admin/AdminStatisticsPage';
 import AdminSettingsPage from './page/admin/AdminSettingsPage';
 import AdminProfilePage from './page/admin/AdminProfilePage';
 import AdminNotificationsPage from './page/admin/AdminNotificationsPage';
+import BlogPage from './page/admin/BlogPage';
 
 // Doctor Pages
 import DoctorDashboardPage from './pages/doctor/DashboardPage';
@@ -186,6 +189,10 @@ const router = createBrowserRouter([
         path: "profile",
         element: <AdminProfilePage />,
       },
+      {
+        path: "blogs",
+        element: <BlogPage />,
+      },
     ],
   },
 ]);
@@ -203,6 +210,7 @@ function App() {
       >
          <UserProvider>
         <RouterProvider router={router} />
+        <ToastContainer position="top-right" autoClose={3000} />
         </UserProvider>
       </ConfigProvider>
     
