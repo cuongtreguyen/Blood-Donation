@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, message, Popconfirm } from 'antd';
+import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm } from 'antd';
 import SearchOutlined from '@ant-design/icons/lib/icons/SearchOutlined';
 import UserOutlined from '@ant-design/icons/lib/icons/UserOutlined';
 import EditOutlined from '@ant-design/icons/lib/icons/EditOutlined';
@@ -9,6 +9,8 @@ import LockOutlined from '@ant-design/icons/lib/icons/LockOutlined';
 import MailOutlined from '@ant-design/icons/lib/icons/MailOutlined';
 import PhoneOutlined from '@ant-design/icons/lib/icons/PhoneOutlined';
 import api from '../../config/api';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const { Option } = Select;
 
@@ -97,14 +99,14 @@ function AdminUsersPage() {
           lastLogin: '-',
         };
         setUsers([...users, newUser]);
-        message.success('Thêm người dùng thành công!');
+        toast.success('Thêm người dùng thành công!');
       } else {
         // Update existing user
         const updatedUsers = users.map(user => 
           user.key === selectedUser.key ? { ...user, ...values } : user
         );
         setUsers(updatedUsers);
-        message.success('Cập nhật thông tin thành công!');
+        toast.success('Cập nhật thông tin thành công!');
       }
       setIsModalVisible(false);
     });
@@ -120,17 +122,17 @@ function AdminUsersPage() {
       // Tìm user cần xóa từ danh sách users
       const userToDelete = users.find(user => user.key === key);
       if (!userToDelete) {
-        message.error('Không tìm thấy người dùng!');
+        toast.error('Không tìm thấy người dùng!');
         return;
       }
 
       // Cập nhật state để xóa user
       const updatedUsers = users.filter(user => user.key !== key);
       setUsers(updatedUsers);
-      message.success('Xóa người dùng thành công!');
+      toast.success('Xóa người dùng thành công!');
     } catch (error) {
       console.error('Lỗi khi xóa người dùng:', error);
-      message.error('Xóa người dùng thất bại. Vui lòng thử lại!');
+      toast.error('Xóa người dùng thất bại. Vui lòng thử lại!');
     }
   };
 
@@ -324,15 +326,6 @@ function AdminUsersPage() {
           >
             <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" />
           </Form.Item>
-          {modalMode === 'add' && (
-            <Form.Item
-              name="password"
-              label="Mật khẩu"
-              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
-            >
-              <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" />
-            </Form.Item>
-          )}
           <Form.Item
             name="role"
             label="Vai trò"

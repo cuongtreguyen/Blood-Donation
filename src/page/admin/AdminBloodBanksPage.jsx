@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, message, Popconfirm } from 'antd';
+import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm } from 'antd';
 import SearchOutlined from '@ant-design/icons/lib/icons/SearchOutlined';
 import PlusOutlined from '@ant-design/icons/lib/icons/PlusOutlined';
 import EditOutlined from '@ant-design/icons/lib/icons/EditOutlined';
@@ -8,6 +8,8 @@ import BankOutlined from '@ant-design/icons/lib/icons/BankOutlined';
 import PhoneOutlined from '@ant-design/icons/lib/icons/PhoneOutlined';
 import MailOutlined from '@ant-design/icons/lib/icons/MailOutlined';
 import GlobalOutlined from '@ant-design/icons/lib/icons/GlobalOutlined';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -126,14 +128,14 @@ function AdminBloodBanksPage() {
           lastUpdate: new Date().toLocaleDateString('vi-VN'),
         };
         setBloodBanks([...bloodBanks, newBloodBank]);
-        message.success('Thêm ngân hàng máu thành công!');
+        toast.success('Thêm ngân hàng máu thành công!');
       } else {
         // Update existing blood bank
         const updatedBloodBanks = bloodBanks.map(bloodBank => 
           bloodBank.key === selectedBloodBank.key ? { ...bloodBank, ...values } : bloodBank
         );
         setBloodBanks(updatedBloodBanks);
-        message.success('Cập nhật thông tin thành công!');
+        toast.success('Cập nhật thông tin thành công!');
       }
       setIsModalVisible(false);
     });
@@ -149,17 +151,17 @@ function AdminBloodBanksPage() {
       // Tìm blood bank cần xóa từ danh sách
       const bloodBankToDelete = bloodBanks.find(bank => bank.key === key);
       if (!bloodBankToDelete) {
-        message.error('Không tìm thấy ngân hàng máu!');
+        toast.error('Không tìm thấy ngân hàng máu!');
         return;
       }
 
       // Cập nhật state để xóa blood bank
       const updatedBloodBanks = bloodBanks.filter(bank => bank.key !== key);
       setBloodBanks(updatedBloodBanks);
-      message.success('Xóa ngân hàng máu thành công!');
+      toast.success('Xóa ngân hàng máu thành công!');
     } catch (error) {
       console.error('Lỗi khi xóa ngân hàng máu:', error);
-      message.error('Xóa ngân hàng máu thất bại. Vui lòng thử lại!');
+      toast.error('Xóa ngân hàng máu thất bại. Vui lòng thử lại!');
     }
   };
 

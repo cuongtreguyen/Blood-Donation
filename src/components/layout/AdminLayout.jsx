@@ -12,8 +12,15 @@ import {
   SettingOutlined,
   LogoutOutlined,
   BarChartOutlined,
-  NotificationOutlined
+  NotificationOutlined,
+  HeartOutlined,
+  ExclamationCircleOutlined,
+  ClockCircleOutlined,
+  FileTextOutlined,
+  WarningOutlined,
+  SwapOutlined
 } from '@ant-design/icons';
+import { toast } from 'react-toastify';
 
 const { Header, Sider, Content } = Layout;
 
@@ -53,7 +60,7 @@ function AdminLayout() {
   // Menu items for admin
   const menuItems = [
     {
-      key: '/admin/dashboard',
+      key: '/admin',
       icon: <DashboardOutlined />,
       label: 'Tổng quan',
     },
@@ -70,7 +77,12 @@ function AdminLayout() {
     {
       key: '/admin/statistics',
       icon: <BarChartOutlined />,
-      label: 'Thống kê',
+      label: 'Thống kê tổng quan',
+    },
+    {
+      key: '/admin/blogs',
+      icon: <FileTextOutlined />,
+      label: 'Quản lý bài viết',
     },
     {
       key: '/admin/notifications',
@@ -94,7 +106,11 @@ function AdminLayout() {
         <Link to="/admin/settings">Cài đặt</Link>
       </Menu.Item>
       <Menu.Divider />
-      <Menu.Item key="logout" onClick={() => navigate('/login')}>
+      <Menu.Item key="logout" onClick={() => {
+        // TODO: Add actual logout logic (e.g., clearing token)
+        toast.success('Đăng xuất thành công!');
+        navigate('/login');
+      }}>
         <LogoutOutlined /> Đăng xuất
       </Menu.Item>
     </Menu>
@@ -161,7 +177,7 @@ function AdminLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed} theme="light">
+      <Sider trigger={null} collapsible collapsed={collapsed} theme="light" style={{ background: '#d32f2f' }}>
         <div className="logo" style={{ height: '64px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
             <img
@@ -169,15 +185,17 @@ function AdminLayout() {
               alt="Logo"
               style={{ width: '40px', height: '40px', borderRadius: '50%' }}
             />
-            {!collapsed && <span style={{ marginLeft: '8px', fontSize: '18px', fontWeight: 'bold', color: '#d32f2f' }}>Dòng Máu Việt</span>}
+            {!collapsed && <span style={{ marginLeft: '8px', fontSize: '18px', fontWeight: 'bold', color: 'white' }}>Dòng Máu Việt</span>}
           </Link>
         </div>
         <Menu
-          theme="light"
+          theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
+          style={{ background: '#d32f2f' }}
+          className="custom-menu"
         />
       </Sider>
       <Layout className="site-layout">
@@ -217,5 +235,26 @@ function AdminLayout() {
     </Layout>
   );
 }
+
+// Add custom styles for menu items
+const customStyles = `
+  .custom-menu .ant-menu-item {
+    color: white !important;
+  }
+  .custom-menu .ant-menu-item-selected {
+    background-color: #ff4d4f !important;
+  }
+  .custom-menu .ant-menu-item:hover {
+    background-color: #ff7875 !important;
+  }
+  .custom-menu .ant-menu-item .anticon {
+    color: white !important;
+  }
+`;
+
+// Add styles to document
+const styleSheet = document.createElement("style");
+styleSheet.innerText = customStyles;
+document.head.appendChild(styleSheet);
 
 export default AdminLayout; 
