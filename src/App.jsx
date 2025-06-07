@@ -42,6 +42,8 @@ import ForgotPassword from './page/loginpage/ForgotPassword';
 import { Provider } from "react-redux";
 import { persistor, store } from "./redux/store";
 import { PersistGate } from "redux-persist/integration/react";
+import OtpVerification from './page/loginpage/OtpVerification';
+// import PasswordResetForm from './page/loginpage/OtpVerification';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -62,12 +64,12 @@ const router = createBrowserRouter([
     element: <RegisterPage />,
   },
   {
-    path: "/ResetPassword",
-    element: <ForgotPassword/>,
-  },
-  {
     path: "/user",
     element: <DonateUser />,
+  },
+  {
+    path: "otp",
+    element: <OtpVerification/>,
   },
   {
     path: "/doctor",
