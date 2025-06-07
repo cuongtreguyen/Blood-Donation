@@ -10,7 +10,6 @@ import 'react-toastify/dist/ReactToastify.css';
 // Layouts
 import MainLayout from './components/layout/MainLayout';
 import DoctorDashboardLayout from './components/layout/DoctorDashboardLayout';
-import NurseDashboardLayout from './components/layout/NurseDashboardLayout';
 import AdminLayout from './components/layout/AdminLayout';
 
 // Pages
@@ -36,19 +35,6 @@ import DoctorMedicalRecordsPage from './pages/doctor/MedicalRecordsPage';
 import DoctorBloodInventoryPage from './pages/doctor/BloodInventoryPage';
 import DoctorReportsPage from './pages/doctor/ReportsPage';
 import DoctorProfilePage from './pages/doctor/ProfilePage';
-
-// Nurse Pages
-import NurseDashboardPage from './pages/nurse/DashboardPage';
-import ScreeningPage from './pages/nurse/ScreeningPage';
-import RegisterDonorPage from './pages/nurse/RegisterDonorPage';
-import AppointmentsPage from './pages/nurse/AppointmentsPage';
-import PostDonationCarePage from './pages/nurse/PostDonationCarePage';
-import NurseDonorsPage from './pages/nurse/DonorsPage';
-import NurseMedicalRecordsPage from './pages/nurse/MedicalRecordsPage';
-import NurseBloodInventoryPage from './pages/nurse/BloodInventoryPage';
-import NurseReportsPage from './pages/nurse/ReportsPage';
-import NurseCampaignsPage from './pages/nurse/CampaignsPage';
-import NurseProfilePage from './pages/nurse/ProfilePage';
 import DonateUser from './page/userpage/DonateUser';
 import ForgotPassword from './page/loginpage/ForgotPassword';
 
@@ -84,56 +70,6 @@ const router = createBrowserRouter([
   {
     path: "otp",
     element: <OtpVerification/>,
-  },
-  {
-    path: "/nurse",
-    element: <NurseDashboardLayout />,
-    children: [
-      {
-        path: "",
-        element: <NurseDashboardPage />,
-      },
-      {
-        path: "screening",
-        element: <ScreeningPage />,
-      },
-      {
-        path: "register-donor",
-        element: <RegisterDonorPage />,
-      },
-      {
-        path: "appointments",
-        element: <AppointmentsPage />,
-      },
-      {
-        path: "donors",
-        element: <NurseDonorsPage />,
-      },
-      {
-        path: "post-donation",
-        element: <PostDonationCarePage />,
-      },
-      {
-        path: "medical-records",
-        element: <NurseMedicalRecordsPage />,
-      },
-      {
-        path: "blood-inventory",
-        element: <NurseBloodInventoryPage />,
-      },
-      {
-        path: "reports",
-        element: <NurseReportsPage />,
-      },
-      {
-        path: "campaigns",
-        element: <NurseCampaignsPage />,
-      },
-      {
-        path: "profile",
-        element: <NurseProfilePage />,
-      },
-    ],
   },
   {
     path: "/doctor",

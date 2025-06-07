@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 // Hero Section Component
-function HeroSection() {
+function HeroSection({ onLearnMoreClick }) {
   const [showDonationForm, setShowDonationForm] = useState(false);
   const [donationFormData, setDonationFormData] = useState({
     fullName: '',
@@ -112,13 +113,16 @@ function HeroSection() {
                 Mỗi lần hiến máu của bạn có thể cứu sống đến 3 người. Hãy tham gia cùng chúng tôi trong sứ mệnh cao quý này.
               </p>
               <div className="d-flex flex-wrap gap-3">
-                <button 
+                <Link
+                  to="/register"
                   className="btn btn-warning btn-lg fw-bold px-4"
-                  onClick={() => setShowDonationForm(true)}
                 >
                   Đăng Ký Hiến Máu
-                </button>
-                <button className="btn btn-outline-light btn-lg fw-bold px-4">
+                </Link>
+                <button
+                  onClick={onLearnMoreClick}
+                  className="btn btn-outline-light btn-lg fw-bold px-4"
+                >
                   Tìm Hiểu Thêm
                 </button>
               </div>

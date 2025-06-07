@@ -22,6 +22,7 @@ const LoginPage = () => {
       const response = await api.post("login", values);
       const user = response.data;
 
+
       // Đăng nhập thành công
       toast.success("Đăng Nhập Thành Công!");
       dispatch(login(response.data)); // Giả sử bạn đã tạo action login trong userSlice
@@ -41,8 +42,6 @@ const LoginPage = () => {
         console.log("Redirecting to user dashboard");
         navigate("/user");
       }
-
-       
       
     } catch (error) {
       console.error("Login error:", error);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 // Layout Components
 import Footer from '../../components/layout/Footer';
@@ -13,6 +13,7 @@ import LocationsSection from '../../components/layout/LocationsSection';
 import AboutSection from '../../components/layout/AboutSection';
 import TestimonialsSection from '../../components/layout/TestimonialsSection';
 import NewsSection from '../../components/layout/NewsSection';
+import LearnMoreSection from '../../components/layout/LearnMoreSection';
 
 // Forms
 import QuickDonationForm from '../../components/forms/QuickDonationForm';
@@ -21,6 +22,12 @@ import QuickDonationForm from '../../components/forms/QuickDonationForm';
 
 
 function HomePage() {
+  const learnMoreRef = useRef(null);
+
+  const scrollToLearnMore = () => {
+    learnMoreRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div>
       {/* External CSS Links */}
@@ -34,7 +41,7 @@ function HomePage() {
       />
       
       <EmergencyBanner />
-      <HeroSection />
+      <HeroSection onLearnMoreClick={scrollToLearnMore} />
       <StatisticsSection />
       <DonationProcess />
       <BloodTypesSection />
@@ -43,6 +50,9 @@ function HomePage() {
       <TestimonialsSection />
       <NewsSection />
       <AboutSection />
+      <div ref={learnMoreRef}>
+        <LearnMoreSection />
+      </div>
       
       {/* Custom Styles */}
     </div>
