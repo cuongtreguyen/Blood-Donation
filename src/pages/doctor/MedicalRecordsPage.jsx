@@ -1,32 +1,27 @@
 import React, { useState } from 'react';
-import { Table, Card, Button, Tag, Space, Tabs, Form, Input, Select, Row, Col, DatePicker, Modal, Statistic, Divider } from 'antd';
-import { FileTextOutlined, CheckCircleOutlined, CloseCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, CalendarOutlined } from '@ant-design/icons';
+import { Table, Card, Button, Tag, Space, Tabs, Form, Input, Select, Row, Col, DatePicker, Modal, Statistic, Divider, Descriptions } from 'antd';
+import { FileTextOutlined, CheckCircleOutlined, CloseCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, CalendarOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { TextArea } = Input;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 function MedicalRecordsPage() {
+  const [searchText, setSearchText] = useState('');
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [form] = Form.useForm();
-
-  const medicalRecords = [
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [medicalRecords, setMedicalRecords] = useState([
     {
       id: 'HS001',
       donorName: 'Nguyễn Văn A',
       date: '2024-03-15',
       bloodType: 'A+',
-      donationType: 'Toàn phần',
+      donationType: 'A+',
       healthStatus: 'approved',
-      examResult: {
-        weight: 65,
-        height: 170,
-        bloodPressure: '120/80',
-        pulse: 75,
-        hemoglobin: 14.5,
-        notes: 'Sức khỏe tốt, đủ điều kiện hiến máu'
-      },
+      examResult: 'Sức khỏe tốt, đủ điều kiện hiến máu',
       doctor: 'Bs. Hoàng Văn X'
     },
     {
@@ -34,36 +29,12 @@ function MedicalRecordsPage() {
       donorName: 'Trần Thị B',
       date: '2024-03-15',
       bloodType: 'O-',
-      donationType: 'Tiểu cầu',
+      donationType: 'O-',
       healthStatus: 'rejected',
-      examResult: {
-        weight: 45,
-        height: 160,
-        bloodPressure: '110/70',
-        pulse: 80,
-        hemoglobin: 11.5,
-        notes: 'Thiếu cân, hemoglobin thấp'
-      },
+      examResult: 'Thiếu cân, hemoglobin thấp',
       doctor: 'Bs. Hoàng Văn X'
-    },
-    {
-      id: 'HS003',
-      donorName: 'Lê Văn C',
-      date: '2024-03-14',
-      bloodType: 'B+',
-      donationType: 'Toàn phần',
-      healthStatus: 'pending',
-      examResult: {
-        weight: 70,
-        height: 175,
-        bloodPressure: '130/85',
-        pulse: 72,
-        hemoglobin: 15.0,
-        notes: 'Đang chờ kết quả xét nghiệm bổ sung'
-      },
-      doctor: 'Bs. Nguyễn Thị Y'
     }
-  ];
+  ]);
 
   const columns = [
     {
@@ -131,7 +102,18 @@ function MedicalRecordsPage() {
       render: (_, record) => (
         <Space>
           <Button 
+            icon={<EditOutlined />} 
+            onClick={() => {
+              setEditingRecord(record);
+              form.setFieldsValue(record);
+              setIsModalVisible(true);
+            }}
+          >
+            Sửa
+          </Button>
+          <Button 
             type="primary"
+            icon={<FileTextOutlined />}
             onClick={() => {
               setSelectedRecord(record);
               setIsViewModalVisible(true);
@@ -139,14 +121,6 @@ function MedicalRecordsPage() {
           >
             Chi tiết
           </Button>
-          {record.healthStatus === 'pending' && (
-            <Space>
-              <Button type="primary" className="bg-green-500 hover:bg-green-600">
-                Duyệt
-              </Button>
-              <Button danger>Từ chối</Button>
-            </Space>
-          )}
         </Space>
       ),
     },
@@ -158,6 +132,28 @@ function MedicalRecordsPage() {
     { title: 'Chờ duyệt', value: medicalRecords.filter(r => r.healthStatus === 'pending').length },
     { title: 'Từ chối', value: medicalRecords.filter(r => r.healthStatus === 'rejected').length },
   ];
+
+  const handleAddEdit = (values) => {
+    if (editingRecord) {
+      // Cập nhật hồ sơ hiện có
+      const updatedRecords = medicalRecords.map(record => 
+        record.id === editingRecord.id ? { ...record, ...values } : record
+      );
+      setMedicalRecords(updatedRecords);
+    } else {
+      // Thêm hồ sơ mới
+      const newRecord = {
+        id: `HS${medicalRecords.length + 1}`,
+        ...values,
+        healthStatus: 'pending',
+        doctor: 'Dr. Example' // Thay thế bằng thông tin bác sĩ thực tế
+      };
+      setMedicalRecords([...medicalRecords, newRecord]);
+    }
+    setIsModalVisible(false);
+    form.resetFields();
+    setEditingRecord(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -262,9 +258,14 @@ function MedicalRecordsPage() {
                         rules={[{ required: true, message: 'Vui lòng chọn loại hiến máu' }]}
                       >
                         <Select placeholder="Chọn loại hiến máu">
-                          <Option value="Toàn phần">Toàn phần</Option>
-                          <Option value="Tiểu cầu">Tiểu cầu</Option>
-                          <Option value="Huyết tương">Huyết tương</Option>
+                          <Option value="A+">A+</Option>
+                          <Option value="A-">A-</Option>
+                          <Option value="B+">B+</Option>
+                          <Option value="B-">B-</Option>
+                          <Option value="AB+">AB+</Option>
+                          <Option value="AB-">AB-</Option>
+                          <Option value="O+">O+</Option>
+                          <Option value="O-">O-</Option>
                         </Select>
                       </Form.Item>
                     </Col>

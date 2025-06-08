@@ -11,6 +11,9 @@ export const userSlice = createSlice({
       return action.payload;
     },
     logout() {
+      // Clear localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       return initialState;
     },
   },

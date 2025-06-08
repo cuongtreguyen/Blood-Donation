@@ -22,12 +22,12 @@ const LoginPage = () => {
       const response = await api.post("login", values);
       const user = response.data;
 
-
       // Đăng nhập thành công
       toast.success("Đăng Nhập Thành Công!");
       dispatch(login(response.data)); // Giả sử bạn đã tạo action login trong userSlice
-      localStorage.setItem("token",response.data.token); // Lưu token vào localStorage
+      localStorage.setItem("token", response.data.token); // Lưu token vào localStorage
       localStorage.setItem("user", JSON.stringify(user));
+      
       // Kiểm tra role và chuyển hướng
       const userRole = user.role;
       console.log("User role detected:", userRole);
@@ -35,14 +35,13 @@ const LoginPage = () => {
       if (userRole === "ADMIN") {
         console.log("Redirecting to admin dashboard");
         navigate("/admin");
-      } else if (userRole === "STAFF") {
+      } else if (userRole === "STAFF" || userRole === "DOCTOR") {
         console.log("Redirecting to doctor dashboard");
         navigate("/doctor");
       } else {
         console.log("Redirecting to user dashboard");
         navigate("/user");
       }
-      
     } catch (error) {
       console.error("Login error:", error);
       if (error.response?.status === 404) {

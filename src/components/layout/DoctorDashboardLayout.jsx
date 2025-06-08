@@ -1,6 +1,7 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { useUser } from "../../contexts/UserContext";
+import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
+import { logout } from "../../redux/features/userSlice";
 import {
   FaTachometerAlt,
   FaUser,
@@ -11,9 +12,10 @@ import {
 } from "react-icons/fa";
 
 function DoctorDashboardLayout() {
-  const { user, logout } = useUser();
+  const user = useSelector((state) => state.user);
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const menuItems = [
     { to: "/doctor", label: "Tổng Quan", icon: <FaTachometerAlt /> },
@@ -25,14 +27,14 @@ function DoctorDashboardLayout() {
   ];
 
   useEffect(() => {
-    // Redirect if not logged in or not a doctor
-    if (!user || user.role !== 'DOCTOR') {
+    // Redirect if not logged in or not authorized
+    if (!user || (user.role !== 'DOCTOR' && user.role !== 'STAFF')) {
       navigate('/login');
     }
   }, [user, navigate]);
 
   const handleLogout = () => {
-    logout();
+    dispatch(logout());
     navigate('/login');
   };
 
@@ -46,11 +48,11 @@ function DoctorDashboardLayout() {
             <Link
               key={item.to}
               to={item.to}
-             className={`flex items-center gap-3 px-4 py-2 rounded font-medium text-white transition ${
-  location.pathname === item.to
-    ? "bg-red-500"
-    : "hover:bg-red-700"
-}`}
+              className={`flex items-center gap-3 px-4 py-2 rounded font-medium text-white transition ${
+                location.pathname === item.to
+                  ? "bg-red-500"
+                  : "hover:bg-red-700"
+              }`}
             >
               <span className="text-lg">{item.icon}</span>
               <span>{item.label}</span>
