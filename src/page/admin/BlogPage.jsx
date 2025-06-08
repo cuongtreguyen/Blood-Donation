@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Table, Tag, Button, Modal, Descriptions, Input, Select, Space, Tooltip, Popconfirm, Form } from 'antd';
-import { EyeOutlined, EditOutlined, DeleteOutlined, PlusOutlined, FileTextOutlined } from '@ant-design/icons';
+import { EyeOutlined, EditOutlined, DeleteOutlined, FileTextOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -54,12 +54,6 @@ function BlogPage() {
     (search === '' ? true : item.title.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const handleAdd = () => {
-    setSelectedEditRecord(null);
-    form.resetFields();
-    setEditModalOpen(true);
-  };
-
   const handleEdit = (record) => {
     setSelectedEditRecord(record);
     form.setFieldsValue({ ...record });
@@ -68,25 +62,11 @@ function BlogPage() {
 
   const handleSave = () => {
     form.validateFields().then(values => {
-      if (selectedEditRecord) {
-        const updatedData = data.map(item => 
-          item.key === selectedEditRecord.key ? { ...item, ...values } : item
-        );
-        setData(updatedData);
-        toast.success('Cập nhật bài viết thành công!');
-      } else {
-        const newBlog = {
-          key: String(data.length + 1),
-          title: values.title,
-          author: 'Admin',
-          date: new Date().toISOString().slice(0, 10),
-          category: values.category,
-          status: values.status,
-          content: values.content,
-        };
-        setData([...data, newBlog]);
-        toast.success('Thêm bài viết mới thành công!');
-      }
+      const updatedData = data.map(item => 
+        item.key === selectedEditRecord.key ? { ...item, ...values } : item
+      );
+      setData(updatedData);
+      toast.success('Cập nhật bài viết thành công!');
       setEditModalOpen(false);
     }).catch(info => {
       console.log('Validate Failed:', info);
@@ -180,9 +160,6 @@ function BlogPage() {
           options={statusOptions}
           style={{ width: 180 }}
         />
-        <Button type="primary" icon={<PlusOutlined />} style={{ background: '#d32f2f', borderColor: '#d32f2f' }} onClick={handleAdd}>
-          Thêm bài viết
-        </Button>
       </div>
       <Table columns={columns} dataSource={filteredData} rowKey="key" />
       <Modal

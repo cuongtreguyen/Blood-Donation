@@ -6,6 +6,10 @@ import viVN from 'antd/locale/vi_VN';
 import { UserProvider } from './contexts/UserContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Provider } from 'react-redux';
+import { persistor, store } from './redux/store';
+import { PersistGate } from 'redux-persist/integration/react';
+import OtpVerification from './page/loginpage/OtpVerification';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -16,17 +20,20 @@ import AdminLayout from './components/layout/AdminLayout';
 import HomePage from './page/homepage/HomePage';
 import LoginPage from './page/loginpage/LoginPage';
 import RegisterPage from './page/loginpage/RegisterPage';
+import BloodRequestForm from './page/blood-request/BloodRequestForm';
 
 // Admin Pages
 import AdminDashboard from './page/admin/AdminDashboard';
 import AdminUsersPage from './page/admin/AdminUsersPage';
 import AdminBloodBanksPage from './page/admin/AdminBloodBanksPage';
-import AdminDonationsPage from './page/admin/AdminDonationsPage';
 import AdminStatisticsPage from './page/admin/AdminStatisticsPage';
 import AdminSettingsPage from './page/admin/AdminSettingsPage';
 import AdminProfilePage from './page/admin/AdminProfilePage';
 import AdminNotificationsPage from './page/admin/AdminNotificationsPage';
 import BlogPage from './page/admin/BlogPage';
+import BloodUnitsManagement from './page/admin/BloodUnitsManagement';
+import EmergencyBloodRequestsPage from './page/admin/EmergencyBloodRequestsPage';
+import DonationConfirmationPage from './page/admin/DonationConfirmationPage';
 
 // Doctor Pages
 import DoctorDashboardPage from './pages/doctor/DashboardPage';
@@ -38,12 +45,6 @@ import DoctorProfilePage from './pages/doctor/ProfilePage';
 import DonateUser from './page/userpage/DonateUser';
 import ForgotPassword from './page/loginpage/ForgotPassword';
 
-
-import { Provider } from "react-redux";
-import { persistor, store } from "./redux/store";
-import { PersistGate } from "redux-persist/integration/react";
-import OtpVerification from './page/loginpage/OtpVerification';
-// import PasswordResetForm from './page/loginpage/OtpVerification';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
         path: "",
         element: <HomePage />,
       },
+      {
+        path: "blood-request",
+        element: <BloodRequestForm />,
+      },      
     ],
   },
   {
@@ -118,8 +123,8 @@ const router = createBrowserRouter([
         element: <AdminBloodBanksPage />,
       },
       {
-        path: "donations",
-        element: <AdminDonationsPage />,
+        path: "blood-units",
+        element: <BloodUnitsManagement />,
       },
       {
         path: "statistics",
@@ -141,32 +146,38 @@ const router = createBrowserRouter([
         path: "blogs",
         element: <BlogPage />,
       },
+      {
+        path: "blood-requests",
+        element: <EmergencyBloodRequestsPage />,
+      },
+      {
+        path: "donation-confirmation",
+        element: <DonationConfirmationPage />,
+      },
     ],
   },
 ]);
 
 function App() {
   return (
-  <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
-      <ConfigProvider
-        locale={viVN}
-        theme={{
-          token: {
-            colorPrimary: '#d32f2f',
-          },
-        }}
-      >
-
-        <UserProvider>
-          <RouterProvider router={router} />
-
-        </UserProvider>
-      </ConfigProvider>
-    </PersistGate>
-  </Provider>
-);
-
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <ConfigProvider
+          locale={viVN}
+          theme={{
+            token: {
+              colorPrimary: '#d32f2f',
+            },
+          }}
+        >
+          <UserProvider>
+            <RouterProvider router={router} />
+            <ToastContainer position="top-right" autoClose={3000} />
+          </UserProvider>
+        </ConfigProvider>
+      </PersistGate>
+    </Provider>
+  );
 }
 
 export default App;

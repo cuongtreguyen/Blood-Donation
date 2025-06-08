@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm } from 'antd';
+import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm, Tooltip } from 'antd';
 import SearchOutlined from '@ant-design/icons/lib/icons/SearchOutlined';
 import PlusOutlined from '@ant-design/icons/lib/icons/PlusOutlined';
 import EditOutlined from '@ant-design/icons/lib/icons/EditOutlined';
@@ -8,13 +8,16 @@ import BankOutlined from '@ant-design/icons/lib/icons/BankOutlined';
 import PhoneOutlined from '@ant-design/icons/lib/icons/PhoneOutlined';
 import MailOutlined from '@ant-design/icons/lib/icons/MailOutlined';
 import GlobalOutlined from '@ant-design/icons/lib/icons/GlobalOutlined';
+import EnvironmentOutlined from '@ant-design/icons/lib/icons/EnvironmentOutlined';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
 const { TextArea } = Input;
 
-function AdminBloodBanksPage() {
+const AdminBloodBanksPage = () => {
+  const navigate = useNavigate();
   const [searchText, setSearchText] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
@@ -24,67 +27,70 @@ function AdminBloodBanksPage() {
   // Mock data for blood banks
   const [bloodBanks, setBloodBanks] = useState([
     {
-      key: '1',
+      key: 'BB001',
       id: 'BB001',
-      name: 'Bệnh viện Đa khoa Trung ương',
-      address: '123 Nguyễn Huệ, Quận 1, TP.HCM',
-      phone: '028 1234 5678',
-      email: 'contact@bvtw.edu.vn',
-      website: 'www.bvtw.edu.vn',
-      status: 'active',
-      bloodInventory: {
-        'A+': 85,
-        'A-': 45,
-        'B+': 76,
-        'B-': 30,
-        'AB+': 25,
-        'AB-': 15,
-        'O+': 92,
-        'O-': 38,
-      },
-      lastUpdate: '15/10/2023',
-    },
-    {
-      key: '2',
-      id: 'BB002',
-      name: 'Trung tâm Huyết học Quốc gia',
-      address: '456 Lê Duẩn, Quận 1, TP.HCM',
-      phone: '028 2345 6789',
-      email: 'info@huyethoc.vn',
-      website: 'www.huyethoc.vn',
-      status: 'active',
-      bloodInventory: {
-        'A+': 65,
-        'A-': 35,
-        'B+': 56,
-        'B-': 25,
-        'AB+': 20,
-        'AB-': 10,
-        'O+': 72,
-        'O-': 28,
-      },
-      lastUpdate: '14/10/2023',
-    },
-    {
-      key: '3',
-      id: 'BB003',
       name: 'Bệnh viện Chợ Rẫy',
-      address: '789 Nguyễn Chí Thanh, Quận 5, TP.HCM',
-      phone: '028 3456 7890',
+      address: '201B Nguyễn Chí Thanh, Quận 5, TP.HCM',
+      phone: '028 3855 4137',
       email: 'contact@choray.vn',
       website: 'www.choray.vn',
+      status: 'active',
+      createdAt: '2023-01-01',
+    },
+    {
+      key: 'BB002',
+      id: 'BB002',
+      name: 'Bệnh viện Nhân dân 115',
+      address: '527 Sư Vạn Hạnh, Quận 10, TP.HCM',
+      phone: '028 3865 4249',
+      email: 'info@benhvien115.com.vn',
+      website: 'www.benhvien115.com.vn',
+      status: 'active',
+      createdAt: '2023-01-02',
+    },
+    {
+      key: 'BB003',
+      id: 'BB003',
+      name: 'Bệnh viện Đại học Y Dược',
+      address: '215 Hồng Bàng, Quận 5, TP.HCM',
+      phone: '028 3855 8412',
+      email: 'contact@umc.edu.vn',
+      website: 'www.umc.edu.vn',
       status: 'inactive',
-      bloodInventory: {
-        'A+': 45,
-        'A-': 25,
-        'B+': 36,
-        'B-': 15,
-        'AB+': 15,
-        'AB-': 5,
-        'O+': 52,
-        'O-': 18,
-      },
-      lastUpdate: '13/10/2023',
+      createdAt: '2023-01-03',
+    },
+    {
+      key: 'BB004',
+      id: 'BB004',
+      name: 'Bệnh viện Quân y 175',
+      address: '786 Nguyễn Kiệm, Gò Vấp, TP.HCM',
+      phone: '028 3894 6563',
+      email: 'info@benhvien175.com',
+      website: 'www.benhvien175.com',
+      status: 'active',
+      createdAt: '2023-01-04',
+    },
+    {
+      key: 'BB005',
+      id: 'BB005',
+      name: 'Viện Huyết học - Truyền máu Trung ương',
+      address: 'Phố Phạm Ngọc Thạch, Đống Đa, Hà Nội',
+      phone: '024 3868 6008',
+      email: 'vhhtmtu@nihbt.org.vn',
+      website: 'www.nihbt.org.vn',
+      status: 'active',
+      createdAt: '2023-01-05',
+    },
+    {
+      key: 'BB006',
+      id: 'BB006',
+      name: 'Bệnh viện Truyền máu Huyết học TP.HCM',
+      address: '118 Hùng Vương, Quận 5, TP.HCM',
+      phone: '028 3957 1342',
+      email: 'tmhh@hcm.vnn.vn',
+      website: 'www.tmhh.vn',
+      status: 'active',
+      createdAt: '2023-01-06',
     },
   ]);
 
@@ -94,14 +100,7 @@ function AdminBloodBanksPage() {
     setIsModalVisible(true);
 
     if (mode === 'edit' && bloodBank) {
-      form.setFieldsValue({
-        name: bloodBank.name,
-        address: bloodBank.address,
-        phone: bloodBank.phone,
-        email: bloodBank.email,
-        website: bloodBank.website,
-        status: bloodBank.status,
-      });
+      form.setFieldsValue(bloodBank);
     } else {
       form.resetFields();
     }
@@ -110,34 +109,17 @@ function AdminBloodBanksPage() {
   const handleOk = () => {
     form.validateFields().then(values => {
       if (modalMode === 'add') {
-        // Add new blood bank
-        const newBloodBank = {
-          key: String(bloodBanks.length + 1),
-          id: `BB${String(bloodBanks.length + 1).padStart(3, '0')}`,
-          ...values,
-          bloodInventory: {
-            'A+': 0,
-            'A-': 0,
-            'B+': 0,
-            'B-': 0,
-            'AB+': 0,
-            'AB-': 0,
-            'O+': 0,
-            'O-': 0,
-          },
-          lastUpdate: new Date().toLocaleDateString('vi-VN'),
-        };
-        setBloodBanks([...bloodBanks, newBloodBank]);
+        const newId = `BB${String(bloodBanks.length + 1).padStart(3, '0')}`;
+        setBloodBanks([...bloodBanks, { key: newId, id: newId, ...values }]);
         toast.success('Thêm ngân hàng máu thành công!');
       } else {
-        // Update existing blood bank
-        const updatedBloodBanks = bloodBanks.map(bloodBank => 
-          bloodBank.key === selectedBloodBank.key ? { ...bloodBank, ...values } : bloodBank
-        );
-        setBloodBanks(updatedBloodBanks);
-        toast.success('Cập nhật thông tin thành công!');
+        setBloodBanks(bloodBanks.map(bank => 
+          bank.key === selectedBloodBank.key ? { ...bank, ...values } : bank
+        ));
+        toast.success('Cập nhật ngân hàng máu thành công!');
       }
       setIsModalVisible(false);
+      form.resetFields();
     });
   };
 
@@ -147,22 +129,8 @@ function AdminBloodBanksPage() {
   };
 
   const handleDelete = (key) => {
-    try {
-      // Tìm blood bank cần xóa từ danh sách
-      const bloodBankToDelete = bloodBanks.find(bank => bank.key === key);
-      if (!bloodBankToDelete) {
-        toast.error('Không tìm thấy ngân hàng máu!');
-        return;
-      }
-
-      // Cập nhật state để xóa blood bank
-      const updatedBloodBanks = bloodBanks.filter(bank => bank.key !== key);
-      setBloodBanks(updatedBloodBanks);
-      toast.success('Xóa ngân hàng máu thành công!');
-    } catch (error) {
-      console.error('Lỗi khi xóa ngân hàng máu:', error);
-      toast.error('Xóa ngân hàng máu thất bại. Vui lòng thử lại!');
-    }
+    setBloodBanks(bloodBanks.filter(bank => bank.key !== key));
+    toast.success('Xóa ngân hàng máu thành công!');
   };
 
   const handleSearch = (e) => {
@@ -183,27 +151,35 @@ function AdminBloodBanksPage() {
       dataIndex: 'id',
       key: 'id',
       sorter: (a, b) => a.id.localeCompare(b.id),
+      width: 50,
     },
     {
       title: 'Tên',
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
+      width: 110,
+      ellipsis: true,
     },
     {
       title: 'Địa chỉ',
       dataIndex: 'address',
       key: 'address',
+      width: 140,
+      ellipsis: true,
     },
     {
-      title: 'Số điện thoại',
+      title: 'SĐT',
       dataIndex: 'phone',
       key: 'phone',
+      width: 90,
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
+      width: 110,
+      ellipsis: true,
     },
     {
       title: 'Website',
@@ -214,56 +190,68 @@ function AdminBloodBanksPage() {
           {website}
         </a>
       ),
+      width: 90,
+      ellipsis: true,
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
       filters: [
-        { text: 'Đang hoạt động', value: 'active' },
+        { text: 'Hoạt động', value: 'active' },
         { text: 'Không hoạt động', value: 'inactive' },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => (
-        <Tag color={status === 'active' ? 'green' : 'orange'}>
-          {status === 'active' ? 'Đang hoạt động' : 'Không hoạt động'}
+        <Tag color={status === 'active' ? 'green' : 'red'}>
+          {status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
         </Tag>
       ),
+      width: 90,
     },
     {
-      title: 'Cập nhật gần nhất',
-      dataIndex: 'lastUpdate',
-      key: 'lastUpdate',
+      title: 'Ngày tạo',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date) => new Date(date).toLocaleDateString('vi-VN'),
       sorter: (a, b) => {
-        const dateA = a.lastUpdate.split('/').reverse().join('');
-        const dateB = b.lastUpdate.split('/').reverse().join('');
-        return dateA.localeCompare(dateB);
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateA.getTime() - dateB.getTime();
       },
+      width: 90,
     },
     {
       title: 'Hành động',
       key: 'action',
+      width: 100,
       render: (_, record) => (
         <Space size="small">
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            size="small"
-            onClick={() => showModal('edit', record)}
-          />
+          <Tooltip title="Sửa">
+            <Button
+              icon={<EditOutlined style={{ color: 'white' }} />}
+              onClick={() => showModal('edit', record)}
+              type="primary"
+              size="small"
+              style={{ color: '#d32f2f', borderColor: '#d32f2f' }}
+              shape="circle"
+            />
+          </Tooltip>
           <Popconfirm
-            title="Xác nhận xóa"
-            description="Bạn có chắc chắn muốn xóa ngân hàng máu này?"
+            title="Bạn có chắc chắn muốn xóa ngân hàng máu này?"
             onConfirm={() => handleDelete(record.key)}
             okText="Xóa"
             cancelText="Hủy"
             okButtonProps={{ danger: true }}
           >
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              size="small"
-            />
+            <Tooltip title="Xóa">
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+                size="small"
+                shape="circle"
+              />
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
@@ -271,13 +259,18 @@ function AdminBloodBanksPage() {
   ];
 
   return (
-    <div>
+    <div style={{ padding: '24px' }}>
       <Card
-        title="Quản lý ngân hàng máu"
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <BankOutlined />
+            Quản Lý Ngân Hàng Máu
+          </div>
+        }
         extra={
           <Space>
             <Input
-              placeholder="Tìm kiếm theo tên, địa chỉ, SĐT, email..."
+              placeholder="Tìm kiếm ngân hàng máu..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={handleSearch}
@@ -289,46 +282,62 @@ function AdminBloodBanksPage() {
               onClick={() => showModal('add')}
               style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
             >
-              Thêm ngân hàng máu
+              Thêm Ngân Hàng Máu
             </Button>
           </Space>
         }
+        bordered={false}
       >
         <Table
-          dataSource={filteredBloodBanks}
           columns={columns}
-          rowKey="key"
+          dataSource={filteredBloodBanks}
           pagination={{ pageSize: 10 }}
+          scroll={{ x: 'max-content' }}
+          bordered
         />
       </Card>
 
       <Modal
-        title={modalMode === 'add' ? 'Thêm ngân hàng máu mới' : 'Chỉnh sửa thông tin'}
-        open={isModalVisible}
+        title={modalMode === 'add' ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <PlusOutlined /> Thêm Ngân Hàng Máu
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <EditOutlined /> Cập Nhật Ngân Hàng Máu
+          </div>
+        )}
+        visible={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
-        okText={modalMode === 'add' ? 'Thêm' : 'Lưu'}
-        cancelText="Hủy"
-        width={600}
+        footer={[
+          <Button key="back" onClick={handleCancel}>
+            Hủy
+          </Button>,
+          <Button key="submit" type="primary" style={{ background: '#d32f2f', borderColor: '#d32f2f' }} onClick={handleOk}>
+            {modalMode === 'add' ? 'Thêm' : 'Cập Nhật'}
+          </Button>,
+        ]}
       >
-        <Form form={form} layout="vertical">
+        <Form
+          form={form}
+          layout="vertical"
+          name="bloodBankForm"
+          initialValues={{ status: 'active' }}
+        >
           <Form.Item
             name="name"
-            label="Tên ngân hàng máu"
+            label="Tên Ngân Hàng Máu"
             rules={[{ required: true, message: 'Vui lòng nhập tên ngân hàng máu!' }]}
           >
-            <Input placeholder="Nhập tên ngân hàng máu" />
+            <Input prefix={<BankOutlined />} placeholder="Nhập tên ngân hàng máu" />
           </Form.Item>
           <Form.Item
             name="address"
             label="Địa chỉ"
             rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
           >
-            <TextArea
-              placeholder="Nhập địa chỉ đầy đủ"
-              autoSize={{ minRows: 2, maxRows: 4 }}
-              prefix={<BankOutlined />}
-            />
+            <Input prefix={<EnvironmentOutlined />} placeholder="Nhập địa chỉ" />
           </Form.Item>
           <Form.Item
             name="phone"
@@ -340,10 +349,7 @@ function AdminBloodBanksPage() {
           <Form.Item
             name="email"
             label="Email"
-            rules={[
-              { required: true, message: 'Vui lòng nhập email!' },
-              { type: 'email', message: 'Email không hợp lệ!' },
-            ]}
+            rules={[{ required: true, type: 'email', message: 'Vui lòng nhập email hợp lệ!' }]}
           >
             <Input prefix={<MailOutlined />} placeholder="Nhập email" />
           </Form.Item>
@@ -360,7 +366,7 @@ function AdminBloodBanksPage() {
             rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
           >
             <Select placeholder="Chọn trạng thái">
-              <Option value="active">Đang hoạt động</Option>
+              <Option value="active">Hoạt động</Option>
               <Option value="inactive">Không hoạt động</Option>
             </Select>
           </Form.Item>
@@ -368,6 +374,6 @@ function AdminBloodBanksPage() {
       </Modal>
     </div>
   );
-}
+};
 
 export default AdminBloodBanksPage; 

@@ -18,7 +18,8 @@ import {
   ClockCircleOutlined,
   FileTextOutlined,
   WarningOutlined,
-  SwapOutlined
+  SwapOutlined,
+  RedEnvelopeOutlined
 } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 
@@ -28,6 +29,21 @@ function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // State for managing open menu keys (for submenus)
+  const [openKeys, setOpenKeys] = useState(() => {
+    // Khởi tạo openKeys dựa trên pathname hiện tại nếu nó là một trong các trang con của 'Quản lý kho máu'
+    if (['/admin/blood-banks', '/admin/blood-units'].includes(location.pathname)) {
+      return ['blood-management'];
+    }
+    return [];
+  });
+
+  // Handle menu open/close
+  const onOpenChange = (keys) => {
+    console.log('onOpenChange called with keys:', keys);
+    setOpenKeys(keys);
+  };
 
   // Mock notifications
   const [notifications, setNotifications] = useState([
@@ -70,14 +86,34 @@ function AdminLayout() {
       label: 'Quản lý người dùng',
     },
     {
-      key: '/admin/blood-banks',
+      key: 'blood-management',
       icon: <BankOutlined />,
-      label: 'Quản lý ngân hàng máu',
+      label: 'Quản lý kho máu',
+      children: [
+        {
+          key: '/admin/blood-banks',
+          label: 'Ngân hàng máu',
+        },
+        {
+          key: '/admin/blood-units',
+          label: 'Đơn vị máu',
+        },
+      ],
     },
     {
       key: '/admin/statistics',
       icon: <BarChartOutlined />,
       label: 'Thống kê tổng quan',
+    },
+    {
+      key: '/admin/blood-requests',
+      icon: <RedEnvelopeOutlined />,
+      label: 'Quản lý yêu cầu máu khẩn cấp',
+    },
+    {
+      key: '/admin/donation-confirmation',
+      icon: <HeartOutlined />,
+      label: 'Duyệt / Xác nhận Hiến máu',
     },
     {
       key: '/admin/blogs',
@@ -192,10 +228,19 @@ function AdminLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
+          openKeys={openKeys}
           items={menuItems}
-          onClick={({ key }) => navigate(key)}
+          onClick={({ key }) => {
+            console.log('onClick called with key:', key);
+            // Chỉ điều hướng nếu key là một đường dẫn (bắt đầu bằng '/')
+            // Việc mở/đóng submenu sẽ do onOpenChange quản lý
+            if (key.startsWith('/')) {
+              navigate(key);
+            }
+          }}
+          onOpenChange={onOpenChange}
+          className="blood-donation-admin-menu"
           style={{ background: '#d32f2f' }}
-          className="custom-menu"
         />
       </Sider>
       <Layout className="site-layout">
@@ -254,6 +299,7 @@ const customStyles = `
 
 // Add styles to document
 const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
 styleSheet.innerText = customStyles;
 document.head.appendChild(styleSheet);
 

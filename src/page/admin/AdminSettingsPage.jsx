@@ -11,6 +11,7 @@ const AdminSettingsPage = () => {
   const [generalForm] = Form.useForm();
   const [passwordForm] = Form.useForm();
   const [emailForm] = Form.useForm();
+  const [systemConfigForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
   const handleGeneralSubmit = async (values) => {
@@ -69,6 +70,21 @@ const AdminSettingsPage = () => {
     }
   };
 
+  const handleSystemConfigSubmit = async (values) => {
+    try {
+      setLoading(true);
+      // Gọi API lưu cài đặt hệ thống (ví dụ: api.put('/settings/system', values);)
+      console.log('Lưu cấu hình hệ thống:', values); // Dùng console log tạm thời
+      toast.success('Lưu cấu hình hệ thống thành công!');
+    } catch (error) {
+      console.error('Lỗi khi lưu cấu hình hệ thống:', error);
+      const errorMessage = error.response?.data?.message || 'Lưu cấu hình hệ thống thất bại. Vui lòng thử lại!';
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-6">
       <Title level={2}>Cài đặt</Title>
@@ -106,6 +122,44 @@ const AdminSettingsPage = () => {
               loading={loading}
             >
               Lưu cài đặt chung
+            </Button>
+          </Form.Item>
+        </Form>
+      </Card>
+
+      {/* Cài đặt hệ thống */}
+      <Card title="Cấu hình hệ thống" className="mb-6">
+        <Form
+          form={systemConfigForm}
+          layout="vertical"
+          onFinish={handleSystemConfigSubmit}
+          initialValues={{
+            reminderFrequencyDays: 90, // Ví dụ: Nhắc nhở sau 90 ngày
+            recoveryTimeMonths: 3,    // Ví dụ: Thời gian phục hồi 3 tháng
+          }}
+        >
+          <Form.Item
+            name="reminderFrequencyDays"
+            label="Tần suất nhắc nhở hiến máu (ngày)"
+            rules={[{ required: true, message: 'Vui lòng nhập tần suất nhắc nhở!', type: 'number', min: 0 }]} 
+          >
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item
+            name="recoveryTimeMonths"
+            label="Thời gian phục hồi sau hiến máu (tháng)"
+            rules={[{ required: true, message: 'Vui lòng nhập thời gian phục hồi!', type: 'number', min: 0 }]} 
+          >
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
+              loading={loading}
+            >
+              Lưu cấu hình hệ thống
             </Button>
           </Form.Item>
         </Form>
