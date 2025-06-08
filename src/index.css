@@ -1,1 +1,77 @@
 @import "tailwindcss";
+
+/* Thêm các quy tắc CSS tùy chỉnh tại đây */
+
+.blood-donation-side-menu .ant-menu-item {
+  color: white !important; /* Đảm bảo chữ màu trắng cho các mục chưa chọn */
+}
+
+.blood-donation-side-menu .ant-menu-item-selected {
+  background-color: #d32f2f !important; /* Đảm bảo nền đỏ cho mục được chọn */
+  color: white !important; /* Đảm bảo chữ trắng cho mục được chọn */
+}
+
+.blood-donation-side-menu .ant-menu-item-active {
+  background-color: rgba(211, 47, 47, 0.8) !important; /* Màu nền khi hover */
+}
+
+.blood-donation-side-menu .ant-menu-submenu-title {
+  color: white !important; /* Đảm bảo chữ màu trắng cho các mục cha chưa chọn */
+}
+
+.blood-donation-side-menu .ant-menu-submenu-selected .ant-menu-submenu-title {
+  color: white !important; /* Đảm bảo chữ màu trắng cho mục cha được chọn */
+}
+
+.blood-donation-side-menu .ant-menu-submenu-active .ant-menu-submenu-title {
+  background-color: rgba(211, 47, 47, 0.8) !important; /* Màu nền khi hover vào mục cha */
+}
+
+.blood-donation-side-menu .ant-menu-item a {
+  color: white !important; /* Đảm bảo chữ màu trắng cho các mục có link */
+}
+
+.blood-donation-side-menu .ant-menu-item-selected a {
+  color: white !important; /* Đảm bảo chữ màu trắng cho các mục có link và được chọn */
+}
+
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-item, 
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-submenu-title {
+  color: white !important;
+}
+
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-item-selected, 
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-submenu-selected .ant-menu-submenu-title {
+  background-color: #f12b2b !important; /* Màu đỏ sáng hơn cho mục được chọn */
+  color: white !important;
+}
+
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-item:hover, 
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-submenu-title:hover {
+  background-color: rgba(241, 43, 43, 0.8) !important; /* Màu nền khi hover */
+  color: white !important;
+}
+
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-item-active {
+  background-color: #f12b2b !important; /* Màu nền khi hover */
+}
+
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-submenu-open {
+  background-color: #f12b2b !important; /* Màu nền cho submenu khi mở */
+}
+
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-submenu-title:hover {
+  color: white !important;
+}
+
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-inline .ant-menu-sub {
+  background-color: #d32f2f !important; /* Đảm bảo màu nền cho submenu con */
+}
+
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-sub .ant-menu-item-selected {
+  background-color: #f12b2b !important; /* Màu đỏ sáng hơn cho mục con được chọn */
+}
+
+.blood-donation-admin-menu.ant-menu-dark .ant-menu-sub .ant-menu-item:hover {
+  background-color: rgba(241, 43, 43, 0.8) !important; /* Màu nền khi hover vào mục con */
+}

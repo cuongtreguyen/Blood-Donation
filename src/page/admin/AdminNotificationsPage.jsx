@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { List, Card, Tag, Typography, Button, Space, Badge, Input, Select, Row, Col, Empty } from 'antd';
 import { BellOutlined, CheckOutlined, DeleteOutlined, SearchOutlined, FilterOutlined } from '@ant-design/icons';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -61,18 +63,31 @@ function AdminNotificationsPage() {
     setNotifications(notifications.map(notification =>
       notification.id === id ? { ...notification, read: true } : notification
     ));
+    toast.success('Đã đánh dấu thông báo là đã đọc!');
   };
 
   const deleteNotification = (id) => {
     setNotifications(notifications.filter(notification => notification.id !== id));
+    toast.success('Đã xóa thông báo!');
   };
 
   const markAllAsRead = () => {
     setNotifications(notifications.map(notification => ({ ...notification, read: true })));
+    toast.success('Đã đánh dấu tất cả thông báo là đã đọc!');
   };
 
   const deleteAllRead = () => {
-    setNotifications(notifications.filter(notification => !notification.read));
+    const initialCount = notifications.length;
+    const remainingNotifications = notifications.filter(notification => !notification.read);
+    const deletedCount = initialCount - remainingNotifications.length;
+
+    setNotifications(remainingNotifications);
+
+    if (deletedCount > 0) {
+      toast.success(`Đã xóa ${deletedCount} thông báo đã đọc!`);
+    } else {
+      toast.info('Không có thông báo nào đã đọc để xóa.');
+    }
   };
 
   // Filter notifications based on search text and filters
