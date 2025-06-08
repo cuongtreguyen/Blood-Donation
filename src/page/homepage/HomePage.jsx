@@ -15,10 +15,8 @@ import TestimonialsSection from '../../components/layout/TestimonialsSection';
 import NewsSection from '../../components/layout/NewsSection';
 import LearnMoreSection from '../../components/layout/LearnMoreSection';
 
-// Forms
-import QuickDonationForm from '../../components/forms/QuickDonationForm';
 
-// Custom CSS
+
 
 
 function HomePage() {
@@ -45,7 +43,6 @@ function HomePage() {
       <StatisticsSection />
       <DonationProcess />
       <BloodTypesSection />
-      <QuickDonationForm />
       <LocationsSection />
       <TestimonialsSection />
       <NewsSection />

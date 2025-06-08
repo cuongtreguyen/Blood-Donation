@@ -36,14 +36,24 @@ import EmergencyBloodRequestsPage from './page/admin/EmergencyBloodRequestsPage'
 import DonationConfirmationPage from './page/admin/DonationConfirmationPage';
 
 // Doctor Pages
-import DoctorDashboardPage from './pages/doctor/DashboardPage';
-import DoctorDonorsPage from './pages/doctor/DonorsPage';
-import DoctorMedicalRecordsPage from './pages/doctor/MedicalRecordsPage';
-import DoctorBloodInventoryPage from './pages/doctor/BloodInventoryPage';
-import DoctorReportsPage from './pages/doctor/ReportsPage';
-import DoctorProfilePage from './pages/doctor/ProfilePage';
+import DoctorDashboardPage from './page/doctorpage/doctor/DashboardPage';
+import DoctorDonorsPage from './page/doctorpage/doctor/DonorsPage';
+import DoctorMedicalRecordsPage from './page/doctorpage/doctor/MedicalRecordsPage';
+import DoctorBloodInventoryPage from './page/doctorpage/doctor/BloodInventoryPage';
+import DoctorReportsPage from './page/doctorpage/doctor/ReportsPage';
+import DoctorProfilePage from './page/doctorpage/doctor/ProfilePage';
 import DonateUser from './page/userpage/DonateUser';
 import ForgotPassword from './page/loginpage/ForgotPassword';
+
+
+
+
+import { Provider } from "react-redux";
+import { persistor, store } from "./redux/store";
+import { PersistGate } from "redux-persist/integration/react";
+import OtpVerification from './page/loginpage/OtpVerification';
+import HeroSection from './components/layout/HeroSection';
+// import PasswordResetForm from './page/loginpage/OtpVerification';
 
 const router = createBrowserRouter([
   {
@@ -64,6 +74,7 @@ const router = createBrowserRouter([
     path: "/login",
     element: <LoginPage />,
   },
+ 
   {
     path: "/register",
     element: <RegisterPage />,
