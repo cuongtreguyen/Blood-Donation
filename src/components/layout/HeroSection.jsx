@@ -113,7 +113,7 @@ function HeroSection({ onLearnMoreClick }) {
                 Mỗi lần hiến máu của bạn có thể cứu sống đến 3 người. Hãy tham gia cùng chúng tôi trong sứ mệnh cao quý này.
               </p>
               <div className="d-flex flex-wrap gap-3">
-                <button onClick={() => setShowDonationForm(true)} className="btn btn-danger btn-lg fw-bold px-4">
+                <button onClick={() => setShowDonationForm(true)} className="btn btn-outline-light btn-lg fw-bold px-4">
                   Đăng Ký Hiến Máu
                 </button>
                 <button

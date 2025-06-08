@@ -15,11 +15,11 @@ const Header = () => {
   }, []);
 
   const navItems = [
-    { name: "Đăng Ký Nhanh", href: "#donate" },
     { name: "Tài liệu về máu", href: "#document-blood" },
     { name: "Hiến máu", href: "#donation-process" },
     { name: "Tìm điểm hiến máu", href: "#donation-centers" },
-    { name: "Đánh Giá", href: "#blog-customer" }
+    { name: "Đánh Giá", href: "#blog-customer" },
+    { name: "Nhận Máu", href: "blood-request" }
   ];
 
   const handleScrollToSection = (id) => {
@@ -39,29 +39,26 @@ const Header = () => {
             <FaHeart className="h-8 w-8 text-red-100 animate-pulse" />
             <span className="ml-2 text-2xl font-bold text-white">Dòng Máu Việt</span>
           </div> */}
-
           <div className="flex-shrink-0 flex items-center">
+<Link to="/" style={{textDecoration :`none` }} className="flex-shrink-0 flex items-center no ">
+
+          
   <img
     src="https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain"
     alt="Logo"
     className="h-8 w-8 rounded-full"
   />
-  <span className="ml-2 text-2xl font-bold text-white">Dòng Máu Việt</span>
-</div>
 
+  <span className="ml-2 text-2xl font-bold text-white no-underline">Dòng Máu Việt</span>
+
+</Link>
+</div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             {navItems.map((item) =>
               item.name === "Hiến máu" ? (
-                <button
-                  key={item.name}
-                  onClick={() => handleScrollToSection("donation-process")}
-                  className="no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                >
-                  {item.name}
-                </button>
-                ) : item.name === "Đăng Ký Nhanh" ? (
+                
                 <button
                   key={item.name}
                   onClick={() => handleScrollToSection("donate")}

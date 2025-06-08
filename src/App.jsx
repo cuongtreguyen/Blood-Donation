@@ -48,13 +48,6 @@ import ForgotPassword from './page/loginpage/ForgotPassword';
 
 
 
-import { Provider } from "react-redux";
-import { persistor, store } from "./redux/store";
-import { PersistGate } from "redux-persist/integration/react";
-import OtpVerification from './page/loginpage/OtpVerification';
-import HeroSection from './components/layout/HeroSection';
-// import PasswordResetForm from './page/loginpage/OtpVerification';
-
 const router = createBrowserRouter([
   {
     path: "/",
