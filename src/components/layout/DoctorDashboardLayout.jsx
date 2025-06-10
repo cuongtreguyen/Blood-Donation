@@ -28,14 +28,14 @@ function DoctorDashboardLayout() {
 
   useEffect(() => {
     // Redirect if not logged in or not authorized
-    if (!user || (user.role !== 'DOCTOR' && user.role !== 'STAFF')) {
+    if (!user || user.role !== 'STAFF') {
       navigate('/login');
     }
   }, [user, navigate]);
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/login');
+    navigate('/');
   };
 
   return (
@@ -65,7 +65,14 @@ function DoctorDashboardLayout() {
       <div className="flex-1 overflow-auto">
         <header className="bg-white shadow p-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Xin chào, BS. {user?.name}</h2>
+            <div>
+              <h2 className="text-xl font-semibold mb-1">
+                Xin chào, BS. {user?.full_name || user?.name}
+              </h2>
+              <p className="text-gray-600">
+                {user?.location && `Phòng khám: ${user.location}`}
+              </p>
+            </div>
             <button 
               onClick={handleLogout}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"

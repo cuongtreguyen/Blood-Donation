@@ -20,16 +20,19 @@ const LoginPage = () => {
 
     try {
       const response = await api.post("login", values);
-      const user = response.data;
+      const userData = {
+        ...response.data,
+        profileImage: response.data.avatar || null // Sử dụng avatar từ API hoặc null nếu không có
+      };
 
       // Đăng nhập thành công
       toast.success("Đăng Nhập Thành Công!");
-      dispatch(login(response.data)); // Giả sử bạn đã tạo action login trong userSlice
-      localStorage.setItem("token", response.data.token); // Lưu token vào localStorage
-      localStorage.setItem("user", JSON.stringify(user));
+      dispatch(login(userData));
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(userData));
       
       // Kiểm tra role và chuyển hướng
-      const userRole = user.role;
+      const userRole = userData.role;
       console.log("User role detected:", userRole);
       
       if (userRole === "ADMIN") {
