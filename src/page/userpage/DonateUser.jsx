@@ -123,7 +123,6 @@ const DonateUser = () => {
         dispatch(login(parsedUser));
         setFormData(parsedUser);
       } else {
-        toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!");
         navigate("/login");
       }
     };
@@ -302,6 +301,7 @@ const DonateUser = () => {
 
   const handleLogout = async () => {
     await dispatch(logout());
+    toast.success("Đăng xuất thành công!");
     navigate("/login");
   };
 
