@@ -43,7 +43,7 @@ const LoginPage = () => {
         navigate("/doctor");
       } else {
         console.log("Redirecting to user dashboard");
-        navigate("/user");
+        navigate("/");
       }
     } catch (error) {
       console.error("Login error:", error);

@@ -1,59 +1,125 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { FaHeart, FaUser, FaCalendar, FaMapMarkerAlt, FaInfoCircle } from 'react-icons/fa';
 
 // Hero Section Component
 function HeroSection({ onLearnMoreClick }) {
   const [showDonationForm, setShowDonationForm] = useState(false);
+  const userData = useSelector((state) => state.user);
   const [donationFormData, setDonationFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    dateOfBirth: '',
-    gender: '',
-    bloodType: '',
-    weight: '',
-    height: '',
-    address: '',
-    city: '',
-    medicalHistory: '',
-    lastDonation: '',
-    preferredDate: '',
-    preferredTime: '',
-    emergencyContact: '',
-    emergencyPhone: '',
-    hasChronicDisease: false,
-    isTakingMedication: false,
-    hasRecentSurgery: false,
-    agreesToTerms: false
+    full_name: userData?.full_name || '',
+    email: userData?.email || '',
+    phone: userData?.phone || '',
+    date_of_birth: userData?.date_of_birth || '',
+    gender: userData?.gender || '',
+    blood_type: userData?.blood_type || '',
+    weight: userData?.weight || '',
+    height: userData?.height || '',
+    address: userData?.address || '',
+    city: userData?.city || '',
+    medical_history: '',
+    last_donation: '',
+    preferred_date: '',
+    preferred_time: '',
+    emergency_contact: userData?.emergency_contact || '',
+    emergency_phone: userData?.emergency_phone || '',
+    has_chronic_disease: false,
+    is_taking_medication: false,
+    has_recent_surgery: false,
+    agrees_to_terms: false,
   });
+
+  // Update form data when user data changes
+  useEffect(() => {
+     setDonationFormData({
+    full_name: userData?.full_name || '',
+    email: userData?.email || '',
+    phone: userData?.phone || '',
+    date_of_birth: userData?.date_of_birth || '',
+    gender: userData?.gender || '',
+    blood_type: userData?.blood_type || '',
+    weight: userData?.weight || '',
+    height: userData?.height || '',
+    address: userData?.address || '',
+    city: userData?.city || '',
+    medical_history: '',
+    last_donation: '',
+    preferred_date: '',
+    preferred_time: '',
+    emergency_contact: userData?.emergency_contact || '',
+    emergency_phone: userData?.emergency_phone || '',
+    has_chronic_disease: false,
+    is_taking_medication: false,
+    has_recent_surgery: false,
+    agrees_to_terms: false,
+  })}, [userData]);
+
+  
 
   const handleDonationInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setDonationFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+
+    // Always allow changes for these fields
+    const alwaysEditableFields = [
+      'emergency_contact',
+      'emergency_phone',
+      'agrees_to_terms',
+      'medical_history',
+      'last_donation',
+      'preferred_date',
+      'preferred_time',
+      'has_chronic_disease',
+      'is_taking_medication',
+      'has_recent_surgery',
+    ];
+
+    // Allow changes for user-related fields if they are empty in userData
+    const userRelatedFields = [
+      'full_name',
+      'email',
+      'phone',
+      'date_of_birth',
+      'gender',
+      'blood_type',
+      'weight',
+      'height',
+      'address',
+      'city',
+    ];
+
+    // Check if the field is user-related and its value is empty in userData
+    const isUserRelatedAndEmpty =
+      userRelatedFields.includes(name) &&
+      (userData[name] === undefined || userData[name] === null || userData[name] === '');
+
+    // Allow change if the field is always editable or user-related and empty
+    if (alwaysEditableFields.includes(name) || isUserRelatedAndEmpty) {
+      setDonationFormData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      }));
+    }
   };
 
   const handleDonationSubmit = (e) => {
     e.preventDefault();
-    
+
     // Validation
-    if (!donationFormData.agreesToTerms) {
+    if (!donationFormData.agrees_to_terms) {
       alert('Vui lòng đồng ý với các điều khoản và điều kiện!');
       return;
     }
 
-    if (!donationFormData.fullName || !donationFormData.email || !donationFormData.phone) {
+    if (!donationFormData.full_name || !donationFormData.email || !donationFormData.phone) {
       alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
       return;
     }
 
     // Calculate age
     const today = new Date();
-    const birthDate = new Date(donationFormData.dateOfBirth);
+    const birthDate = new Date(donationFormData.date_of_birth);
     const age = today.getFullYear() - birthDate.getFullYear();
-    
+
     if (age < 18 || age > 60) {
       alert('Tuổi hiến máu phải từ 18 đến 60 tuổi!');
       return;
@@ -65,31 +131,23 @@ function HeroSection({ onLearnMoreClick }) {
     }
 
     console.log('Đăng ký hiến máu:', donationFormData);
-    alert(`Cảm ơn ${donationFormData.fullName}! Đăng ký hiến máu thành công. Chúng tôi sẽ liên hệ với bạn trong vòng 24h để xác nhận lịch hẹn.`);
-    
+    alert(
+      `Cảm ơn ${donationFormData.full_name}! Đăng ký hiến máu thành công. Chúng tôi sẽ liên hệ với bạn trong vòng 24h để xác nhận lịch hẹn.`,
+    );
+
     setShowDonationForm(false);
-    setDonationFormData({
-      fullName: '',
-      email: '',
-      phone: '',
-      dateOfBirth: '',
-      gender: '',
-      bloodType: '',
-      weight: '',
-      height: '',
-      address: '',
-      city: '',
-      medicalHistory: '',
-      lastDonation: '',
-      preferredDate: '',
-      preferredTime: '',
-      emergencyContact: '',
-      emergencyPhone: '',
-      hasChronicDisease: false,
-      isTakingMedication: false,
-      hasRecentSurgery: false,
-      agreesToTerms: false
-    });
+    // Reset only non-user fields
+    setDonationFormData((prev) => ({
+      ...prev,
+      medical_history: '',
+      last_donation: '',
+      preferred_date: '',
+      preferred_time: '',
+      has_chronic_disease: false,
+      is_taking_medication: false,
+      has_recent_surgery: false,
+      agrees_to_terms: false,
+    }));
   };
 
   const handleCloseDonationForm = () => {
@@ -98,7 +156,11 @@ function HeroSection({ onLearnMoreClick }) {
 
   return (
     <>
-      <section id="home" className="hero-section bg-gradient-danger text-white py-5" style={{ marginTop: '80px', background: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)' }}>
+      <section
+        id="home"
+        className="hero-section bg-gradient-danger text-white py-5"
+        style={{ marginTop: '80px', background: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)' }}
+      >
         <div className="container py-5">
           <div className="row align-items-center min-vh-75">
             <div className="col-lg-6">
@@ -111,7 +173,10 @@ function HeroSection({ onLearnMoreClick }) {
                 Mỗi lần hiến máu của bạn có thể cứu sống đến 3 người. Hãy tham gia cùng chúng tôi trong sứ mệnh cao quý này.
               </p>
               <div className="d-flex flex-wrap gap-3">
-                <button onClick={() => setShowDonationForm(true)} className="btn btn-outline-light btn-lg fw-bold px-4">
+                <button
+                  onClick={() => setShowDonationForm(true)}
+                  className="btn btn-outline-light btn-lg fw-bold px-4"
+                >
                   Đăng Ký Hiến Máu
                 </button>
                 <button
@@ -123,9 +188,9 @@ function HeroSection({ onLearnMoreClick }) {
               </div>
             </div>
             <div className="col-lg-6 text-center">
-              <img 
-                src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Blood Donation" 
+              <img
+                src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                alt="Blood Donation"
                 className="img-fluid rounded-3 shadow-lg"
                 style={{ maxHeight: '500px', objectFit: 'cover' }}
               />
@@ -141,19 +206,26 @@ function HeroSection({ onLearnMoreClick }) {
             <div className="modal-content border-0 shadow-lg">
               <div className="modal-header border-0 pb-0 bg-danger text-white">
                 <h4 className="modal-title fw-bold">
-                  <i className="fas fa-heart me-2"></i>
+                  <FaHeart className="me-2" />
                   Đăng Ký Hiến Máu Tình Nguyện
                 </h4>
-                <button 
-                  type="button" 
-                  className="btn-close btn-close-white" 
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
                   onClick={handleCloseDonationForm}
                 ></button>
               </div>
               <div className="modal-body p-4">
+                {userData && Object.keys(userData).length > 0 && (
+                  <div className="alert alert-success mb-4">
+                    <FaUser className="me-2" />
+                    Xin chào <strong>{userData.full_name || 'Người dùng'}</strong>! Thông tin cá nhân của bạn đã được điền sẵn.
+                  </div>
+                )}
+
                 <div className="alert alert-info mb-4">
                   <h6 className="fw-bold mb-2">
-                    <i className="fas fa-info-circle me-2"></i>
+                    <FaInfoCircle className="me-2" />
                     Điều kiện hiến máu:
                   </h6>
                   <ul className="mb-0 small">
@@ -168,7 +240,7 @@ function HeroSection({ onLearnMoreClick }) {
                   {/* Thông tin cá nhân */}
                   <div className="border rounded p-3 mb-4">
                     <h6 className="fw-bold text-danger mb-3">
-                      <i className="fas fa-user me-2"></i>
+                      <FaUser className="me-2" />
                       Thông Tin Cá Nhân
                     </h6>
                     <div className="row">
@@ -176,11 +248,14 @@ function HeroSection({ onLearnMoreClick }) {
                         <label className="form-label fw-semibold">Họ và tên *</label>
                         <input
                           type="text"
-                          className="form-control"
-                          name="fullName"
-                          value={donationFormData.fullName}
+                          className={`form-control ${
+                            userData?.full_name ? 'bg-light' : ''
+                          }`}
+                          name="full_name"
+                          value={donationFormData.full_name}
                           onChange={handleDonationInputChange}
                           placeholder="Nhập họ tên đầy đủ"
+                          readOnly={!!userData?.full_name}
                           required
                         />
                       </div>
@@ -188,11 +263,14 @@ function HeroSection({ onLearnMoreClick }) {
                         <label className="form-label fw-semibold">Email *</label>
                         <input
                           type="email"
-                          className="form-control"
+                          className={`form-control ${
+                            userData?.email ? 'bg-light' : ''
+                          }`}
                           name="email"
                           value={donationFormData.email}
                           onChange={handleDonationInputChange}
                           placeholder="Nhập địa chỉ email"
+                          readOnly={!!userData?.email}
                           required
                         />
                       </div>
@@ -202,11 +280,14 @@ function HeroSection({ onLearnMoreClick }) {
                         <label className="form-label fw-semibold">Số điện thoại *</label>
                         <input
                           type="tel"
-                          className="form-control"
+                          className={`form-control ${
+                            userData?.phone ? 'bg-light' : ''
+                          }`}
                           name="phone"
                           value={donationFormData.phone}
                           onChange={handleDonationInputChange}
                           placeholder="Số điện thoại"
+                          readOnly={!!userData?.phone}
                           required
                         />
                       </div>
@@ -214,20 +295,26 @@ function HeroSection({ onLearnMoreClick }) {
                         <label className="form-label fw-semibold">Ngày sinh *</label>
                         <input
                           type="date"
-                          className="form-control"
-                          name="dateOfBirth"
-                          value={donationFormData.dateOfBirth}
+                          className={`form-control ${
+                            userData?.date_of_birth ? 'bg-light' : ''
+                          }`}
+                          name="date_of_birth"
+                          value={donationFormData.date_of_birth}
                           onChange={handleDonationInputChange}
+                          readOnly={!!userData?.date_of_birth}
                           required
                         />
                       </div>
                       <div className="col-md-4 mb-3">
                         <label className="form-label fw-semibold">Giới tính</label>
                         <select
-                          className="form-select"
+                          className={`form-select ${
+                            userData?.gender ? 'bg-light' : ''
+                          }`}
                           name="gender"
                           value={donationFormData.gender}
                           onChange={handleDonationInputChange}
+                          disabled={!!userData?.gender}
                         >
                           <option value="">Chọn giới tính</option>
                           <option value="male">Nam</option>
@@ -241,22 +328,28 @@ function HeroSection({ onLearnMoreClick }) {
                         <label className="form-label fw-semibold">Địa chỉ</label>
                         <input
                           type="text"
-                          className="form-control"
+                          className={`form-control ${
+                            userData?.address ? 'bg-light' : ''
+                          }`}
                           name="address"
                           value={donationFormData.address}
                           onChange={handleDonationInputChange}
                           placeholder="Số nhà, tên đường"
+                          readOnly={!!userData?.address}
                         />
                       </div>
                       <div className="col-md-4 mb-3">
                         <label className="form-label fw-semibold">Thành phố</label>
                         <input
                           type="text"
-                          className="form-control"
+                          className={`form-control ${
+                            userData?.city ? 'bg-light' : ''
+                          }`}
                           name="city"
                           value={donationFormData.city}
                           onChange={handleDonationInputChange}
                           placeholder="Thành phố"
+                          readOnly={!!userData?.city}
                         />
                       </div>
                     </div>
@@ -265,27 +358,30 @@ function HeroSection({ onLearnMoreClick }) {
                   {/* Thông tin sức khỏe */}
                   <div className="border rounded p-3 mb-4">
                     <h6 className="fw-bold text-danger mb-3">
-                      <i className="fas fa-heartbeat me-2"></i>
+                      <FaHeart className="me-2" />
                       Thông Tin Sức Khỏe
                     </h6>
                     <div className="row">
                       <div className="col-md-4 mb-3">
                         <label className="form-label fw-semibold">Nhóm máu</label>
                         <select
-                          className="form-select"
-                          name="bloodType"
-                          value={donationFormData.bloodType}
+                          className={`form-select ${
+                            userData?.blood_type ? 'bg-light' : ''
+                          }`}
+                          name="blood_type"
+                          value={donationFormData.blood_type}
                           onChange={handleDonationInputChange}
+                          disabled={!!userData?.blood_type}
                         >
                           <option value="">Chọn nhóm máu</option>
-                          <option value="A+">A+</option>
-                          <option value="A-">A-</option>
-                          <option value="B+">B+</option>
-                          <option value="B-">B-</option>
-                          <option value="AB+">AB+</option>
-                          <option value="AB-">AB-</option>
-                          <option value="O+">O+</option>
-                          <option value="O-">O-</option>
+                          <option value="A_POSITIVE">A+</option>
+                          <option value="A_NEGATIVE">A-</option>
+                          <option value="B_POSITIVE">B+</option>
+                          <option value="B_NEGATIVE">B-</option>
+                          <option value="AB_POSITIVE">AB+</option>
+                          <option value="AB_NEGATIVE">AB-</option>
+                          <option value="O_POSITIVE">O+</option>
+                          <option value="O_NEGATIVE">O-</option>
                           <option value="unknown">Chưa biết</option>
                         </select>
                       </div>
@@ -293,13 +389,16 @@ function HeroSection({ onLearnMoreClick }) {
                         <label className="form-label fw-semibold">Cân nặng (kg) *</label>
                         <input
                           type="number"
-                          className="form-control"
+                          className={`form-control ${
+                            userData?.weight ? 'bg-light' : ''
+                          }`}
                           name="weight"
                           value={donationFormData.weight}
                           onChange={handleDonationInputChange}
                           placeholder="Cân nặng"
                           min="30"
                           max="200"
+                          readOnly={!!userData?.weight}
                           required
                         />
                       </div>
@@ -307,13 +406,16 @@ function HeroSection({ onLearnMoreClick }) {
                         <label className="form-label fw-semibold">Chiều cao (cm)</label>
                         <input
                           type="number"
-                          className="form-control"
+                          className={`form-control ${
+                            userData?.height ? 'bg-light' : ''
+                          }`}
                           name="height"
                           value={donationFormData.height}
                           onChange={handleDonationInputChange}
                           placeholder="Chiều cao"
                           min="100"
                           max="250"
+                          readOnly={!!userData?.height}
                         />
                       </div>
                     </div>
@@ -322,8 +424,8 @@ function HeroSection({ onLearnMoreClick }) {
                       <input
                         type="date"
                         className="form-control"
-                        name="lastDonation"
-                        value={donationFormData.lastDonation}
+                        name="last_donation"
+                        value={donationFormData.last_donation}
                         onChange={handleDonationInputChange}
                       />
                       <div className="form-text">Để trống nếu lần đầu hiến máu</div>
@@ -332,8 +434,8 @@ function HeroSection({ onLearnMoreClick }) {
                       <label className="form-label fw-semibold">Tiền sử bệnh (nếu có)</label>
                       <textarea
                         className="form-control"
-                        name="medicalHistory"
-                        value={donationFormData.medicalHistory}
+                        name="medical_history"
+                        value={donationFormData.medical_history}
                         onChange={handleDonationInputChange}
                         rows="2"
                         placeholder="Mô tả các bệnh đã từng mắc hoặc đang điều trị"
@@ -345,13 +447,11 @@ function HeroSection({ onLearnMoreClick }) {
                           <input
                             className="form-check-input"
                             type="checkbox"
-                            name="hasChronicDisease"
-                            checked={donationFormData.hasChronicDisease}
+                            name="has_chronic_disease"
+                            checked={donationFormData.has_chronic_disease}
                             onChange={handleDonationInputChange}
                           />
-                          <label className="form-check-label">
-                            Có bệnh mãn tính
-                          </label>
+                          <label className="form-check-label">Có bệnh mãn tính</label>
                         </div>
                       </div>
                       <div className="col-md-4">
@@ -359,13 +459,11 @@ function HeroSection({ onLearnMoreClick }) {
                           <input
                             className="form-check-input"
                             type="checkbox"
-                            name="isTakingMedication"
-                            checked={donationFormData.isTakingMedication}
+                            name="is_taking_medication"
+                            checked={donationFormData.is_taking_medication}
                             onChange={handleDonationInputChange}
                           />
-                          <label className="form-check-label">
-                            Đang dùng thuốc
-                          </label>
+                          <label className="form-check-label">Đang dùng thuốc</label>
                         </div>
                       </div>
                       <div className="col-md-4">
@@ -373,13 +471,11 @@ function HeroSection({ onLearnMoreClick }) {
                           <input
                             className="form-check-input"
                             type="checkbox"
-                            name="hasRecentSurgery"
-                            checked={donationFormData.hasRecentSurgery}
+                            name="has_recent_surgery"
+                            checked={donationFormData.has_recent_surgery}
                             onChange={handleDonationInputChange}
                           />
-                          <label className="form-check-label">
-                            Phẫu thuật gần đây
-                          </label>
+                          <label className="form-check-label">Phẫu thuật gần đây</label>
                         </div>
                       </div>
                     </div>
@@ -388,7 +484,7 @@ function HeroSection({ onLearnMoreClick }) {
                   {/* Thông tin lịch hẹn */}
                   <div className="border rounded p-3 mb-4">
                     <h6 className="fw-bold text-danger mb-3">
-                      <i className="fas fa-calendar-alt me-2"></i>
+                      <FaCalendar className="me-2" />
                       Lịch Hẹn Hiến Máu
                     </h6>
                     <div className="row">
@@ -397,8 +493,8 @@ function HeroSection({ onLearnMoreClick }) {
                         <input
                           type="date"
                           className="form-control"
-                          name="preferredDate"
-                          value={donationFormData.preferredDate}
+                          name="preferred_date"
+                          value={donationFormData.preferred_date}
                           onChange={handleDonationInputChange}
                           min={new Date().toISOString().split('T')[0]}
                         />
@@ -407,8 +503,8 @@ function HeroSection({ onLearnMoreClick }) {
                         <label className="form-label fw-semibold">Giờ mong muốn</label>
                         <select
                           className="form-select"
-                          name="preferredTime"
-                          value={donationFormData.preferredTime}
+                          name="preferred_time"
+                          value={donationFormData.preferred_time}
                           onChange={handleDonationInputChange}
                         >
                           <option value="">Chọn giờ</option>
@@ -422,13 +518,12 @@ function HeroSection({ onLearnMoreClick }) {
                           <option value="16:00">16:00 - 17:00</option>
                         </select>
                       </div>
-
                     </div>
-                    
+
                     {/* Hiển thị địa chỉ chi tiết mặc định */}
                     <div className="alert alert-light border-start border-danger border-4 mb-3">
                       <div className="d-flex align-items-start">
-                        <i className="fas fa-map-marker-alt text-danger me-2 mt-1"></i>
+                        <FaMapMarkerAlt className="text-danger me-2 mt-1" />
                         <div>
                           <strong className="text-danger">Địa điểm hiến máu:</strong>
                           <div className="mt-1">Bệnh viện Chợ Rẫy - 201B Nguyễn Chí Thanh, Quận 5, TP.HCM</div>
@@ -440,7 +535,6 @@ function HeroSection({ onLearnMoreClick }) {
                   {/* Người liên hệ khẩn cấp */}
                   <div className="border rounded p-3 mb-4">
                     <h6 className="fw-bold text-danger mb-3">
-                      <i className="fas fa-phone me-2"></i>
                       Người Liên Hệ Khẩn Cấp
                     </h6>
                     <div className="row">
@@ -449,8 +543,8 @@ function HeroSection({ onLearnMoreClick }) {
                         <input
                           type="text"
                           className="form-control"
-                          name="emergencyContact"
-                          value={donationFormData.emergencyContact}
+                          name="emergency_contact"
+                          value={donationFormData.emergency_contact}
                           onChange={handleDonationInputChange}
                           placeholder="Tên người thân"
                         />
@@ -460,8 +554,8 @@ function HeroSection({ onLearnMoreClick }) {
                         <input
                           type="tel"
                           className="form-control"
-                          name="emergencyPhone"
-                          value={donationFormData.emergencyPhone}
+                          name="emergency_phone"
+                          value={donationFormData.emergency_phone}
                           onChange={handleDonationInputChange}
                           placeholder="Số điện thoại người thân"
                         />
@@ -474,31 +568,34 @@ function HeroSection({ onLearnMoreClick }) {
                     <input
                       className="form-check-input"
                       type="checkbox"
-                      name="agreesToTerms"
-                      checked={donationFormData.agreesToTerms}
+                      name="agrees_to_terms"
+                      checked={donationFormData.agrees_to_terms}
                       onChange={handleDonationInputChange}
                       required
                     />
                     <label className="form-check-label">
                       Tôi xác nhận rằng tất cả thông tin trên là chính xác và đồng ý với{' '}
-                      <a href="#" className="text-decoration-none text-danger">điều khoản hiến máu</a> và{' '}
-                      <a href="#" className="text-decoration-none text-danger">chính sách bảo mật</a> *
+                      <a href="#" className="text-decoration-none text-danger">
+                        điều khoản hiến máu
+                      </a>{' '}
+                      và{' '}
+                      <a href="#" className="text-decoration-none text-danger">
+                        chính sách bảo mật
+                      </a>{' '}
+                      *
                     </label>
                   </div>
 
                   <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       className="btn btn-outline-secondary me-md-2"
                       onClick={handleCloseDonationForm}
                     >
                       Hủy
                     </button>
-                    <button 
-                      type="submit" 
-                      className="btn btn-danger btn-lg px-4"
-                    >
-                      <i className="fas fa-heart me-2"></i>
+                    <button type="submit" className="btn btn-danger btn-lg px-4">
+                      <FaHeart className="me-2" />
                       Đăng Ký Hiến Máu
                     </button>
                   </div>
