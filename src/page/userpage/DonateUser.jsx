@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   FaUser, FaCalendar, FaHistory, FaSignOutAlt, FaTint, FaClock, FaMapMarkerAlt,
-  FaCheckCircle, FaEdit, FaAward, FaMedal, FaStar, FaFire, FaBell, FaSearch
+  FaCheckCircle, FaEdit, FaAward, FaMedal, FaStar, FaFire, FaBell, FaSearch, FaCamera
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import api from "../../config/api";
@@ -223,8 +223,9 @@ const DonateUser = () => {
       setFormData(updatedUser);
       toast.success("Cập nhật thông tin thành công!");
       setIsEditing(false);
-    } catch (error) {
-      if (error.response?.status === 404) {
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      if (err.response?.status === 404) {
         toast.error("Không tìm thấy người dùng. Vui lòng kiểm tra lại!");
       } else {
         toast.error("Cập nhật thông tin thất bại. Vui lòng thử lại!");
@@ -271,7 +272,8 @@ const DonateUser = () => {
       setAppointments([...appointments, response.data]);
       setNewAppointment({ date: "", time: "", location: "" });
       toast.success("Đặt lịch hẹn thành công!");
-    } catch (error) {
+    } catch (err) {
+      console.error("Error scheduling appointment:", err);
       toast.error("Đặt lịch hẹn thất bại. Vui lòng thử lại!");
     } finally {
       setIsLoading(false);
@@ -293,7 +295,8 @@ const DonateUser = () => {
         await api.delete(`/appointments/${appointmentId}`);
         setAppointments(appointments.filter((appt) => appt.id !== appointmentId));
         toast.success("Hủy lịch hẹn thành công!");
-      } catch (error) {
+      } catch (err) {
+        console.error("Error canceling appointment:", err);
         toast.error("Hủy lịch hẹn thất bại. Vui lòng thử lại!");
       }
     }
@@ -301,8 +304,7 @@ const DonateUser = () => {
 
   const handleLogout = async () => {
     await dispatch(logout());
-    toast.success("Đăng xuất thành công!");
-    navigate("/login");
+    navigate("/");
   };
 
   // Emergency blood request handlers
@@ -322,7 +324,8 @@ const DonateUser = () => {
       setEmergencyRequests([...emergencyRequests, response.data]);
       setEmergencyRequest({ blood_type: "", date: "", location: "", note: "" });
       toast.success("Đăng ký nhận máu khẩn cấp thành công!");
-    } catch (error) {
+    } catch (err) {
+      console.error("Error registering emergency request:", err);
       toast.error("Đăng ký thất bại. Vui lòng thử lại!");
     } finally {
       setIsEmergencyLoading(false);
@@ -347,8 +350,48 @@ const DonateUser = () => {
       toast.success("Tìm kiếm thành công!");
       // Placeholder: Display results (requires UI update)
       console.log("Donors found:", response.data);
-    } catch (error) {
+    } catch (err) {
+      console.error("Error searching donors:", err);
       toast.error("Tìm kiếm thất bại. Vui lòng thử lại!");
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Vui lòng chọn file hình ảnh!");
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast.error("Kích thước ảnh không được vượt quá 5MB!");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+
+      const response = await api.put(`/users/${userData.id}/profile-image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const updatedUser = { ...userData, profileImage: response.data.profileImage };
+      dispatch(login(updatedUser));
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setFormData(updatedUser);
+      toast.success("Cập nhật ảnh đại diện thành công!");
+    } catch (err) {
+      console.error("Error uploading profile image:", err);
+      toast.error("Cập nhật ảnh đại diện thất bại. Vui lòng thử lại!");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -367,9 +410,15 @@ const DonateUser = () => {
               alt="Hồ sơ"
               className="w-24 h-24 rounded-full object-cover ring-4 ring-red-200 shadow-lg border-4 border-white"
             />
-            <span className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 border border-red-200 shadow">
-              <FaTint className="text-red-500 text-2xl animate-pulse" />
-            </span>
+            <label className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 border border-red-200 shadow cursor-pointer hover:bg-red-50 transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <FaCamera className="text-red-500 text-2xl" />
+            </label>
           </div>
           <div>
             <h2 className="text-3xl font-bold text-gray-800 mb-2">{userData.full_name || "Người dùng"}</h2>
@@ -708,7 +757,7 @@ const DonateUser = () => {
                   <span className="italic">{req.status || "Đang chờ xử lý"}</span>
                 </div>
                 <div>
-                  <b>Ngày:</b> {req.date}  | 
+                  <b>Ngày:</b> {req.date}  | 
                   <b>Địa điểm:</b> {req.location}
                 </div>
                 {req.note && (
@@ -827,14 +876,14 @@ const DonateUser = () => {
       <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">
         <div className="container mx-auto px-6 py-8">
           <div className="flex justify-between items-center">
-            <div className="flex-shrink-0 flex items-center">
+            <Link to="/" className="flex-shrink-0 flex items-center no-underline text-white">
               <img
                 src="https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain"
                 alt="Biểu tượng"
                 className="h-8 w-8 text-red-100 animate-pulse rounded-full"
               />
-              <span className="ml-2 text-2xl font-bold text-white">Dòng Máu Việt</span>
-            </div>
+              <span className="ml-2 text-2xl font-bold">Dòng Máu Việt</span>
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 text-white font-semibold px-4 py-2 border border-white rounded-lg hover:bg-white hover:text-red-700 transition-all duration-300"

@@ -15,12 +15,16 @@ import OtpVerification from './page/loginpage/OtpVerification';
 import MainLayout from './components/layout/MainLayout';
 import DoctorDashboardLayout from './components/layout/DoctorDashboardLayout';
 import AdminLayout from './components/layout/AdminLayout';
+import UserLayout from './components/layout/UserLayout';
 
 // Pages
 import HomePage from './page/homepage/HomePage';
 import LoginPage from './page/loginpage/LoginPage';
 import RegisterPage from './page/loginpage/RegisterPage';
 import BloodRequestForm from './page/blood-request/BloodRequestForm';
+import UserProfile from './page/userpage/UserProfile';
+import UserHomePage from './page/userpage/UserHomePage';
+import DonateUser from './page/userpage/DonateUser';
 
 // Admin Pages
 import AdminDashboard from './page/admin/AdminDashboard';
@@ -42,11 +46,7 @@ import DoctorMedicalRecordsPage from './page/doctorpage/doctor/MedicalRecordsPag
 import DoctorBloodInventoryPage from './page/doctorpage/doctor/BloodInventoryPage';
 import DoctorReportsPage from './page/doctorpage/doctor/ReportsPage';
 import DoctorProfilePage from './page/doctorpage/doctor/ProfilePage';
-import DonateUser from './page/userpage/DonateUser';
 import ForgotPassword from './page/loginpage/ForgotPassword';
-
-
-
 
 const router = createBrowserRouter([
   {
@@ -64,17 +64,16 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: "/user",
+    element: <DonateUser />,
+  },
+  {
     path: "/login",
     element: <LoginPage />,
   },
- 
   {
     path: "/register",
     element: <RegisterPage />,
-  },
-  {
-    path: "/user",
-    element: <DonateUser />,
   },
   {
     path: "otp",

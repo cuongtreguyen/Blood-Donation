@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Layout, Menu, Avatar, Dropdown, Badge, Button } from 'antd';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../redux/features/userSlice';
 import {
   UserOutlined,
   BellOutlined,
@@ -29,6 +31,7 @@ function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // State for managing open menu keys (for submenus)
   const [openKeys, setOpenKeys] = useState(() => {
@@ -143,9 +146,9 @@ function AdminLayout() {
       </Menu.Item>
       <Menu.Divider />
       <Menu.Item key="logout" onClick={() => {
-        // TODO: Add actual logout logic (e.g., clearing token)
+        dispatch(logout());
         toast.success('Đăng xuất thành công!');
-        navigate('/login');
+        navigate('/');
       }}>
         <LogoutOutlined /> Đăng xuất
       </Menu.Item>
