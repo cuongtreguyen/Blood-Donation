@@ -328,35 +328,59 @@ const AdminBloodBanksPage = () => {
           <Form.Item
             name="name"
             label="Tên Ngân Hàng Máu"
-            rules={[{ required: true, message: 'Vui lòng nhập tên ngân hàng máu!' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập tên ngân hàng máu!' },
+              { min: 3, message: 'Tên ngân hàng máu phải có ít nhất 3 ký tự!' },
+              { max: 100, message: 'Tên ngân hàng máu không được vượt quá 100 ký tự!' }
+            ]}
           >
             <Input prefix={<BankOutlined />} placeholder="Nhập tên ngân hàng máu" />
           </Form.Item>
           <Form.Item
             name="address"
             label="Địa chỉ"
-            rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập địa chỉ!' },
+              { min: 10, message: 'Địa chỉ phải có ít nhất 10 ký tự!' },
+              { max: 200, message: 'Địa chỉ không được vượt quá 200 ký tự!' }
+            ]}
           >
             <Input prefix={<EnvironmentOutlined />} placeholder="Nhập địa chỉ" />
           </Form.Item>
           <Form.Item
             name="phone"
             label="Số điện thoại"
-            rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập số điện thoại!' },
+              { pattern: /^[0-9]{10}$/, message: 'Số điện thoại phải có 10 chữ số!' }
+            ]}
           >
             <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" />
           </Form.Item>
           <Form.Item
             name="email"
             label="Email"
-            rules={[{ required: true, type: 'email', message: 'Vui lòng nhập email hợp lệ!' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập email!' },
+              { type: 'email', message: 'Email không hợp lệ!' },
+              { 
+                pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                message: 'Email phải có định dạng hợp lệ (ví dụ: example@domain.com)!'
+              }
+            ]}
           >
             <Input prefix={<MailOutlined />} placeholder="Nhập email" />
           </Form.Item>
           <Form.Item
             name="website"
             label="Website"
-            rules={[{ required: true, message: 'Vui lòng nhập website!' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập website!' },
+              { 
+                pattern: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,
+                message: 'Website phải có định dạng hợp lệ (ví dụ: www.example.com)!'
+              }
+            ]}
           >
             <Input prefix={<GlobalOutlined />} placeholder="Nhập website" />
           </Form.Item>

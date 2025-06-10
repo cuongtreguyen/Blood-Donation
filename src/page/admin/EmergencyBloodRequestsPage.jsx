@@ -322,16 +322,59 @@ const EmergencyBloodRequestsPage = () => {
         width={700}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="patientName" label="Tên bệnh nhân" rules={[{ required: true, message: 'Vui lòng nhập tên bệnh nhân!' }]}>
+          <Form.Item 
+            name="patientName" 
+            label="Tên bệnh nhân" 
+            rules={[
+              { required: true, message: 'Vui lòng nhập tên bệnh nhân!' },
+              { pattern: /^[a-zA-ZÀ-ỹ\s]+$/, message: 'Tên bệnh nhân chỉ được chứa chữ cái và khoảng trắng!' }
+            ]}
+          >
             <Input prefix={<UserOutlined />} placeholder="Tên bệnh nhân" />
           </Form.Item>
-          <Form.Item name="hospital" label="Bệnh viện" rules={[{ required: true, message: 'Vui lòng nhập tên bệnh viện!' }]}>
+          <Form.Item 
+            name="hospital" 
+            label="Bệnh viện" 
+            rules={[
+              { required: true, message: 'Vui lòng nhập tên bệnh viện!' },
+              { min: 3, message: 'Tên bệnh viện phải có ít nhất 3 ký tự!' }
+            ]}
+          >
             <Input prefix={<SafetyOutlined />} placeholder="Tên bệnh viện" />
           </Form.Item>
-          <Form.Item name="contactInfo" label="Thông tin liên hệ" rules={[{ required: true, message: 'Vui lòng nhập thông tin liên hệ!' }]}>
+          <Form.Item 
+            name="contactInfo" 
+            label="Thông tin liên hệ" 
+            rules={[
+              { required: true, message: 'Vui lòng nhập thông tin liên hệ!' },
+              { 
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  // Kiểm tra nếu là email
+                  if (value.includes('@')) {
+                    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    if (!emailRegex.test(value)) {
+                      return Promise.reject('Email không hợp lệ!');
+                    }
+                  } else {
+                    // Kiểm tra nếu là số điện thoại
+                    const phoneRegex = /^[0-9]{10}$/;
+                    if (!phoneRegex.test(value)) {
+                      return Promise.reject('Số điện thoại phải có 10 chữ số!');
+                    }
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
+          >
             <Input prefix={<PhoneOutlined />} placeholder="Số điện thoại hoặc Email" />
           </Form.Item>
-          <Form.Item name="bloodType" label="Nhóm máu" rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}>
+          <Form.Item 
+            name="bloodType" 
+            label="Nhóm máu" 
+            rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
+          >
             <Select placeholder="Chọn nhóm máu">
               <Option value="A+">A+</Option>
               <Option value="A-">A-</Option>
@@ -343,7 +386,11 @@ const EmergencyBloodRequestsPage = () => {
               <Option value="O-">O-</Option>
             </Select>
           </Form.Item>
-          <Form.Item name="component" label="Thành phần" rules={[{ required: true, message: 'Vui lòng chọn thành phần!' }]}>
+          <Form.Item 
+            name="component" 
+            label="Thành phần" 
+            rules={[{ required: true, message: 'Vui lòng chọn thành phần!' }]}
+          >
             <Select placeholder="Chọn thành phần">
               <Option value="Whole Blood">Whole Blood</Option>
               <Option value="Plasma">Plasma</Option>
@@ -351,10 +398,22 @@ const EmergencyBloodRequestsPage = () => {
               <Option value="Platelets">Platelets</Option>
             </Select>
           </Form.Item>
-          <Form.Item name="quantity" label="Số lượng (đơn vị)" rules={[{ required: true, message: 'Vui lòng nhập số lượng!', type: 'number', min: 1 }]}>
+          <Form.Item 
+            name="quantity" 
+            label="Số lượng (đơn vị)" 
+            rules={[
+              { required: true, message: 'Vui lòng nhập số lượng!' },
+              { type: 'number', min: 1, message: 'Số lượng phải lớn hơn 0!' },
+              { type: 'number', max: 10, message: 'Số lượng không được vượt quá 10 đơn vị!' }
+            ]}
+          >
             <Input type="number" placeholder="Số lượng" />
           </Form.Item>
-          <Form.Item name="priority" label="Mức độ ưu tiên" rules={[{ required: true, message: 'Vui lòng chọn mức độ ưu tiên!' }]}>
+          <Form.Item 
+            name="priority" 
+            label="Mức độ ưu tiên" 
+            rules={[{ required: true, message: 'Vui lòng chọn mức độ ưu tiên!' }]}
+          >
             <Select placeholder="Chọn mức độ ưu tiên">
               <Option value="Urgent">Khẩn cấp</Option>
               <Option value="High">Cao</Option>
@@ -362,17 +421,63 @@ const EmergencyBloodRequestsPage = () => {
               <Option value="Low">Thấp</Option>
             </Select>
           </Form.Item>
-          <Form.Item name="requestDate" label="Ngày yêu cầu" rules={[{ required: true, message: 'Vui lòng chọn ngày yêu cầu!' }]}>
+          <Form.Item 
+            name="requestDate" 
+            label="Ngày yêu cầu" 
+            rules={[
+              { required: true, message: 'Vui lòng chọn ngày yêu cầu!' },
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  const today = dayjs().startOf('day');
+                  const selectedDate = value.startOf('day');
+                  if (selectedDate.isBefore(today)) {
+                    return Promise.reject('Ngày yêu cầu không thể là ngày trong quá khứ!');
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
+          >
             <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
           </Form.Item>
-          <Form.Item name="dueDate" label="Ngày đến hạn" rules={[{ required: true, message: 'Vui lòng chọn ngày đến hạn!' }]}>
+          <Form.Item 
+            name="dueDate" 
+            label="Ngày đến hạn" 
+            rules={[
+              { required: true, message: 'Vui lòng chọn ngày đến hạn!' },
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  const today = dayjs().startOf('day');
+                  const selectedDate = value.startOf('day');
+                  if (selectedDate.isBefore(today)) {
+                    return Promise.reject('Ngày đến hạn không thể là ngày trong quá khứ!');
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
+          >
             <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
           </Form.Item>
-          <Form.Item name="reason" label="Lý do" rules={[{ required: true, message: 'Vui lòng nhập lý do yêu cầu!' }]}>
+          <Form.Item 
+            name="reason" 
+            label="Lý do" 
+            rules={[
+              { required: true, message: 'Vui lòng nhập lý do yêu cầu!' },
+              { min: 10, message: 'Lý do phải có ít nhất 10 ký tự!' },
+              { max: 500, message: 'Lý do không được vượt quá 500 ký tự!' }
+            ]}
+          >
             <TextArea rows={3} placeholder="Lý do yêu cầu" />
           </Form.Item>
           {modalMode === 'edit' && (
-            <Form.Item name="status" label="Trạng thái" rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}>
+            <Form.Item 
+              name="status" 
+              label="Trạng thái" 
+              rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
+            >
               <Select placeholder="Chọn trạng thái">
                 <Option value="Pending">Đang chờ</Option>
                 <Option value="Approved">Đã duyệt</Option>

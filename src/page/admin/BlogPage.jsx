@@ -188,16 +188,38 @@ function BlogPage() {
         cancelText="Hủy"
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="title" label="Tiêu đề" rules={[{ required: true, message: 'Vui lòng nhập tiêu đề' }]}> 
+          <Form.Item 
+            name="title" 
+            label="Tiêu đề" 
+            rules={[
+              { required: true, message: 'Vui lòng nhập tiêu đề!' },
+              { min: 5, message: 'Tiêu đề phải có ít nhất 5 ký tự!' },
+              { max: 200, message: 'Tiêu đề không được vượt quá 200 ký tự!' }
+            ]}
+          > 
             <Input />
           </Form.Item>
-          <Form.Item name="category" label="Danh mục" rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}> 
+          <Form.Item 
+            name="category" 
+            label="Danh mục" 
+            rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}> 
             <Select options={categoryOptions} />
           </Form.Item>
-          <Form.Item name="status" label="Trạng thái" rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}> 
+          <Form.Item 
+            name="status" 
+            label="Trạng thái" 
+            rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}> 
             <Select options={statusOptions.filter(opt => opt.value !== 'all')} />
           </Form.Item>
-          <Form.Item name="content" label="Nội dung" rules={[{ required: true, message: 'Vui lòng nhập nội dung' }]}> 
+          <Form.Item 
+            name="content" 
+            label="Nội dung" 
+            rules={[
+              { required: true, message: 'Vui lòng nhập nội dung!' },
+              { min: 50, message: 'Nội dung phải có ít nhất 50 ký tự!' },
+              { max: 5000, message: 'Nội dung không được vượt quá 5000 ký tự!' }
+            ]}
+          > 
             <Input.TextArea rows={4} />
           </Form.Item>
         </Form>
