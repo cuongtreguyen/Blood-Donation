@@ -74,56 +74,54 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          {!user && (
-            <nav className="hidden md:flex space-x-8">
-              {navItems.map((item) =>
-                item.name === "Hiến máu" ? (
-                  <button
-                    key={item.name}
-                    onClick={() => handleScrollToSection("donation-process")}
-                    className="relative no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:text-white hover:scale-105 hover:bg-red-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 focus:ring-offset-red-600"
-                  >
-                    {item.name}
-                  </button>
-                ) : item.name === "Tài liệu về máu" ? (
-                  <button
-                    key={item.name}
-                    onClick={() => handleScrollToSection("document-blood")}
-                    className="relative no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:text-white hover:scale-105 hover:bg-red-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 focus:ring-offset-red-600"
-                  >
-                    {item.name}
-                  </button>
-                ) : item.name === "Tìm điểm hiến máu" ? (
-                  <button
-                    key={item.name}
-                    onClick={() => handleScrollToSection("donation-centers")}
-                    className="relative no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:text-white hover:scale-105 hover:bg-red-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 focus:ring-offset-red-600"
-                  >
-                    {item.name}
-                  </button>
-                ) : item.name === "Đánh Giá" ? (
-                  <button
-                    key={item.name}
-                    onClick={() => handleScrollToSection("blog-customer")}
-                    className="relative no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:text-white hover:scale-105 hover:bg-red-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 focus:ring-offset-red-600"
-                  >
-                    {item.name}
-                  </button>
-                ) : (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    style={{ color: "white", textDecoration: "none" }}
-                    className="relative no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:text-white hover:scale-105 hover:bg-red-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 focus:ring-offset-red-600"
-                    aria-label={item.name}
-                  >
-                    {item.name}
-                  </Link>
-                )
-              )}
-            </nav>
-          )}
+          {/* Desktop Navigation - Hiển thị luôn */}
+          <nav className="hidden md:flex space-x-8">
+            {navItems.map((item) =>
+              item.name === "Hiến máu" ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleScrollToSection("donation-process")}
+                  className="relative no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:text-white hover:scale-105 hover:bg-red-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 focus:ring-offset-red-600"
+                >
+                  {item.name}
+                </button>
+              ) : item.name === "Tài liệu về máu" ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleScrollToSection("document-blood")}
+                  className="relative no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:text-white hover:scale-105 hover:bg-red-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 focus:ring-offset-red-600"
+                >
+                  {item.name}
+                </button>
+              ) : item.name === "Tìm điểm hiến máu" ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleScrollToSection("donation-centers")}
+                  className="relative no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:text-white hover:scale-105 hover:bg-red-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 focus:ring-offset-red-600"
+                >
+                  {item.name}
+                </button>
+              ) : item.name === "Đánh Giá" ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleScrollToSection("blog-customer")}
+                  className="relative no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:text-white hover:scale-105 hover:bg-red-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 focus:ring-offset-red-600"
+                >
+                  {item.name}
+                </button>
+              ) : (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  style={{ color: "white", textDecoration: "none" }}
+                  className="relative no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:text-white hover:scale-105 hover:bg-red-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 focus:ring-offset-red-600"
+                  aria-label={item.name}
+                >
+                  {item.name}
+                </Link>
+              )
+            )}
+          </nav>
 
           {/* User Profile or Login Button */}
           <div className="flex items-center">
@@ -168,25 +166,23 @@ const Header = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          {!user && (
-            <div className="md:hidden flex items-center">
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="text-white hover:text-red-100 focus:outline-none transition-transform duration-300 hover:scale-110 active:scale-95"
-                aria-label="Toggle menu"
-              >
-                {isOpen ? (
-                  <FaTimes className="h-6 w-6" />
-                ) : (
-                  <FaBars className="h-6 w-6" />
-                )}
-              </button>
-            </div>
-          )}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-white hover:text-red-100 focus:outline-none transition-transform duration-300 hover:scale-110 active:scale-95"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? (
+                <FaTimes className="h-6 w-6" />
+              ) : (
+                <FaBars className="h-6 w-6" />
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Menu */}
-        {!user && isOpen && (
+        {/* Mobile Menu - Hiển thị luôn */}
+        {isOpen && (
           <div className="md:hidden transition-all duration-300 ease-in-out">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               {navItems.map((item) =>
@@ -198,10 +194,26 @@ const Header = () => {
                   >
                     {item.name}
                   </button>
+                ) : item.name === "Tài liệu về máu" ? (
+                  <button
+                    key={item.name}
+                    onClick={() => handleScrollToSection("document-blood")}
+                    className="text-red-100 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-all duration-300 hover:bg-red-500 hover:pl-6"
+                  >
+                    {item.name}
+                  </button>
                 ) : item.name === "Tìm điểm hiến máu" ? (
                   <button
                     key={item.name}
                     onClick={() => handleScrollToSection("donation-centers")}
+                    className="text-red-100 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-all duration-300 hover:bg-red-500 hover:pl-6"
+                  >
+                    {item.name}
+                  </button>
+                ) : item.name === "Đánh Giá" ? (
+                  <button
+                    key={item.name}
+                    onClick={() => handleScrollToSection("blog-customer")}
                     className="text-red-100 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-all duration-300 hover:bg-red-500 hover:pl-6"
                   >
                     {item.name}
