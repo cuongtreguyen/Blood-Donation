@@ -19,7 +19,6 @@ function HeroSection({ onLearnMoreClick }) {
     lastDonation: '',
     preferredDate: '',
     preferredTime: '',
-    preferredLocation: '',
     emergencyContact: '',
     emergencyPhone: '',
     hasChronicDisease: false,
@@ -84,7 +83,6 @@ function HeroSection({ onLearnMoreClick }) {
       lastDonation: '',
       preferredDate: '',
       preferredTime: '',
-      preferredLocation: '',
       emergencyContact: '',
       emergencyPhone: '',
       hasChronicDisease: false,
@@ -424,19 +422,17 @@ function HeroSection({ onLearnMoreClick }) {
                           <option value="16:00">16:00 - 17:00</option>
                         </select>
                       </div>
-                      <div className="col-md-4 mb-3">
-                        <label className="form-label fw-semibold">Địa điểm</label>
-                        <select
-                          className="form-select"
-                          name="preferredLocation"
-                          value={donationFormData.preferredLocation}
-                          onChange={handleDonationInputChange}
-                        >
-                          <option value="">Chọn địa điểm</option>
-                          <option value="central">Bệnh viện Đa khoa Trung ương</option>
-                          <option value="hematology">Trung tâm Huyết học Quốc gia</option>
-                          <option value="choray">Bệnh viện Chợ Rẫy</option>
-                        </select>
+
+                    </div>
+                    
+                    {/* Hiển thị địa chỉ chi tiết mặc định */}
+                    <div className="alert alert-light border-start border-danger border-4 mb-3">
+                      <div className="d-flex align-items-start">
+                        <i className="fas fa-map-marker-alt text-danger me-2 mt-1"></i>
+                        <div>
+                          <strong className="text-danger">Địa điểm hiến máu:</strong>
+                          <div className="mt-1">Bệnh viện Chợ Rẫy - 201B Nguyễn Chí Thanh, Quận 5, TP.HCM</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -516,4 +512,4 @@ function HeroSection({ onLearnMoreClick }) {
   );
 }
 
-export default HeroSection; 
+export default HeroSection;
