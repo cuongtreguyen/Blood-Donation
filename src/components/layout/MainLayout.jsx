@@ -1,20 +1,23 @@
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
-import { Outlet } from 'react-router-dom';
+import EmergencyBanner from './EmergencyBanner';
 import ContactButton from './ContactButton';
+import ChatBox from '../chat/ChatBox';
 
-function MainLayout() {
+const MainLayout = () => {
   return (
-   <>
-    <Header/>
-    <main className='min-h-screen pt-[100px] bg-gray-100'>
-    <Outlet/>
-    </main>
-    <ContactButton />
-    <Footer/>
-   </>
+    <div className="flex flex-col min-h-screen">
+      <EmergencyBanner />
+      <Header />
+      <main className="flex-grow">
+        <Outlet />
+      </main>
+      <Footer />
+      <ChatBox />
+    </div>
   );
-}
+};
 
 export default MainLayout;

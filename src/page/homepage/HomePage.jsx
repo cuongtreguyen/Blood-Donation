@@ -1,23 +1,16 @@
 import React, { useRef } from 'react';
 
 // Layout Components
-import Footer from '../../components/layout/Footer';
 import EmergencyBanner from '../../components/layout/EmergencyBanner';
-
-// Homepage Sections
 import HeroSection from '../../components/layout/HeroSection';
 import StatisticsSection from '../../components/layout/StatisticsSection';
 import DonationProcess from '../../components/layout/DonationProcess';
 import BloodTypesSection from '../../components/layout/BloodTypesSection';
-import LocationsSection from '../../components/layout/LocationsSection';
 import AboutSection from '../../components/layout/AboutSection';
 import TestimonialsSection from '../../components/layout/TestimonialsSection';
 import NewsSection from '../../components/layout/NewsSection';
 import LearnMoreSection from '../../components/layout/LearnMoreSection';
-
-
-
-
+import DonationLocations from '../../components/sections/DonationLocations';
 
 function HomePage() {
   const learnMoreRef = useRef(null);
@@ -43,15 +36,13 @@ function HomePage() {
       <StatisticsSection />
       <DonationProcess />
       <BloodTypesSection />
-      <LocationsSection />
+      <DonationLocations />
+      <AboutSection />
       <TestimonialsSection />
       <NewsSection />
-      <AboutSection />
       <div ref={learnMoreRef}>
         <LearnMoreSection />
       </div>
-      
-      {/* Custom Styles */}
     </div>
   );
 }

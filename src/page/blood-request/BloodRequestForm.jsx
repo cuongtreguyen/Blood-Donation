@@ -1,36 +1,125 @@
 import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Form, Input, Select, DatePicker, Button, Checkbox, Radio, Space, Card, Row, Col } from 'antd';
 import { UserOutlined, MailOutlined, PhoneOutlined, CalendarOutlined, EnvironmentOutlined, HeartOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dayjs from 'dayjs';
+import api from '../../config/api';
+import { login } from "../../redux/features/userSlice";
+import moment from 'moment';
+
 
 const { Option } = Select;
 const { TextArea } = Input;
 
 function BloodRequestForm() {
   const [form] = Form.useForm();
+  const dispatch = useDispatch();
+  const userData = useSelector((state) => state.user) || {};
 
-  const onFinish = (values) => {
-    console.log('Received values of form: ', values);
-    toast.success('Yêu cầu cần máu của bạn đã được gửi thành công!');
-    form.resetFields();
+  const onFinish = async (values) => {
+    // Map form values to API-compatible field names
+    const formData = {
+      request_type: values.requestType,
+      full_name: values.full_name,
+      email: values.email,
+      phone: values.phone,
+      date_of_birth: values.date_of_birth ? moment(values.date_of_birth).format('YYYY-MM-DD') : '',
+      gender: values.gender,
+      address: values.address,
+      city: values.city,
+      blood_type: values.blood_type,
+      weight: values.weight,
+      height: values.height,
+      last_donation_date: values.last_donation_date ? moment(values.last_donation_date).format('YYYY-MM-DD') : '',
+      medical_history: values.medical_history || '',
+      has_chronic_disease: values.chronic_disease || false,
+      is_taking_medication: values.taking_medication || false,
+      has_recent_surgery: values.recent_surgery || false,
+      preferred_date: values.preferred_date ? moment(values.preferred_date).format('YYYY-MM-DD') : '',
+      preferred_time: values.preferred_time,
+      preferred_location: values.preferred_location,
+      emergency_contact: values.emergency_contact,
+      emergency_phone: values.emergency_phone,
+      agrees_to_terms: values.agreement,
+    };
+
+    // Validation
+    const today = new Date();
+    const birthDate = new Date(formData.date_of_birth);
+    const age = today.getFullYear() - birthDate.getFullYear();
+
+    if (age < 18 || age > 60) {
+      toast.error('Tuổi yêu cầu máu phải từ 18 đến 60 tuổi!');
+      return;
+    }
+
+    if (formData.weight && parseInt(formData.weight) < 45) {
+      toast.error('Cân nặng tối thiểu để yêu cầu máu là 45kg!');
+      return;
+    }
+
+    try {
+      // Update user data if new values were entered
+      const updatedUserFields = {};
+      ['full_name', 'email', 'phone', 'date_of_birth', 'gender', 'address', 'city'].forEach((field) => {
+        if (formData[field] && !userData[field]) {
+          updatedUserFields[field] = formData[field];
+        }
+      });
+
+      if (Object.keys(updatedUserFields).length > 0 && userData.id) {
+        const response = await api.put(`/users/${userData.id}`, updatedUserFields);
+        dispatch(login({ ...userData, ...response.data }));
+        localStorage.setItem('user', JSON.stringify({ ...userData, ...response.data }));
+      }
+
+      // Submit blood request
+      await api.post('/blood-requests', formData);
+      console.log('Blood request submitted:', formData);
+      toast.success(`Cảm ơn ${formData.full_name}! Yêu cầu cần máu của bạn đã được gửi thành công.`);
+      form.resetFields();
+    } catch (err) {
+      console.error('Error submitting blood request:', err);
+      toast.error('Đăng ký thất bại. Vui lòng thử lại!');
+    }
   };
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
       <Card title="Đăng Ký Nhận Máu" styles={{ header: { backgroundColor: '#d32f2f', color: 'white', fontSize: '20px', fontWeight: 'bold' } }}>
+        {userData && Object.keys(userData).length > 0 && (
+          <div style={{ background: '#f6ffed', border: '1px solid #b7eb8f', padding: '12px', marginBottom: '20px', borderRadius: '4px' }}>
+            <UserOutlined style={{ marginRight: '8px', color: '#52c41a' }} />
+            Xin chào <strong>{userData.full_name || 'Người dùng'}</strong>! Thông tin cá nhân của bạn đã được điền sẵn.
+          </div>
+        )}
         <Form
           form={form}
           layout="vertical"
           onFinish={onFinish}
           initialValues={{
-            requestType: 'normal',
-            gender: 'male' // Giá trị mặc định cho giới tính
+
+            request_type: 'normal',
+            full_name: userData.full_name || '',
+            email: userData.email || '',
+            phone: userData.phone || '',
+            date_of_birth: userData.date_of_birth ? moment(userData.date_of_birth) : null,
+            gender: userData.gender || 'male',
+            address: userData.address || '',
+            city: userData.city || '',
+            blood_type: userData.blood_type || '',
+            weight: userData.weight || '',
+            height: userData.height || '',
+            last_donation_date: userData.last_donation_date ? moment(userData.last_donation_date) : null,
+            emergency_contact: userData.emergency_contact || '',
+            emergency_phone: userData.emergency_phone || '',
+
           }}
         >
           <Form.Item
-            name="requestType"
+            name="request_type"
             label="Loại yêu cầu"
             rules={[{ required: true, message: 'Vui lòng chọn loại yêu cầu!' }]}
           >
@@ -40,15 +129,22 @@ function BloodRequestForm() {
             </Radio.Group>
           </Form.Item>
 
-          <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '20px', marginTop: '30px' }}><UserOutlined style={{ marginRight: '8px', color: '#d32f2f' }} />Thông Tin Cá Nhân</h3>
+          <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '20px', marginTop: '30px' }}>
+            <UserOutlined style={{ marginRight: '8px', color: '#d32f2f' }} />Thông Tin Cá Nhân
+          </h3>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="fullName"
+                name="full_name"
                 label="Họ và tên"
                 rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
               >
-                <Input placeholder="Nhập họ tên đầy đủ" />
+                <Input
+                  prefix={<UserOutlined />}
+                  placeholder="Nhập họ tên đầy đủ"
+                  readOnly={!!userData.full_name}
+                  style={{ backgroundColor: userData.full_name ? '#f5f5f5' : 'white' }}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -64,26 +160,36 @@ function BloodRequestForm() {
                   }
                 ]}
               >
-                <Input placeholder="Nhập địa chỉ email" />
+                <Input
+                  prefix={<MailOutlined />}
+                  placeholder="Nhập địa chỉ email"
+                  readOnly={!!userData.email}
+                  style={{ backgroundColor: userData.email ? '#f5f5f5' : 'white' }}
+                />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item
-                name="phoneNumber"
+                name="phone"
                 label="Số điện thoại"
                 rules={[
                   { required: true, message: 'Vui lòng nhập số điện thoại!' },
                   { pattern: /^[0-9]{10}$/, message: 'Số điện thoại phải có 10 chữ số!' }
                 ]}
               >
-                <Input placeholder="Số điện thoại" />
+                <Input
+                  prefix={<PhoneOutlined />}
+                  placeholder="Số điện thoại"
+                  readOnly={!!userData.phone}
+                  style={{ backgroundColor: userData.phone ? '#f5f5f5' : 'white' }}
+                />
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item
-                name="dateOfBirth"
+                name="date_of_birth"
                 label="Ngày sinh"
                 rules={[
                   { required: true, message: 'Vui lòng chọn ngày sinh!' },
@@ -102,7 +208,12 @@ function BloodRequestForm() {
                   }
                 ]}
               >
-                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" placeholder="dd/mm/yyyy" />
+                <DatePicker
+                  style={{ width: '100%', backgroundColor: userData.date_of_birth ? '#f5f5f5' : 'white' }}
+                  format="DD/MM/YYYY"
+                  placeholder="dd/mm/yyyy"
+                  disabled={!!userData.date_of_birth}
+                />
               </Form.Item>
             </Col>
             <Col span={8}>
@@ -111,7 +222,11 @@ function BloodRequestForm() {
                 label="Giới tính"
                 rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
               >
-                <Select placeholder="Chọn giới tính">
+                <Select
+                  placeholder="Chọn giới tính"
+                  disabled={!!userData.gender}
+                  style={{ backgroundColor: userData.gender ? '#f5f5f5' : 'white' }}
+                >
                   <Option value="male">Nam</Option>
                   <Option value="female">Nữ</Option>
                   <Option value="other">Khác</Option>
@@ -126,7 +241,12 @@ function BloodRequestForm() {
                 label="Địa chỉ"
                 rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
               >
-                <Input placeholder="Số nhà, tên đường" />
+                <Input
+                  prefix={<EnvironmentOutlined />}
+                  placeholder="Số nhà, tên đường"
+                  readOnly={!!userData.address}
+                  style={{ backgroundColor: userData.address ? '#f5f5f5' : 'white' }}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -135,28 +255,35 @@ function BloodRequestForm() {
                 label="Thành phố"
                 rules={[{ required: true, message: 'Vui lòng nhập thành phố!' }]}
               >
-                <Input placeholder="Thành phố" />
+                <Input
+                  prefix={<EnvironmentOutlined />}
+                  placeholder="Thành phố"
+                  readOnly={!!userData.city}
+                  style={{ backgroundColor: userData.city ? '#f5f5f5' : 'white' }}
+                />
               </Form.Item>
             </Col>
           </Row>
 
-          <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '20px', marginTop: '30px' }}><HeartOutlined style={{ marginRight: '8px', color: '#d32f2f' }} />Thông Tin Sức Khỏe</h3>
+          <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '20px', marginTop: '30px' }}>
+            <HeartOutlined style={{ marginRight: '8px', color: '#d32f2f' }} />Thông Tin Sức Khỏe
+          </h3>
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item
-                name="bloodType"
+                name="blood_type"
                 label="Nhóm máu"
                 rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
               >
                 <Select placeholder="Chọn nhóm máu">
-                  <Option value="A+">A+</Option>
-                  <Option value="A-">A-</Option>
-                  <Option value="B+">B+</Option>
-                  <Option value="B-">B-</Option>
-                  <Option value="AB+">AB+</Option>
-                  <Option value="AB-">AB-</Option>
-                  <Option value="O+">O+</Option>
-                  <Option value="O-">O-</Option>
+                  <Option value="A_POSITIVE">A+</Option>
+                  <Option value="A_NEGATIVE">A-</Option>
+                  <Option value="B_POSITIVE">B+</Option>
+                  <Option value="B_NEGATIVE">B-</Option>
+                  <Option value="AB_POSITIVE">AB+</Option>
+                  <Option value="AB_NEGATIVE">AB-</Option>
+                  <Option value="O_POSITIVE">O+</Option>
+                  <Option value="O_NEGATIVE">O-</Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -180,7 +307,7 @@ function BloodRequestForm() {
             </Col>
           </Row>
           <Form.Item
-            name="lastDonationDate"
+            name="last_donation_date"
             label="Lần hiến máu gần nhất"
             rules={[
               {
@@ -199,7 +326,7 @@ function BloodRequestForm() {
             <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" placeholder="dd/mm/yyyy" />
           </Form.Item>
           <Form.Item
-            name="medicalHistory"
+            name="medical_history"
             label="Tiền sử bệnh (nếu có)"
           >
             <TextArea
@@ -209,27 +336,29 @@ function BloodRequestForm() {
           </Form.Item>
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item name="chronicDisease" valuePropName="checked">
+              <Form.Item name="has_chronic_disease" valuePropName="checked">
                 <Checkbox>Có bệnh mãn tính</Checkbox>
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="takingMedication" valuePropName="checked">
+              <Form.Item name="is_taking_medication" valuePropName="checked">
                 <Checkbox>Đang dùng thuốc</Checkbox>
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="recentSurgery" valuePropName="checked">
+              <Form.Item name="has_recent_surgery" valuePropName="checked">
                 <Checkbox>Phẫu thuật gần đây</Checkbox>
               </Form.Item>
             </Col>
           </Row>
 
-          <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '20px', marginTop: '30px' }}><CalendarOutlined style={{ marginRight: '8px', color: '#d32f2f' }} />Lịch Hẹn Nhận Máu</h3>
+          <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '20px', marginTop: '30px' }}>
+            <CalendarOutlined style={{ marginRight: '8px', color: '#d32f2f' }} />Lịch Hẹn Nhận Máu
+          </h3>
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item
-                name="desiredDate"
+                name="preferred_date"
                 label="Ngày mong muốn"
                 rules={[
                   { required: true, message: 'Vui lòng chọn ngày mong muốn!' },
@@ -254,7 +383,7 @@ function BloodRequestForm() {
             </Col>
             <Col span={8}>
               <Form.Item
-                name="desiredTime"
+                name="preferred_time"
                 label="Giờ mong muốn"
                 rules={[{ required: true, message: 'Vui lòng chọn giờ mong muốn!' }]}
               >
@@ -267,7 +396,7 @@ function BloodRequestForm() {
             </Col>
             <Col span={8}>
               <Form.Item
-                name="desiredLocation"
+                name="preferred_location"
                 label="Địa điểm"
                 rules={[{ required: true, message: 'Vui lòng chọn địa điểm!' }]}
               >
@@ -280,11 +409,13 @@ function BloodRequestForm() {
             </Col>
           </Row>
 
-          <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '20px', marginTop: '30px' }}><PhoneOutlined style={{ marginRight: '8px', color: '#d32f2f' }} />Người Liên Hệ Khẩn Cấp</h3>
+          <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '20px', marginTop: '30px' }}>
+            <PhoneOutlined style={{ marginRight: '8px', color: '#d32f2f' }} />Người Liên Hệ Khẩn Cấp
+          </h3>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="emergencyContactName"
+                name="emergency_contact"
                 label="Họ tên"
                 rules={[{ required: true, message: 'Vui lòng nhập họ tên người liên hệ khẩn cấp!' }]}
               >
@@ -293,7 +424,7 @@ function BloodRequestForm() {
             </Col>
             <Col span={12}>
               <Form.Item
-                name="emergencyContactPhone"
+                name="emergency_phone"
                 label="Số điện thoại"
                 rules={[
                   { required: true, message: 'Vui lòng nhập số điện thoại người liên hệ khẩn cấp!' },
@@ -306,11 +437,13 @@ function BloodRequestForm() {
           </Row>
 
           <Form.Item
-            name="agreement"
+            name="agrees_to_terms"
             valuePropName="checked"
-            rules={[{ validator: (_, value) => value ? Promise.resolve() : Promise.reject(new Error('Vui lòng xác nhận thông tin!')) }]}
+            rules={[{ validator: (_, value) => (value ? Promise.resolve() : Promise.reject(new Error('Vui lòng xác nhận thông tin!'))) }]}
           >
-            <Checkbox>Tôi xác nhận rằng tất cả thông tin trên là chính xác và đồng ý với <a href="#">điều khoản nhận máu</a> và <a href="#">chính sách bảo mật</a>.</Checkbox>
+            <Checkbox>
+              Tôi xác nhận rằng tất cả thông tin trên là chính xác và đồng ý với <a href="#">điều khoản nhận máu</a> và <a href="#">chính sách bảo mật</a>.
+            </Checkbox>
           </Form.Item>
 
           <Form.Item>
@@ -329,4 +462,4 @@ function BloodRequestForm() {
   );
 }
 
-export default BloodRequestForm; 
+export default BloodRequestForm;
