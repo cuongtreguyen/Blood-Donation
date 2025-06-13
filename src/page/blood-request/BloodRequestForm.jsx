@@ -4,9 +4,11 @@ import { Form, Input, Select, DatePicker, Button, Checkbox, Radio, Space, Card, 
 import { UserOutlined, MailOutlined, PhoneOutlined, CalendarOutlined, EnvironmentOutlined, HeartOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import dayjs from 'dayjs';
 import api from '../../config/api';
 import { login } from "../../redux/features/userSlice";
 import moment from 'moment';
+
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -98,6 +100,7 @@ function BloodRequestForm() {
           layout="vertical"
           onFinish={onFinish}
           initialValues={{
+
             request_type: 'normal',
             full_name: userData.full_name || '',
             email: userData.email || '',
@@ -112,6 +115,7 @@ function BloodRequestForm() {
             last_donation_date: userData.last_donation_date ? moment(userData.last_donation_date) : null,
             emergency_contact: userData.emergency_contact || '',
             emergency_phone: userData.emergency_phone || '',
+
           }}
         >
           <Form.Item
@@ -147,7 +151,14 @@ function BloodRequestForm() {
               <Form.Item
                 name="email"
                 label="Email"
-                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ email!', type: 'email' }]}
+                rules={[
+                  { required: true, message: 'Vui lòng nhập địa chỉ email!' },
+                  { type: 'email', message: 'Email không hợp lệ!' },
+                  { 
+                    pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                    message: 'Email phải có định dạng hợp lệ (ví dụ: example@domain.com)!'
+                  }
+                ]}
               >
                 <Input
                   prefix={<MailOutlined />}
@@ -163,7 +174,10 @@ function BloodRequestForm() {
               <Form.Item
                 name="phone"
                 label="Số điện thoại"
-                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
+                rules={[
+                  { required: true, message: 'Vui lòng nhập số điện thoại!' },
+                  { pattern: /^[0-9]{10}$/, message: 'Số điện thoại phải có 10 chữ số!' }
+                ]}
               >
                 <Input
                   prefix={<PhoneOutlined />}
@@ -177,7 +191,22 @@ function BloodRequestForm() {
               <Form.Item
                 name="date_of_birth"
                 label="Ngày sinh"
-                rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}
+                rules={[
+                  { required: true, message: 'Vui lòng chọn ngày sinh!' },
+                  {
+                    validator: (_, value) => {
+                      if (!value) return Promise.resolve();
+                      const age = dayjs().diff(value, 'year');
+                      if (age < 18) {
+                        return Promise.reject('Bạn phải từ 18 tuổi trở lên!');
+                      }
+                      if (age > 65) {
+                        return Promise.reject('Bạn phải dưới 65 tuổi!');
+                      }
+                      return Promise.resolve();
+                    }
+                  }
+                ]}
               >
                 <DatePicker
                   style={{ width: '100%', backgroundColor: userData.date_of_birth ? '#f5f5f5' : 'white' }}
@@ -280,6 +309,19 @@ function BloodRequestForm() {
           <Form.Item
             name="last_donation_date"
             label="Lần hiến máu gần nhất"
+            rules={[
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  const today = dayjs().startOf('day');
+                  const selectedDate = value.startOf('day');
+                  if (selectedDate.isAfter(today)) {
+                    return Promise.reject('Ngày hiến máu không thể là ngày trong tương lai!');
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
           >
             <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" placeholder="dd/mm/yyyy" />
           </Form.Item>
@@ -318,7 +360,23 @@ function BloodRequestForm() {
               <Form.Item
                 name="preferred_date"
                 label="Ngày mong muốn"
-                rules={[{ required: true, message: 'Vui lòng chọn ngày mong muốn!' }]}
+                rules={[
+                  { required: true, message: 'Vui lòng chọn ngày mong muốn!' },
+                  {
+                    validator: (_, value) => {
+                      if (!value) return Promise.resolve();
+                      const today = dayjs().startOf('day');
+                      const selectedDate = value.startOf('day');
+                      if (selectedDate.isBefore(today)) {
+                        return Promise.reject('Ngày mong muốn không thể là ngày trong quá khứ!');
+                      }
+                      if (selectedDate.isAfter(today.add(30, 'day'))) {
+                        return Promise.reject('Ngày mong muốn không thể quá 30 ngày trong tương lai!');
+                      }
+                      return Promise.resolve();
+                    }
+                  }
+                ]}
               >
                 <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" placeholder="dd/mm/yyyy" />
               </Form.Item>
@@ -368,7 +426,10 @@ function BloodRequestForm() {
               <Form.Item
                 name="emergency_phone"
                 label="Số điện thoại"
-                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại người liên hệ khẩn cấp!' }]}
+                rules={[
+                  { required: true, message: 'Vui lòng nhập số điện thoại người liên hệ khẩn cấp!' },
+                  { pattern: /^[0-9]{10}$/, message: 'Số điện thoại phải có 10 chữ số!' }
+                ]}
               >
                 <Input placeholder="Số điện thoại người thân" />
               </Form.Item>

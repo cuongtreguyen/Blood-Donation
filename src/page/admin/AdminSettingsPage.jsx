@@ -103,14 +103,22 @@ const AdminSettingsPage = () => {
           <Form.Item
             name="siteTitle"
             label="Tiêu đề trang web"
-            rules={[{ required: true, message: 'Vui lòng nhập tiêu đề trang web' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập tiêu đề trang web' },
+              { min: 3, message: 'Tiêu đề trang web phải có ít nhất 3 ký tự!' },
+              { max: 100, message: 'Tiêu đề trang web không được vượt quá 100 ký tự!' }
+            ]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             name="adminEmail"
             label="Email Admin"
-            rules={[{ required: true, message: 'Vui lòng nhập email admin' }, { type: 'email', message: 'Email không hợp lệ' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập email admin' },
+              { type: 'email', message: 'Email không hợp lệ' },
+              { pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: 'Email phải có định dạng hợp lệ (ví dụ: example@domain.com)!' }
+            ]}
           >
             <Input prefix={<MailOutlined />} />
           </Form.Item>
@@ -141,14 +149,36 @@ const AdminSettingsPage = () => {
           <Form.Item
             name="reminderFrequencyDays"
             label="Tần suất nhắc nhở hiến máu (ngày)"
-            rules={[{ required: true, message: 'Vui lòng nhập tần suất nhắc nhở!', type: 'number', min: 0 }]} 
+            rules={[
+              { required: true, message: 'Vui lòng nhập tần suất nhắc nhở!' },
+              { type: 'number', min: 1, message: 'Tần suất nhắc nhở phải là số nguyên dương!' },
+              { 
+                validator: (_, value) => {
+                  if (value && !Number.isInteger(Number(value))) {
+                    return Promise.reject(new Error('Tần suất nhắc nhở phải là số nguyên!'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
           >
             <Input type="number" />
           </Form.Item>
           <Form.Item
             name="recoveryTimeMonths"
             label="Thời gian phục hồi sau hiến máu (tháng)"
-            rules={[{ required: true, message: 'Vui lòng nhập thời gian phục hồi!', type: 'number', min: 0 }]} 
+            rules={[
+              { required: true, message: 'Vui lòng nhập thời gian phục hồi!' },
+              { type: 'number', min: 1, message: 'Thời gian phục hồi phải là số nguyên dương!' },
+              { 
+                validator: (_, value) => {
+                  if (value && !Number.isInteger(Number(value))) {
+                    return Promise.reject(new Error('Thời gian phục hồi phải là số nguyên!'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
           >
             <Input type="number" />
           </Form.Item>
@@ -175,7 +205,7 @@ const AdminSettingsPage = () => {
           <Form.Item
             name="currentPassword"
             label="Mật khẩu hiện tại"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại' }]}
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại!' }]}
           >
             <Input.Password prefix={<LockOutlined />} />
           </Form.Item>
@@ -183,8 +213,9 @@ const AdminSettingsPage = () => {
             name="newPassword"
             label="Mật khẩu mới"
             rules={[
-              { required: true, message: 'Vui lòng nhập mật khẩu mới' },
-              { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' }
+              { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
+              { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
+              { max: 50, message: 'Mật khẩu không được vượt quá 50 ký tự!' }
             ]}
           >
             <Input.Password prefix={<LockOutlined />} />
@@ -194,7 +225,7 @@ const AdminSettingsPage = () => {
             label="Xác nhận mật khẩu mới"
             dependencies={['newPassword']}
             rules={[
-              { required: true, message: 'Vui lòng xác nhận mật khẩu mới' },
+              { required: true, message: 'Vui lòng xác nhận mật khẩu mới!' },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue('newPassword') === value) {
@@ -233,7 +264,11 @@ const AdminSettingsPage = () => {
            <Form.Item
             name="contactEmail"
             label="Email liên hệ"
-            rules={[{ required: true, message: 'Vui lòng nhập email liên hệ' }, { type: 'email', message: 'Email không hợp lệ' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập email liên hệ!' },
+              { type: 'email', message: 'Email không hợp lệ!' },
+              { pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: 'Email phải có định dạng hợp lệ (ví dụ: example@domain.com)!' }
+            ]}
           >
             <Input prefix={<MailOutlined />} />
           </Form.Item>

@@ -294,20 +294,29 @@ function AdminUsersPage() {
       </Card>
 
       <Modal
-        title={modalMode === 'add' ? 'Thêm người dùng mới' : 'Chỉnh sửa thông tin'}
-        open={isModalVisible}
+        title={modalMode === 'add' ? 'Thêm người dùng mới' : 'Chỉnh sửa thông tin người dùng'}
+        visible={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
-        okText={modalMode === 'add' ? 'Thêm' : 'Lưu'}
+        okText={modalMode === 'add' ? 'Thêm' : 'Cập nhật'}
         cancelText="Hủy"
       >
-        <Form form={form} layout="vertical">
+        <Form
+          form={form}
+          layout="vertical"
+          name="userForm"
+        >
           <Form.Item
             name="name"
-            label="Họ và tên"
-            rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
+            label="Tên người dùng"
+            rules={[
+              { required: true, message: 'Vui lòng nhập tên người dùng!' },
+              { min: 3, message: 'Tên người dùng phải có ít nhất 3 ký tự!' },
+              { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' },
+              { pattern: /^[a-zA-Z\sÀÁẠẢÃĂẰẮẶẲẴÂẦẤẬẨẪÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐđ]+$/, message: 'Tên người dùng chỉ được chứa chữ cái và khoảng trắng!' }
+            ]}
           >
-            <Input prefix={<UserOutlined />} placeholder="Nhập họ và tên" />
+            <Input prefix={<UserOutlined />} placeholder="Nhập tên người dùng" />
           </Form.Item>
           <Form.Item
             name="email"
@@ -315,6 +324,7 @@ function AdminUsersPage() {
             rules={[
               { required: true, message: 'Vui lòng nhập email!' },
               { type: 'email', message: 'Email không hợp lệ!' },
+              { pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: 'Email phải có định dạng hợp lệ (ví dụ: example@domain.com)!' }
             ]}
           >
             <Input prefix={<MailOutlined />} placeholder="Nhập email" />
@@ -322,10 +332,26 @@ function AdminUsersPage() {
           <Form.Item
             name="phone"
             label="Số điện thoại"
-            rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập số điện thoại!' },
+              { pattern: /^[0-9]{10}$/, message: 'Số điện thoại phải có 10 chữ số!' }
+            ]}
           >
             <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" />
           </Form.Item>
+          {modalMode === 'add' && (
+            <Form.Item
+              name="password"
+              label="Mật khẩu"
+              rules={[
+                { required: true, message: 'Vui lòng nhập mật khẩu!' },
+                { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
+                { max: 50, message: 'Mật khẩu không được vượt quá 50 ký tự!' }
+              ]}
+            >
+              <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" />
+            </Form.Item>
+          )}
           <Form.Item
             name="role"
             label="Vai trò"
@@ -338,16 +364,18 @@ function AdminUsersPage() {
               <Option value="admin">Quản trị viên</Option>
             </Select>
           </Form.Item>
-          <Form.Item
-            name="status"
-            label="Trạng thái"
-            rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
-          >
-            <Select placeholder="Chọn trạng thái">
-              <Option value="active">Đang hoạt động</Option>
-              <Option value="inactive">Không hoạt động</Option>
-            </Select>
-          </Form.Item>
+          {modalMode === 'edit' && (
+            <Form.Item
+              name="status"
+              label="Trạng thái"
+              rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
+            >
+              <Select placeholder="Chọn trạng thái">
+                <Option value="active">Đang hoạt động</Option>
+                <Option value="inactive">Không hoạt động</Option>
+              </Select>
+            </Form.Item>
+          )}
         </Form>
       </Modal>
     </div>
