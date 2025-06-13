@@ -24,10 +24,9 @@ import RegisterPage from './page/loginpage/RegisterPage';
 import BloodRequestForm from './page/blood-request/BloodRequestForm';
 import UserProfile from './page/userpage/UserProfile';
 import UserHomePage from './page/userpage/UserHomePage';
-import DonateUser from './page/userpage/DonateUser';
+import AdminDashboard from './page/admin/AdminDashboard';
 
 // Admin Pages
-import AdminDashboard from './page/admin/AdminDashboard';
 import AdminUsersPage from './page/admin/AdminUsersPage';
 import AdminBloodBanksPage from './page/admin/AdminBloodBanksPage';
 import AdminStatisticsPage from './page/admin/AdminStatisticsPage';
@@ -87,9 +86,7 @@ const router = createBrowserRouter([
     path: '/user',
     element: <UserLayout />,
     children: [
-      { index: true, element: <UserHomePage /> },
-      { path: 'profile', element: <UserProfile /> },
-      { path: 'donate', element: <DonateUser /> },
+      { index: true, element: <UserProfile /> },
     ],
   },
 ]);
