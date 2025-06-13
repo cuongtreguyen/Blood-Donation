@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaHeart, FaBars, FaTimes } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Dropdown, Menu, Avatar } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import { UserOutlined } from '@ant-design/icons';
@@ -12,6 +12,7 @@ const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -148,7 +149,7 @@ const Header = () => {
                   )}
                 </div>
               </Dropdown>
-            ) : (
+            ) : location.pathname !== "/login" && (
               <Link
                 to="/login"
                 className="relative inline-flex items-center justify-center px-6 py-2 overflow-hidden font-bold text-white rounded-full shadow-2xl group"

@@ -24,10 +24,9 @@ import RegisterPage from './page/loginpage/RegisterPage';
 import BloodRequestForm from './page/blood-request/BloodRequestForm';
 import UserProfile from './page/userpage/UserProfile';
 import UserHomePage from './page/userpage/UserHomePage';
-import DonateUser from './page/userpage/DonateUser';
+import AdminDashboard from './page/admin/AdminDashboard';
 
 // Admin Pages
-import AdminDashboard from './page/admin/AdminDashboard';
 import AdminUsersPage from './page/admin/AdminUsersPage';
 import AdminBloodBanksPage from './page/admin/AdminBloodBanksPage';
 import AdminStatisticsPage from './page/admin/AdminStatisticsPage';
@@ -50,113 +49,44 @@ import ForgotPassword from './page/loginpage/ForgotPassword';
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <MainLayout />,
     children: [
-      {
-        path: "",
-        element: <HomePage />,
-      },
-      {
-        path: "blood-request",
-        element: <BloodRequestForm />,
-      },      
+      { index: true, element: <HomePage /> },
+      { path: 'login', element: <LoginPage /> },
+      { path: 'register', element: <RegisterPage /> },
+      { path: 'blood-request', element: <BloodRequestForm /> },
+      { path: 'verify-otp', element: <OtpVerification /> }
     ],
   },
   {
-    path: "/user",
-    element: <DonateUser />,
-  },
-  {
-    path: "/login",
-    element: <LoginPage />,
-  },
-  {
-    path: "/register",
-    element: <RegisterPage />,
-  },
-  {
-    path: "otp",
-    element: <OtpVerification/>,
-  },
-  {
-    path: "/doctor",
-    element: <DoctorDashboardLayout />,
-    children: [
-      {
-        path: "",
-        element: <DoctorDashboardPage />,
-      },
-      {
-        path: "donors",
-        element: <DoctorDonorsPage />,
-      },
-      {
-        path: "medical-records",
-        element: <DoctorMedicalRecordsPage />,
-      },
-      {
-        path: "blood-inventory",
-        element: <DoctorBloodInventoryPage />,
-      },
-      {
-        path: "reports",
-        element: <DoctorReportsPage />,
-      },
-      {
-        path: "profile",
-        element: <DoctorProfilePage />,
-      },
-    ],
-  },
-  {
-    path: "/admin",
+    path: '/admin',
     element: <AdminLayout />,
     children: [
-      {
-        path: "",
-        element: <AdminDashboard />,
-      },
-      {
-        path: "users",
-        element: <AdminUsersPage />,
-      },
-      {
-        path: "blood-banks",
-        element: <AdminBloodBanksPage />,
-      },
-      {
-        path: "blood-units",
-        element: <BloodUnitsManagement />,
-      },
-      {
-        path: "statistics",
-        element: <AdminStatisticsPage />,
-      },
-      {
-        path: "notifications",
-        element: <AdminNotificationsPage />,
-      },
-      {
-        path: "settings",
-        element: <AdminSettingsPage />,
-      },
-      {
-        path: "profile",
-        element: <AdminProfilePage />,
-      },
-      {
-        path: "blogs",
-        element: <BlogPage />,
-      },
-      {
-        path: "blood-requests",
-        element: <EmergencyBloodRequestsPage />,
-      },
-      {
-        path: "donation-confirmation",
-        element: <DonationConfirmationPage />,
-      },
+      { index: true, element: <AdminDashboard /> },
+      { path: 'users', element: <AdminUsersPage /> },
+      { path: 'blood-banks', element: <AdminBloodBanksPage /> },
+      { path: 'blood-units', element: <BloodUnitsManagement /> },
+      { path: 'statistics', element: <AdminStatisticsPage /> },
+      { path: 'settings', element: <AdminSettingsPage /> },
+      { path: 'profile', element: <AdminProfilePage /> },
+      { path: 'notifications', element: <AdminNotificationsPage /> },
+      { path: 'blogs', element: <BlogPage /> },
+      { path: 'blood-requests', element: <EmergencyBloodRequestsPage /> }
+    ],
+  },
+  {
+    path: '/doctor',
+    element: <DoctorDashboardLayout />,
+    children: [
+      { index: true, element: <AdminDashboard /> },
+    ],
+  },
+  {
+    path: '/user',
+    element: <UserLayout />,
+    children: [
+      { index: true, element: <UserProfile /> },
     ],
   },
 ]);
@@ -165,17 +95,21 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <ConfigProvider
-          locale={viVN}
-          theme={{
-            token: {
-              colorPrimary: '#d32f2f',
-            },
-          }}
-        >
+        <ConfigProvider locale={viVN}>
           <UserProvider>
             <RouterProvider router={router} />
-            <ToastContainer position="top-right" autoClose={3000} />
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
           </UserProvider>
         </ConfigProvider>
       </PersistGate>
