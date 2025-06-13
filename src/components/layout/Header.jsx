@@ -39,7 +39,7 @@ const Header = () => {
 
   const navItems = [
     { name: "Tài liệu về máu", href: "#document-blood" },
-    { name: "Hiến máu", href: "#donation-process" },
+    { name: "Hiến máu", href: "#home" }, // Đổi từ #donation-process thành #home
     { name: "Tìm điểm hiến máu", href: "#donation-centers" },
     { name: "Đánh Giá", href: "#blog-customer" },
     { name: "Nhận Máu", href: "blood-request" }
@@ -80,7 +80,7 @@ const Header = () => {
               item.name === "Hiến máu" ? (
                 <button
                   key={item.name}
-                  onClick={() => handleScrollToSection("donation-process")}
+                  onClick={() => handleScrollToSection("home")} // Đổi từ "donation-process" thành "home"
                   className="relative no-underline text-amber-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:text-white hover:scale-105 hover:bg-red-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 focus:ring-offset-red-600"
                 >
                   {item.name}
@@ -189,7 +189,7 @@ const Header = () => {
                 item.name === "Hiến máu" ? (
                   <button
                     key={item.name}
-                    onClick={() => handleScrollToSection("donation-process")}
+                    onClick={() => handleScrollToSection("home")} // Đổi từ "donation-process" thành "home"
                     className="text-red-100 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-all duration-300 hover:bg-red-500 hover:pl-6"
                   >
                     {item.name}
