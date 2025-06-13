@@ -22,6 +22,7 @@ const LoginPage = () => {
       const response = await api.post("login", values);
       const userData = {
         ...response.data,
+        id: response.data.id || response.data.userId || response.data._id,
         profileImage: response.data.avatar || null // Sử dụng avatar từ API hoặc null nếu không có
       };
 
