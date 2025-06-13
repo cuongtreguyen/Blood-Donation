@@ -239,6 +239,7 @@ function AdminUsersPage() {
             icon={<EditOutlined />}
             size="small"
             onClick={() => showModal('edit', record)}
+            style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
           />
           <Popconfirm
             title="Xác nhận xóa"
