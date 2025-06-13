@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Form, Input, Select, DatePicker, Button, Checkbox, Radio, Space, Card, Row, Col } from 'antd';
 import { UserOutlined, MailOutlined, PhoneOutlined, CalendarOutlined, EnvironmentOutlined, HeartOutlined, ClockCircleOutlined } from '@ant-design/icons';
@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import api from '../../config/api';
 import { login } from "../../redux/features/userSlice";
 import moment from 'moment';
+import { useNavigate } from 'react-router-dom';
 
 
 const { Option } = Select;
@@ -16,11 +17,31 @@ const { TextArea } = Input;
 function BloodRequestForm() {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const userData = useSelector((state) => state.user) || {};
+
+  // Kiểm tra đăng nhập khi component được mount
+  useEffect(() => {
+    // Kiểm tra nếu không có userData hoặc userData không có id (chưa đăng nhập)
+    if (!userData || !userData.id) {
+      // Lưu đường dẫn hiện tại để chuyển lại sau khi đăng nhập
+      localStorage.setItem('redirectAfterLogin', '/blood-request');
+      
+      // Hiển thị thông báo
+      toast.error('Vui lòng đăng nhập để tiếp tục!', {
+        position: "top-right",
+        autoClose: 3000
+      });
+      
+      // Chuyển hướng đến trang đăng nhập
+      navigate('/login');
+    }
+  }, [userData, navigate]);
 
   const onFinish = async (values) => {
     // Map form values to API-compatible field names
     const formData = {
+      // ... code hiện tại giữ nguyên
       request_type: values.requestType,
       full_name: values.full_name,
       email: values.email,

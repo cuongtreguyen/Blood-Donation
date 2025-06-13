@@ -38,6 +38,7 @@ import BlogPage from './page/admin/BlogPage';
 import BloodUnitsManagement from './page/admin/BloodUnitsManagement';
 import EmergencyBloodRequestsPage from './page/admin/EmergencyBloodRequestsPage';
 import DonationConfirmationPage from './page/admin/DonationConfirmationPage';
+import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
 
 // Doctor Pages
 import DoctorDashboardPage from './page/doctorpage/doctor/DashboardPage';
@@ -62,7 +63,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/admin',
-    element: <AdminLayout />,
+    element: <AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>,
     children: [
       { index: true, element: <AdminDashboard /> },
       { path: 'users', element: <AdminUsersPage /> },

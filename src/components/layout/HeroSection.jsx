@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { FaHeart, FaUser, FaCalendar, FaMapMarkerAlt, FaInfoCircle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 // Hero Section Component
 function HeroSection({ onLearnMoreClick }) {
   const [showDonationForm, setShowDonationForm] = useState(false);
   const userData = useSelector((state) => state.user);
+  const navigate = useNavigate();
   const [donationFormData, setDonationFormData] = useState({
     full_name: userData?.full_name || '',
     email: userData?.email || '',
@@ -53,6 +56,26 @@ function HeroSection({ onLearnMoreClick }) {
     has_recent_surgery: false,
     agrees_to_terms: false,
   })}, [userData]);
+
+  // Xử lý đăng ký hiến máu - kiểm tra đăng nhập trước
+  const handleDonateClick = () => {
+    if (!userData || !userData.id) {
+      // Chưa đăng nhập - lưu URL hiện tại và chuyển hướng đến trang đăng nhập
+      localStorage.setItem('redirectAfterLogin', '/');
+      
+      // Hiển thị thông báo yêu cầu đăng nhập
+      toast.error('Vui lòng đăng nhập để đăng ký hiến máu!', {
+        position: "top-right",
+        autoClose: 3000
+      });
+      
+      // Chuyển hướng đến trang đăng nhập
+      navigate('/login');
+    } else {
+      // Đã đăng nhập - hiển thị form đăng ký hiến máu
+      setShowDonationForm(true);
+    }
+  };
 
   
 
@@ -174,7 +197,7 @@ function HeroSection({ onLearnMoreClick }) {
               </p>
               <div className="d-flex flex-wrap gap-3">
                 <button
-                  onClick={() => setShowDonationForm(true)}
+                  onClick={handleDonateClick}
                   className="btn btn-outline-light btn-lg fw-bold px-4"
                 >
                   Đăng Ký Hiến Máu
