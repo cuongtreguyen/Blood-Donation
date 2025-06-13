@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Form, Input, Button, Checkbox, Select, Row, Col, Typography } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Checkbox,
+  Select,
+  Row,
+  Col,
+  Typography,
+} from "antd";
 import { useNavigate, Link } from "react-router-dom";
 import { FaMoon, FaSun } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -24,21 +33,18 @@ const RegisterPage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-
-
-
   const onFinish = async (values) => {
     setIsLoading(true);
     console.log("Form Values:", values);
 
     try {
       const userData = {
-        full_name: values.fullname,
+        fullName: values.fullName,
         email: values.email,
         password: values.password,
         phone: values.phone,
         address: values.address,
-        blood_type: values.blood_type,
+        bloodType: values.bloodType,
       };
 
       console.log("Data to send:", userData);
@@ -71,7 +77,11 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col md:flex-row ${isDarkMode ? "dark bg-gray-900" : "bg-gray-50"}`}>
+    <div
+      className={`min-h-screen flex flex-col md:flex-row ${
+        isDarkMode ? "dark bg-gray-900" : "bg-gray-50"
+      }`}
+    >
       <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center space-x-2">
@@ -80,19 +90,29 @@ const RegisterPage = () => {
               alt="Logo"
               className="w-10 h-10 rounded-full"
             />
-            <h1 style={{ color: "red" }} className={`text-2xl font-bold ${isDarkMode ? "text-red-500" : "text-gray-800"}`}>
+            <h1
+              style={{ color: "red" }}
+              className={`text-2xl font-bold ${
+                isDarkMode ? "text-red-500" : "text-gray-800"
+              }`}
+            >
               Dòng Máu Việt
             </h1>
           </div>
           <div className="flex space-x-4">
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`p-2 rounded-full transition-colors ${isDarkMode
-                ? "hover:bg-gray-700 text-yellow-400"
-                : " hover:bg-gray-200 text-gray-600"
-                }`}
+              className={`p-2 rounded-full transition-colors ${
+                isDarkMode
+                  ? "hover:bg-gray-700 text-yellow-400"
+                  : " hover:bg-gray-200 text-gray-600"
+              }`}
             >
-              {isDarkMode ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-gray-600" />}
+              {isDarkMode ? (
+                <FaSun className="text-yellow-400" />
+              ) : (
+                <FaMoon className="text-gray-600" />
+              )}
             </button>
           </div>
         </div>
@@ -107,16 +127,24 @@ const RegisterPage = () => {
             <Row gutter={16}>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Họ và tên *</span>}
-                  name="fullname"
+                  label={
+                    <span
+                      className={isDarkMode ? "text-white" : "text-gray-700"}
+                    >
+                      Họ và tên *
+                    </span>
+                  }
+                  name="fullName"
                   rules={[
                     { required: true, message: "Vui lòng nhập họ và tên" },
-                    { min: 2, message: "Họ tên phải có ít nhất 2 ký tự" }
+                    { min: 2, message: "Họ tên phải có ít nhất 2 ký tự" },
                   ]}
                 >
                   <Input
                     placeholder="Nhập họ và tên"
-                    className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
+                    className={
+                      isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""
+                    }
                   />
                 </Form.Item>
               </Col>
@@ -135,22 +163,29 @@ const RegisterPage = () => {
                   />
                 </Form.Item> */}
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Email *</span>}
+                  label={
+                    <span
+                      className={isDarkMode ? "text-white" : "text-gray-700"}
+                    >
+                      Email *
+                    </span>
+                  }
                   name="email"
                   rules={[
                     { required: true, message: "Vui lòng nhập email" },
                     {
                       pattern: /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$/,
-                      message: "Email không hợp lệ"
-                    }
+                      message: "Email không hợp lệ",
+                    },
                   ]}
                 >
                   <Input
                     placeholder="example@email.com"
-                    className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
+                    className={
+                      isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""
+                    }
                   />
                 </Form.Item>
-
               </Col>
             </Row>
             <Row gutter={16}>
@@ -169,23 +204,31 @@ const RegisterPage = () => {
                   />
                 </Form.Item> */}
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Mật khẩu *</span>}
+                  label={
+                    <span
+                      className={isDarkMode ? "text-white" : "text-gray-700"}
+                    >
+                      Mật khẩu *
+                    </span>
+                  }
                   name="password"
                   rules={[
                     { required: true, message: "Vui lòng nhập mật khẩu" },
                     {
-                      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,20}$/,
-                      message: "Mật khẩu phải từ 8-20 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
-                    }
+                      pattern:
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,20}$/,
+                      message:
+                        "Mật khẩu phải từ 8-20 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
+                    },
                   ]}
                 >
                   <Input.Password
                     placeholder="Nhập mật khẩu"
-                    className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
+                    className={
+                      isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""
+                    }
                   />
                 </Form.Item>
-
-
               </Col>
               <Col xs={24} md={12}>
                 {/* <Form.Item
@@ -210,50 +253,78 @@ const RegisterPage = () => {
                   />
                 </Form.Item> */}
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Xác nhận mật khẩu *</span>}
+                  label={
+                    <span
+                      className={isDarkMode ? "text-white" : "text-gray-700"}
+                    >
+                      Xác nhận mật khẩu *
+                    </span>
+                  }
                   name="confirmPassword"
-                  dependencies={['password']}
+                  dependencies={["password"]}
                   rules={[
                     { required: true, message: "Vui lòng xác nhận mật khẩu" },
                     ({ getFieldValue }) => ({
                       validator(_, value) {
-                        if (!value || getFieldValue('password') === value) {
+                        if (!value || getFieldValue("password") === value) {
                           return Promise.resolve();
                         }
-                        return Promise.reject(new Error('Mật khẩu không khớp!'));
+                        return Promise.reject(
+                          new Error("Mật khẩu không khớp!")
+                        );
                       },
                     }),
                   ]}
                 >
                   <Input.Password
                     placeholder="Nhập lại mật khẩu"
-                    className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
+                    className={
+                      isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""
+                    }
                   />
                 </Form.Item>
-
               </Col>
             </Row>
             <Row gutter={16}>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Số điện thoại *</span>}
+                  label={
+                    <span
+                      className={isDarkMode ? "text-white" : "text-gray-700"}
+                    >
+                      Số điện thoại *
+                    </span>
+                  }
                   name="phone"
                   rules={[
                     { required: true, message: "Vui lòng nhập số điện thoại" },
-                    { pattern: /^[0-9]{10,11}$/, message: "Số điện thoại không hợp lệ" }
+                    {
+                      pattern: /^[0-9]{10,11}$/,
+                      message: "Số điện thoại không hợp lệ",
+                    },
                   ]}
                 >
                   <Input
                     placeholder="Nhập số điện thoại"
-                    className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
+                    className={
+                      isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""
+                    }
                   />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Nhóm máu *</span>}
-                  name="blood_type"
-                  rules={[{ required: true, message: "Vui lòng chọn nhóm máu" }]}
+                  label={
+                    <span
+                      className={isDarkMode ? "text-white" : "text-gray-700"}
+                    >
+                      Nhóm máu *
+                    </span>
+                  }
+                  name="bloodType"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn nhóm máu" },
+                  ]}
                 >
                   <Select
                     placeholder="Chọn nhóm máu"
@@ -264,20 +335,25 @@ const RegisterPage = () => {
               </Col>
             </Row>
             <Form.Item
-              label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Địa chỉ *</span>}
+              label={
+                <span className={isDarkMode ? "text-white" : "text-gray-700"}>
+                  Địa chỉ *
+                </span>
+              }
               name="address"
               rules={[
                 { required: true, message: "Vui lòng nhập địa chỉ" },
-                { min: 10, message: "Địa chỉ phải có ít nhất 10 ký tự" }
+                { min: 10, message: "Địa chỉ phải có ít nhất 10 ký tự" },
               ]}
             >
               <Input.TextArea
                 placeholder="Nhập địa chỉ chi tiết"
                 autoSize={{ minRows: 2, maxRows: 4 }}
-                className={isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""}
+                className={
+                  isDarkMode ? "bg-gray-800 border-gray-600 text-white" : ""
+                }
               />
             </Form.Item>
-
 
             <Form.Item
               name="agreement"
@@ -285,12 +361,23 @@ const RegisterPage = () => {
               rules={[
                 {
                   validator: (_, value) =>
-                    value ? Promise.resolve() : Promise.reject(new Error('Bạn phải đồng ý với điều khoản!')),
+                    value
+                      ? Promise.resolve()
+                      : Promise.reject(
+                          new Error("Bạn phải đồng ý với điều khoản!")
+                        ),
                 },
               ]}
             >
               <Checkbox className={isDarkMode ? "text-white" : ""}>
-                Tôi đồng ý với <AntdLink href="#" style={{ color: "#d32f2f" }}>điều khoản sử dụng</AntdLink> và <AntdLink href="#" style={{ color: "#d32f2f" }}>chính sách bảo mật</AntdLink>
+                Tôi đồng ý với{" "}
+                <AntdLink href="#" style={{ color: "#d32f2f" }}>
+                  điều khoản sử dụng
+                </AntdLink>{" "}
+                và{" "}
+                <AntdLink href="#" style={{ color: "#d32f2f" }}>
+                  chính sách bảo mật
+                </AntdLink>
               </Checkbox>
             </Form.Item>
             <Form.Item>
@@ -323,7 +410,7 @@ const RegisterPage = () => {
                 }}
                 onClick={() => {
                   form.resetFields();
-                  navigate('/login');
+                  navigate("/login");
                 }}
                 disabled={isLoading}
               >
@@ -333,7 +420,11 @@ const RegisterPage = () => {
           </Form>
         </div>
 
-        <p className={`mt-6 text-center text-sm ${isDarkMode ? "text-white" : "text-gray-500"}`}>
+        <p
+          className={`mt-6 text-center text-sm ${
+            isDarkMode ? "text-white" : "text-gray-500"
+          }`}
+        >
           Đã có tài khoản?{" "}
           <Link
             to="/login"
