@@ -22,7 +22,7 @@ const DonateUser = () => {
 
   // Emergency blood request states
   const [emergencyRequest, setEmergencyRequest] = useState({
-    blood_type: "",
+    bloodType: "",
     date: "",
     location: "",
     note: "",
@@ -31,7 +31,7 @@ const DonateUser = () => {
   const [emergencyRequests, setEmergencyRequests] = useState([]);
   const [invitations, setInvitations] = useState([]); // For DNR02
   const [searchCriteria, setSearchCriteria] = useState({
-    blood_type: "",
+    bloodType: "",
     location: "",
     bloodTypeDetail: "", // For REC03
   });
@@ -202,7 +202,7 @@ const DonateUser = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!formData.full_name || !formData.email) {
+    if (!formData.fullName || !formData.email) {
       toast.error("Tên và email là bắt buộc!");
       setIsLoading(false);
       return;
@@ -210,11 +210,11 @@ const DonateUser = () => {
 
     try {
       const response = await api.put(`/users/${userData.id}`, {
-        full_name: formData.full_name,
+        fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
         address: formData.address,
-        blood_type: formData.blood_type,
+        bloodType: formData.bloodType,
       });
 
       const updatedUser = { ...userData, ...response.data };
@@ -310,7 +310,7 @@ const DonateUser = () => {
   // Emergency blood request handlers
   const handleEmergencyRegister = async (e) => {
     e.preventDefault();
-    if (!emergencyRequest.blood_type || !emergencyRequest.date || !emergencyRequest.location) {
+    if (!emergencyRequest.bloodType || !emergencyRequest.date || !emergencyRequest.location) {
       toast.error("Vui lòng điền đầy đủ thông tin yêu cầu khẩn cấp!");
       return;
     }
@@ -322,7 +322,7 @@ const DonateUser = () => {
         status: "Đang chờ xử lý",
       });
       setEmergencyRequests([...emergencyRequests, response.data]);
-      setEmergencyRequest({ blood_type: "", date: "", location: "", note: "" });
+      setEmergencyRequest({ bloodType: "", date: "", location: "", note: "" });
       toast.success("Đăng ký nhận máu khẩn cấp thành công!");
     } catch (err) {
       console.error("Error registering emergency request:", err);
@@ -335,16 +335,16 @@ const DonateUser = () => {
   // Search for donors (REC02, REC03, REC04)
   const handleSearchDonors = async (e) => {
     e.preventDefault();
-    if (!searchCriteria.blood_type && !searchCriteria.location && !searchCriteria.bloodTypeDetail) {
+    if (!searchCriteria.bloodType && !searchCriteria.location && !searchCriteria.bloodTypeDetail) {
       toast.error("Vui lòng chọn ít nhất một tiêu chí tìm kiếm!");
       return;
     }
     try {
       const response = await api.get("/donors/search", {
         params: {
-          blood_type: searchCriteria.blood_type,
+          bloodType: searchCriteria.bloodType,
           location: searchCriteria.location,
-          blood_type_detail: searchCriteria.bloodTypeDetail,
+          bloodType_detail: searchCriteria.bloodTypeDetail,
         },
       });
       toast.success("Tìm kiếm thành công!");
@@ -421,10 +421,10 @@ const DonateUser = () => {
             </label>
           </div>
           <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">{userData.full_name || "Người dùng"}</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">{userData.fullName || "Người dùng"}</h2>
             <div className="flex items-center bg-gradient-to-r from-red-100 to-red-200 px-4 py-2 rounded-full">
               <FaTint className="text-red-600 mr-2 animate-pulse" />
-              <span className="text-xl font-semibold text-red-600">{getBloodTypeLabel(userData.blood_type)}</span>
+              <span className="text-xl font-semibold text-red-600">{getBloodTypeLabel(userData.bloodType)}</span>
             </div>
           </div>
         </div>
@@ -440,11 +440,11 @@ const DonateUser = () => {
       {renderProgress()}
       {!isEditing ? (
         <div className="space-y-4 mb-8">
-          <p className="text-gray-600"><strong>Tên:</strong> {userData.full_name || "Chưa có thông tin"}</p>
+          <p className="text-gray-600"><strong>Tên:</strong> {userData.fullName || "Chưa có thông tin"}</p>
           <p className="text-gray-600"><strong>Email:</strong> {userData.email || "Chưa có thông tin"}</p>
           <p className="text-gray-600"><strong>Điện thoại:</strong> {userData.phone || "Chưa có thông tin"}</p>
           <p className="text-gray-600"><strong>Địa chỉ:</strong> {userData.address || "Chưa có thông tin"}</p>
-          <p className="text-gray-600"><strong>Nhóm máu:</strong> {getBloodTypeLabel(userData.blood_type)}</p>
+          <p className="text-gray-600"><strong>Nhóm máu:</strong> {getBloodTypeLabel(userData.bloodType)}</p>
         </div>
       ) : (
         <form onSubmit={handleProfileUpdate} className="space-y-6">
@@ -453,8 +453,8 @@ const DonateUser = () => {
               <label className="block text-gray-700 mb-2">Tên</label>
               <input
                 type="text"
-                value={formData.full_name || ""}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                value={formData.fullName || ""}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 className="w-full p-3 border rounded-lg"
                 required
                 disabled={isLoading}
@@ -493,8 +493,8 @@ const DonateUser = () => {
             <div>
               <label className="block text-gray-700 mb-2">Nhóm máu</label>
               <select
-                value={formData.blood_type || ""}
-                onChange={(e) => setFormData({ ...formData, blood_type: e.target.value })}
+                value={formData.bloodType || ""}
+                onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
                 className="w-full p-3 border rounded-lg"
                 disabled={isLoading}
               >
@@ -679,9 +679,9 @@ const DonateUser = () => {
         <div>
           <label className="block text-gray-700 mb-2">Nhóm máu cần nhận</label>
           <select
-            value={emergencyRequest.blood_type}
+            value={emergencyRequest.bloodType}
             onChange={(e) =>
-              setEmergencyRequest({ ...emergencyRequest, blood_type: e.target.value })
+              setEmergencyRequest({ ...emergencyRequest, bloodType: e.target.value })
             }
             className="w-full p-3 border rounded-lg"
             required
@@ -752,7 +752,7 @@ const DonateUser = () => {
               >
                 <div className="flex justify-between">
                   <span>
-                    <b>Nhóm máu:</b> {getBloodTypeLabel(req.blood_type)}
+                    <b>Nhóm máu:</b> {getBloodTypeLabel(req.bloodType)}
                   </span>
                   <span className="italic">{req.status || "Đang chờ xử lý"}</span>
                 </div>
@@ -778,8 +778,8 @@ const DonateUser = () => {
           <div>
             <label className="block text-gray-700 mb-2">Nhóm máu</label>
             <select
-              value={searchCriteria.blood_type}
-              onChange={(e) => setSearchCriteria({ ...searchCriteria, blood_type: e.target.value })}
+              value={searchCriteria.bloodType}
+              onChange={(e) => setSearchCriteria({ ...searchCriteria, bloodType: e.target.value })}
               className="w-full p-3 border rounded-lg"
             >
               <option value="">Tất cả</option>
