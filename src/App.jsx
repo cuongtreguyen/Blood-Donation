@@ -86,11 +86,13 @@ const router = createBrowserRouter([
   },
   {
     path: '/user',
+
     element:<DonateUser/>
     // element: <UserLayout />,
     // children: [
     //   { index: true, element: <UserProfile /> },
     // ],
+
   },
 ]);
 
