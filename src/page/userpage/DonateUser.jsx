@@ -20,20 +20,11 @@ const DonateUser = () => {
   const [donationHistory, setDonationHistory] = useState([]);
   const [appointments, setAppointments] = useState([]);
 
-  // Emergency blood request states
-  const [emergencyRequest, setEmergencyRequest] = useState({
-    bloodType: "",
-    date: "",
-    location: "",
-    note: "",
-  });
-  const [isEmergencyLoading, setIsEmergencyLoading] = useState(false);
-  const [emergencyRequests, setEmergencyRequests] = useState([]);
-  const [invitations, setInvitations] = useState([]); // For DNR02
+  const [invitations, setInvitations] = useState([]);
   const [searchCriteria, setSearchCriteria] = useState({
     bloodType: "",
     location: "",
-    bloodTypeDetail: "", // For REC03
+    bloodTypeDetail: "",
   });
 
   const bloodGroups = [
@@ -134,7 +125,7 @@ const DonateUser = () => {
     }
   }, [userData, navigate, dispatch]);
 
-  // Fetch donation history, appointments, emergency requests, and invitations
+  // Fetch donation history, appointments, and invitations
   useEffect(() => {
     const fetchDonationHistory = async () => {
       try {
@@ -166,15 +157,6 @@ const DonateUser = () => {
       }
     };
 
-    const fetchEmergencyRequests = async () => {
-      try {
-        const res = await api.get(`/emergency-requests/${userData.id}`);
-        setEmergencyRequests(res.data);
-      } catch (error) {
-        setEmergencyRequests([]);
-      }
-    };
-
     const fetchInvitations = async () => {
       try {
         const res = await api.get(`/invitations/${userData.id}`);
@@ -187,16 +169,9 @@ const DonateUser = () => {
     if (userData.id) {
       fetchDonationHistory();
       fetchAppointments();
-      fetchEmergencyRequests();
       fetchInvitations();
     }
   }, [userData.id]);
-
-  const [newAppointment, setNewAppointment] = useState({
-    date: "",
-    time: "",
-    location: "",
-  });
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
@@ -235,101 +210,9 @@ const DonateUser = () => {
     }
   };
 
-  const handleScheduleAppointment = async (e) => {
-    e.preventDefault();
-    if (!newAppointment.date || !newAppointment.time || !newAppointment.location) {
-      toast.error("Vui lòng điền đầy đủ thông tin lịch hẹn!");
-      return;
-    }
-
-    const today = new Date();
-    const selectedDate = new Date(newAppointment.date);
-    if (selectedDate < today.setHours(0, 0, 0, 0)) {
-      toast.error("Ngày hẹn không thể là ngày trong quá khứ!");
-      return;
-    }
-
-    const conflict = appointments.find(
-      (appt) =>
-        appt.date === newAppointment.date &&
-        appt.time === newAppointment.time &&
-        appt.location === newAppointment.location
-    );
-    if (conflict) {
-      toast.error("Lịch hẹn đã tồn tại tại thời gian và địa điểm này!");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const response = await api.post(`/appointments`, {
-        user_id: userData.id,
-        date: newAppointment.date,
-        time: newAppointment.time,
-        location: newAppointment.location,
-        status: "Đã Xác Nhận",
-      });
-      setAppointments([...appointments, response.data]);
-      setNewAppointment({ date: "", time: "", location: "" });
-      toast.success("Đặt lịch hẹn thành công!");
-    } catch (err) {
-      console.error("Error scheduling appointment:", err);
-      toast.error("Đặt lịch hẹn thất bại. Vui lòng thử lại!");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEditAppointment = (appointment) => {
-    setNewAppointment({
-      date: appointment.date,
-      time: appointment.time,
-      location: appointment.location,
-    });
-    setAppointments(appointments.filter((appt) => appt.id !== appointment.id));
-  };
-
-  const handleCancelAppointment = async (appointmentId) => {
-    if (window.confirm("Bạn có chắc muốn hủy lịch hẹn này?")) {
-      try {
-        await api.delete(`/appointments/${appointmentId}`);
-        setAppointments(appointments.filter((appt) => appt.id !== appointmentId));
-        toast.success("Hủy lịch hẹn thành công!");
-      } catch (err) {
-        console.error("Error canceling appointment:", err);
-        toast.error("Hủy lịch hẹn thất bại. Vui lòng thử lại!");
-      }
-    }
-  };
-
   const handleLogout = async () => {
     await dispatch(logout());
     navigate("/");
-  };
-
-  // Emergency blood request handlers
-  const handleEmergencyRegister = async (e) => {
-    e.preventDefault();
-    if (!emergencyRequest.bloodType || !emergencyRequest.date || !emergencyRequest.location) {
-      toast.error("Vui lòng điền đầy đủ thông tin yêu cầu khẩn cấp!");
-      return;
-    }
-    setIsEmergencyLoading(true);
-    try {
-      const response = await api.post("/emergency-requests", {
-        user_id: userData.id,
-        ...emergencyRequest,
-        status: "Đang chờ xử lý",
-      });
-      setEmergencyRequests([...emergencyRequests, response.data]);
-      setEmergencyRequest({ bloodType: "", date: "", location: "", note: "" });
-      toast.success("Đăng ký nhận máu khẩn cấp thành công!");
-    } catch (err) {
-      console.error("Error registering emergency request:", err);
-      toast.error("Đăng ký thất bại. Vui lòng thử lại!");
-    } finally {
-      setIsEmergencyLoading(false);
-    }
   };
 
   // Search for donors (REC02, REC03, REC04)
@@ -567,210 +450,38 @@ const DonateUser = () => {
   );
 
   const renderAppointments = () => (
-    <div className="space-y-8">
-      <div className="bg-white p-8 rounded-xl shadow-2xl">
-        <h3 className="text-2xl font-bold mb-6 text-gray-800">Đặt Lịch Hẹn Mới</h3>
-        <form onSubmit={handleScheduleAppointment} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-gray-700 mb-2">Ngày</label>
-              <input
-                type="date"
-                value={newAppointment.date}
-                onChange={(e) => setNewAppointment({ ...newAppointment, date: e.target.value })}
-                className="w-full p-3 border rounded-lg"
-                min={new Date().toISOString().split("T")[0]}
-                required
-              />
+    <div className="bg-white p-8 rounded-xl shadow-2xl">
+      <h3 className="text-2xl font-bold mb-6 text-gray-800">Lịch Hẹn Sắp Tới</h3>
+      {appointments.length === 0 ? (
+        <p className="text-gray-600">Chưa có lịch hẹn nào.</p>
+      ) : (
+        appointments.map((appointment, index) => (
+          <div key={index} className="bg-gradient-to-r from-red-50 to-white p-6 rounded-xl shadow-sm mb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <FaCalendar className="text-red-600 text-xl mr-3" />
+                <span className="font-semibold text-lg">{appointment.date}</span>
+              </div>
+              <span className="bg-green-100 text-green-600 px-4 py-2 rounded-full text-sm font-semibold">
+                {appointment.status}
+              </span>
             </div>
-            <div>
-              <label className="block text-gray-700 mb-2">Giờ</label>
-              <select
-                value={newAppointment.time}
-                onChange={(e) => setNewAppointment({ ...newAppointment, time: e.target.value })}
-                className="w-full p-3 border rounded-lg"
-                required
-              >
-                <option value="">Chọn giờ</option>
-                {Array.from({ length: 10 }, (_, i) => {
-                  const hour = 8 + i;
-                  return (
-                    <option key={hour} value={`${hour}:00`}>
-                      {`${hour}:00`}
-                    </option>
-                  );
-                })}
-              </select>
+            <div className="flex items-center text-gray-700 text-base mb-2">
+              <FaClock className="mr-3" />
+              <span>{appointment.time}</span>
+            </div>
+            <div className="flex items-center text-gray-700 text-base">
+              <FaMapMarkerAlt className="mr-3" />
+              <span>{appointment.location}</span>
             </div>
           </div>
-          <div>
-            <label className="block text-gray-700 mb-2">Địa điểm</label>
-            <select
-              value={newAppointment.location}
-              onChange={(e) => setNewAppointment({ ...newAppointment, location: e.target.value })}
-              className="w-full p-3 border rounded-lg"
-              required
-            >
-              <option value="">Chọn địa điểm</option>
-              <option value="Bệnh Viện Đa Khoa Trung Ương">Bệnh Viện Đa Khoa Trung Ương</option>
-              <option value="Trung Tâm Huyết Học Quốc Gia">Trung Tâm Huyết Học Quốc Gia</option>
-              <option value="Bệnh Viện Chợ Rẫy">Bệnh Viện Chợ Rẫy</option>
-            </select>
-          </div>
-          <button
-            type="submit"
-            className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors duration-300 font-semibold"
-            disabled={isLoading}
-          >
-            {isLoading ? "Đang xử lý..." : "Đặt Lịch Hẹn"}
-          </button>
-        </form>
-      </div>
-
-      <div className="bg-white p-8 rounded-xl shadow-2xl">
-        <h3 className="text-2xl font-bold mb-6 text-gray-800">Lịch Hẹn Sắp Tới</h3>
-        {appointments.length === 0 ? (
-          <p className="text-gray-600">Chưa có lịch hẹn nào.</p>
-        ) : (
-          appointments.map((appointment, index) => (
-            <div key={index} className="bg-gradient-to-r from-red-50 to-white p-6 rounded-xl shadow-sm mb-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <FaCalendar className="text-red-600 text-xl mr-3" />
-                  <span className="font-semibold text-lg">{appointment.date}</span>
-                </div>
-                <span className="bg-green-100 text-green-600 px-4 py-2 rounded-full text-sm font-semibold">
-                  {appointment.status}
-                </span>
-              </div>
-              <div className="flex items-center text-gray-700 text-base mb-2">
-                <FaClock className="mr-3" />
-                <span>{appointment.time}</span>
-              </div>
-              <div className="flex items-center text-gray-700 text-base mb-4">
-                <FaMapMarkerAlt className="mr-3" />
-                <span>{appointment.location}</span>
-              </div>
-              <div className="flex space-x-4">
-                <button
-                  onClick={() => handleEditAppointment(appointment)}
-                  className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors duration-300 font-semibold"
-                >
-                  Sửa
-                </button>
-                <button
-                  onClick={() => handleCancelAppointment(appointment.id)}
-                  className="border-2 border-red-600 text-red-600 px-6 py-3 rounded-lg hover:bg-red-50 transition-colors duration-300 font-semibold"
-                >
-                  Hủy
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+        ))
+      )}
     </div>
   );
 
   const renderEmergency = () => (
     <div className="bg-white p-8 rounded-xl shadow-2xl space-y-8">
-      <h3 className="text-2xl font-bold mb-6 text-gray-800">Đăng ký nhận máu khẩn cấp</h3>
-      <form onSubmit={handleEmergencyRegister} className="space-y-6">
-        <div>
-          <label className="block text-gray-700 mb-2">Nhóm máu cần nhận</label>
-          <select
-            value={emergencyRequest.bloodType}
-            onChange={(e) =>
-              setEmergencyRequest({ ...emergencyRequest, bloodType: e.target.value })
-            }
-            className="w-full p-3 border rounded-lg"
-            required
-          >
-            <option value="">Chọn nhóm máu</option>
-            {bloodGroups.map((group) => (
-              <option key={group.value} value={group.value}>
-                {group.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-gray-700 mb-2">Ngày cần nhận</label>
-          <input
-            type="date"
-            value={emergencyRequest.date}
-            onChange={(e) =>
-              setEmergencyRequest({ ...emergencyRequest, date: e.target.value })
-            }
-            className="w-full p-3 border rounded-lg"
-            required
-            min={new Date().toISOString().split("T")[0]}
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 mb-2">Địa điểm</label>
-          <input
-            type="text"
-            value={emergencyRequest.location}
-            onChange={(e) =>
-              setEmergencyRequest({ ...emergencyRequest, location: e.target.value })
-            }
-            className="w-full p-3 border rounded-lg"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 mb-2">Ghi chú (không bắt buộc)</label>
-          <textarea
-            value={emergencyRequest.note}
-            onChange={(e) =>
-              setEmergencyRequest({ ...emergencyRequest, note: e.target.value })
-            }
-            className="w-full p-3 border rounded-lg"
-            rows={2}
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700"
-          disabled={isEmergencyLoading}
-        >
-          {isEmergencyLoading ? "Đang gửi..." : "Gửi yêu cầu khẩn cấp"}
-        </button>
-      </form>
-
-      <div>
-        <h4 className="font-bold mb-2 text-gray-800">Lịch sử yêu cầu khẩn cấp</h4>
-        {emergencyRequests.length === 0 ? (
-          <p className="text-gray-600">Chưa có yêu cầu nào.</p>
-        ) : (
-          <ul className="space-y-3">
-            {emergencyRequests.map((req, idx) => (
-              <li
-                key={idx}
-                className="p-4 bg-gradient-to-r from-red-50 to-white rounded-xl shadow-sm"
-              >
-                <div className="flex justify-between">
-                  <span>
-                    <b>Nhóm máu:</b> {getBloodTypeLabel(req.bloodType)}
-                  </span>
-                  <span className="italic">{req.status || "Đang chờ xử lý"}</span>
-                </div>
-                <div>
-                  <b>Ngày:</b> {req.date}  | 
-                  <b>Địa điểm:</b> {req.location}
-                </div>
-                {req.note && (
-                  <div>
-                    <b>Ghi chú:</b> {req.note}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
       {/* Search Donors (REC02, REC03, REC04) */}
       <div className="bg-white p-6 rounded-xl shadow-2xl">
         <h4 className="text-xl font-bold mb-4 text-gray-800">Tìm người hiến máu</h4>
@@ -873,27 +584,6 @@ const DonateUser = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-blue-50">
-      <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex justify-between items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center no-underline text-white">
-              <img
-                src="https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain"
-                alt="Biểu tượng"
-                className="h-8 w-8 text-red-100 animate-pulse rounded-full"
-              />
-              <span className="ml-2 text-2xl font-bold">Dòng Máu Việt</span>
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-white font-semibold px-4 py-2 border border-white rounded-lg hover:bg-white hover:text-red-700 transition-all duration-300"
-            >
-              <FaSignOutAlt />
-              <span>Đăng xuất</span>
-            </button>
-          </div>
-        </div>
-      </div>
 
       <div className="container mx-auto px-6 py-8">
         {renderBanner()}
