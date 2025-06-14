@@ -47,6 +47,7 @@ import DoctorBloodInventoryPage from './page/doctorpage/doctor/BloodInventoryPag
 import DoctorReportsPage from './page/doctorpage/doctor/ReportsPage';
 import DoctorProfilePage from './page/doctorpage/doctor/ProfilePage';
 import ForgotPassword from './page/loginpage/ForgotPassword';
+import DonateUser from './page/userpage/DonateUser';
 
 const router = createBrowserRouter([
   {
@@ -85,10 +86,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/user',
-    element: <UserLayout />,
-    children: [
-      { index: true, element: <UserProfile /> },
-    ],
+    element:<DonateUser/>
+    // element: <UserLayout />,
+    // children: [
+    //   { index: true, element: <UserProfile /> },
+    // ],
   },
 ]);
 
