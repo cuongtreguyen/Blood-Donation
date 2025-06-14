@@ -3,12 +3,13 @@ import { useSelector } from 'react-redux';
 import { FaHeart, FaUser, FaCalendar, FaMapMarkerAlt, FaInfoCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAuthCheck } from '../../hook/useAuthCheck';
 
 // Hero Section Component
 function HeroSection({ onLearnMoreClick }) {
-  const [showDonationForm, setShowDonationForm] = useState(false);
-  const userData = useSelector((state) => state.user);
+  const [showDonationForm, setShowDonationForm] = useState(false);  
   const navigate = useNavigate();
+  const { isAuthenticated, userData } = useAuthCheck('/login', false);
   const [donationFormData, setDonationFormData] = useState({
     full_name: userData?.full_name || '',
     email: userData?.email || '',
@@ -59,20 +60,16 @@ function HeroSection({ onLearnMoreClick }) {
 
   // Xử lý đăng ký hiến máu - kiểm tra đăng nhập trước
   const handleDonateClick = () => {
-    if (!userData || !userData.id) {
-      // Chưa đăng nhập - lưu URL hiện tại và chuyển hướng đến trang đăng nhập
+    if (!isAuthenticated) {
+      // Nếu chưa đăng nhập, lưu đường dẫn hiện tại và chuyển hướng
       localStorage.setItem('redirectAfterLogin', '/');
-      
-      // Hiển thị thông báo yêu cầu đăng nhập
       toast.error('Vui lòng đăng nhập để đăng ký hiến máu!', {
         position: "top-right",
         autoClose: 3000
       });
-      
-      // Chuyển hướng đến trang đăng nhập
       navigate('/login');
     } else {
-      // Đã đăng nhập - hiển thị form đăng ký hiến máu
+      // Nếu đã đăng nhập, hiển thị form
       setShowDonationForm(true);
     }
   };
