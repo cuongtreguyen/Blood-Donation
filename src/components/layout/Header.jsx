@@ -132,18 +132,18 @@ const Header = () => {
                   {user.profileImage ? (
                     <img
                       src={user.profileImage}
-                      alt={user.full_name || "User"}
+                      alt={user.fullName || "User"}
                       className="h-10 w-10 rounded-full object-cover border-2 border-white transform transition-all duration-300 group-hover:scale-110 group-hover:border-red-200 shadow-lg hover:shadow-xl"
                     />
                   ) : (
                     <div className="flex items-center">
                       <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center border-2 border-white transform transition-all duration-300 group-hover:scale-110 group-hover:border-red-200 group-hover:bg-red-500 shadow-lg hover:shadow-xl">
                         <span className="text-white text-lg font-medium">
-                          {user?.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}
+                          {user?.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
                         </span>
                       </div>
                       <span className="ml-2 text-white font-medium hidden md:block transition-colors duration-300 group-hover:text-red-200">
-                        {user.full_name || "User"}
+                        {user.fullName || "User"}
                       </span>
                     </div>
                   )}
