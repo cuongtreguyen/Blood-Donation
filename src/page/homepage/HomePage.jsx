@@ -31,7 +31,6 @@ function HomePage() {
         rel="stylesheet" 
       />
       
-      <EmergencyBanner />
       <HeroSection onLearnMoreClick={scrollToLearnMore} />
       <StatisticsSection />
       <DonationProcess />

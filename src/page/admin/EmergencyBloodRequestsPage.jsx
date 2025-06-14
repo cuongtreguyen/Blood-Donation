@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm, DatePicker, Tooltip } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined, SafetyOutlined, UserOutlined, PhoneOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dayjs from 'dayjs';
+import api from '../../config/api';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -279,6 +280,16 @@ const EmergencyBloodRequestsPage = () => {
     },
   ];
 
+  const [registers, setRegisters] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await api.get('/api/blood-register/list-all');
+      setRegisters(response.data);
+    };
+    fetchData();
+  }, []);
+
   return (
     <div style={{ padding: '24px' }}>
       <Card
@@ -487,6 +498,34 @@ const EmergencyBloodRequestsPage = () => {
           )}
         </Form>
       </Modal>
+
+      <div className="mt-4">
+        <h2>Danh sách đăng ký hiến máu</h2>
+        <table className="table table-bordered">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Status</th>
+              <th>Wanted Date</th>
+              <th>Wanted Hour</th>
+            </tr>
+          </thead>
+          <tbody>
+            {registers.map((item) => (
+              <tr key={item.id}>
+                <td>{item.id}</td>
+                <td>{item.status}</td>
+                <td>{item.wantedDate}</td>
+                <td>
+                  {item.wantedHour
+                    ? `${item.wantedHour.hour}:${item.wantedHour.minute}:${item.wantedHour.second}`
+                    : ''}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

@@ -9,7 +9,9 @@ import ChatBox from '../chat/ChatBox';
 const MainLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
-      <EmergencyBanner />
+      <div style={{ position: 'relative', marginTop: '64px' }}>
+        <EmergencyBanner />
+      </div>
       <Header />
       <main className="flex-grow">
         <Outlet />
