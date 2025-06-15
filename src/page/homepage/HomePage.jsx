@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 
 // Layout Components
-import EmergencyBanner from '../../components/layout/EmergencyBanner';
 import HeroSection from '../../components/layout/HeroSection';
 import StatisticsSection from '../../components/layout/StatisticsSection';
 import DonationProcess from '../../components/layout/DonationProcess';
