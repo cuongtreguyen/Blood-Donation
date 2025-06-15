@@ -79,7 +79,6 @@ const router = createBrowserRouter([
       { path: "notifications", element: <AdminNotificationsPage /> },
       { path: "blogs", element: <BlogPage /> },
       { path: "blood-requests", element: <EmergencyBloodRequestsPage /> },
-      
     ],
   },
   {
