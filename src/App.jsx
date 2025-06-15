@@ -22,7 +22,6 @@ import HomePage from "./page/homepage/HomePage";
 import LoginPage from "./page/loginpage/LoginPage";
 import RegisterPage from "./page/loginpage/RegisterPage";
 import BloodRequestForm from "./page/blood-request/BloodRequestForm";
-import UserProfile from "./page/userpage/UserProfile";
 import UserHomePage from "./page/userpage/UserHomePage";
 import AdminDashboard from "./page/admin/AdminDashboard";
 
