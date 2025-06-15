@@ -135,15 +135,28 @@ const ChatBox = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 right-4 z-50 bg-red-200 rounded-full p-2">
       {/* Chat Button */}
       {!isOpen && (
         <Button
           type="primary"
           shape="circle"
           size="large"
-          className="bg-red-600 hover:bg-red-700 border-none shadow-lg"
+          className="border-none shadow-lg"
+          style={{ 
+            backgroundColor: '#f87171', 
+            borderColor: '#f87171',
+            color: 'white'
+          }}
           onClick={() => setIsOpen(true)}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#ef4444';
+            e.currentTarget.style.borderColor = '#ef4444';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#f87171';
+            e.currentTarget.style.borderColor = '#f87171';
+          }}
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
