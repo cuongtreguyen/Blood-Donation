@@ -15,14 +15,12 @@ import OtpVerification from "./page/loginpage/OtpVerification";
 import MainLayout from "./components/layout/MainLayout";
 import DoctorDashboardLayout from "./components/layout/DoctorDashboardLayout";
 import AdminLayout from "./components/layout/AdminLayout";
-import UserLayout from "./components/layout/UserLayout";
 
 // Pages
 import HomePage from "./page/homepage/HomePage";
 import LoginPage from "./page/loginpage/LoginPage";
 import RegisterPage from "./page/loginpage/RegisterPage";
 import BloodRequestForm from "./page/blood-request/BloodRequestForm";
-import UserHomePage from "./page/userpage/UserHomePage";
 import AdminDashboard from "./page/admin/AdminDashboard";
 
 // Admin Pages
