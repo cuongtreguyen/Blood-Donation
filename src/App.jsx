@@ -15,7 +15,6 @@ import OtpVerification from "./page/loginpage/OtpVerification";
 import MainLayout from "./components/layout/MainLayout";
 import DoctorDashboardLayout from "./components/layout/DoctorDashboardLayout";
 import AdminLayout from "./components/layout/AdminLayout";
-import UserLayout from "./components/layout/UserLayout";
 
 // Pages
 import HomePage from "./page/homepage/HomePage";
