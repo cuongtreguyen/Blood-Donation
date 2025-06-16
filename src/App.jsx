@@ -82,7 +82,14 @@ const router = createBrowserRouter([
   {
     path: "/doctor",
     element: <DoctorDashboardLayout />,
-    children: [{ index: true, element: <AdminDashboard /> }],
+    children: [
+      { index: true, element: <DoctorDashboardPage /> },
+      { path: "donors", element: <DoctorDonorsPage /> },
+      { path: "medical-records", element: <DoctorMedicalRecordsPage /> },
+      { path: "blood-inventory", element: <DoctorBloodInventoryPage /> },
+      { path: "reports", element: <DoctorReportsPage /> },
+      { path: "profile", element: <DoctorProfilePage /> },
+    ],
   },
 ]);
 

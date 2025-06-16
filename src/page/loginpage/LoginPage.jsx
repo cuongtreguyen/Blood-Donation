@@ -23,7 +23,7 @@ const LoginPage = () => {
       const userData = {
         ...response.data,
         id: response.data.id || response.data.userId || response.data._id,
-        profileImage: response.data.avatar || null // Sử dụng avatar từ API hoặc null nếu không có
+        profileImage: response.data.avatar || null, // Sử dụng avatar từ API hoặc null nếu không có
       };
 
       // Đăng nhập thành công
@@ -31,11 +31,11 @@ const LoginPage = () => {
       dispatch(login(userData));
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(userData));
-      
+
       // Kiểm tra role và chuyển hướng
       const userRole = userData.role;
       console.log("User role detected:", userRole);
-      
+
       if (userRole === "ADMIN") {
         console.log("Redirecting to admin dashboard");
         navigate("/admin");
@@ -64,7 +64,11 @@ const LoginPage = () => {
 
   // Rest of the component remains the same...
   return (
-    <div className={`min-h-screen flex flex-col md:flex-row ${isDarkMode ? "dark bg-gray-900" : "bg-gray-50"}`}>
+    <div
+      className={`min-h-screen flex flex-col md:flex-row ${
+        isDarkMode ? "dark bg-gray-900" : "bg-gray-50"
+      }`}
+    >
       {/* Left Column - Login Form */}
       <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
         <div className="flex justify-between items-center mb-8">
@@ -74,7 +78,12 @@ const LoginPage = () => {
               alt="Logo"
               className="w-10 h-10 rounded-full"
             />
-            <h1 style={{ color: "red" }} className={`text-2xl font-bold ${isDarkMode ? "text-red-500" : "text-gray-800"}`}>
+            <h1
+              style={{ color: "red" }}
+              className={`text-2xl font-bold ${
+                isDarkMode ? "text-red-500" : "text-gray-800"
+              }`}
+            >
               Dòng Máu Việt
             </h1>
           </div>
@@ -83,7 +92,11 @@ const LoginPage = () => {
               onClick={() => setIsDarkMode(!isDarkMode)}
               className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
             >
-              {isDarkMode ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-gray-600" />}
+              {isDarkMode ? (
+                <FaSun className="text-yellow-400" />
+              ) : (
+                <FaMoon className="text-gray-600" />
+              )}
             </button>
           </div>
         </div>
@@ -95,45 +108,53 @@ const LoginPage = () => {
           className="space-y-6"
         >
           <Form.Item
-            label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Đăng Nhập Email</span>}
+            label={
+              <span className={isDarkMode ? "text-white" : "text-gray-700"}>
+                Đăng Nhập Email
+              </span>
+            }
             name="email"
             rules={[
               { required: true, message: "Vui Lòng Nhập Email" },
-              { type: 'email', message: 'Email không hợp lệ!' }
+              { type: "email", message: "Email không hợp lệ!" },
             ]}
           >
-            <Input 
-              className="dark:bg-gray-800 dark:text-white" 
+            <Input
+              className="dark:bg-gray-800 dark:text-white"
               placeholder="example@email.com"
             />
           </Form.Item>
 
           <Form.Item
-            label={<span className={isDarkMode ? "text-white" : "text-gray-700"}>Nhập Mật Khẩu</span>}
+            label={
+              <span className={isDarkMode ? "text-white" : "text-gray-700"}>
+                Nhập Mật Khẩu
+              </span>
+            }
             name="password"
             rules={[
               { required: true, message: "Vui Lòng Nhập Mật Khẩu" },
-              { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' }
+              { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
             ]}
           >
-            <Input.Password 
-              className="dark:bg-gray-800 dark:text-white" 
+            <Input.Password
+              className="dark:bg-gray-800 dark:text-white"
               placeholder="Nhập mật khẩu"
             />
           </Form.Item>
 
           <div className="flex items-center justify-between">
             <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox 
-                style={{ color: "red" }} 
+              <Checkbox
+                style={{ color: "red" }}
                 className={isDarkMode ? "text-red-500" : "text-gray-700"}
               >
                 Ghi Nhớ Cho Lần Đăng Nhập Sau
               </Checkbox>
             </Form.Item>
-            
-            <Link 
-              to="/otp" 
+
+            <Link
+              to="/otp"
               style={{ color: "red", textDecoration: "none" }}
               className="text-sm font-medium text-red-600 hover:text-red-500"
             >
@@ -159,7 +180,13 @@ const LoginPage = () => {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className={`px-2 ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-500"}`}>
+                <span
+                  className={`px-2 ${
+                    isDarkMode
+                      ? "bg-gray-900 text-white"
+                      : "bg-gray-50 text-gray-500"
+                  }`}
+                >
                   Hoặc tiếp tục với
                 </span>
               </div>
@@ -171,10 +198,14 @@ const LoginPage = () => {
           </div>
         </Form>
 
-        <p className={`mt-10 text-center text-sm ${isDarkMode ? "text-white" : "text-gray-500"}`}>
+        <p
+          className={`mt-10 text-center text-sm ${
+            isDarkMode ? "text-white" : "text-gray-500"
+          }`}
+        >
           Chưa Có Tài Khoản?{" "}
-          <Link 
-            to="/register" 
+          <Link
+            to="/register"
             style={{ color: "red", textDecoration: "none" }}
             className="font-medium text-red-300 hover:text-red-500"
           >
@@ -209,4 +240,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-

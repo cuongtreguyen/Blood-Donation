@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import {
@@ -24,10 +25,12 @@ function HeroSection({ onLearnMoreClick }) {
     phone: userData?.phone || "",
     date_of_birth: userData?.date_of_birth || "",
     gender: userData?.gender || "",
+
     bloodType: userData?.bloodType || "",
     weight: userData?.weight || "",
     height: userData?.height || "",
     address: userData?.address || "",
+
     medical_history: "",
     last_donation: "",
     preferred_date: "",
@@ -48,10 +51,12 @@ function HeroSection({ onLearnMoreClick }) {
       phone: userData?.phone || "",
       date_of_birth: userData?.date_of_birth || "",
       gender: userData?.gender || "",
+
       bloodType: userData?.bloodType || "",
       weight: userData?.weight || "",
       height: userData?.height || "",
       address: userData?.address || "",
+
       medical_history: "",
       last_donation: "",
       preferred_date: "",
@@ -105,10 +110,12 @@ function HeroSection({ onLearnMoreClick }) {
       "phone",
       "date_of_birth",
       "gender",
+
       "bloodType",
       "weight",
       "height",
       "address",
+
     ];
 
     // Check if the field is user-related and its value is empty in userData
@@ -155,7 +162,9 @@ function HeroSection({ onLearnMoreClick }) {
       wantedHour: formatTime(formData.preferred_time),
       emergencyName: formData.emergency_contact || null,
       emergencyPhone: formData.emergency_phone || null,
+
       location: "Bệnh viện Chợ Rẫy - 201B Nguyễn Chí Thanh, Quận 5, TP.HCM",
+
     };
   };
 
@@ -165,11 +174,13 @@ function HeroSection({ onLearnMoreClick }) {
       const response = await api.post("blood-register", apiData);
       console.log(response.data);
       setShowDonationForm(false);
+
       toast.success("Đăng ký máu thành công, chờ phê duyệt");
       return response.data;
     } catch (error) {
       console.error("API Error:", error);
       toast.error(error.response?.data?.message || "Đã xảy ra lỗi khi đăng ký");
+
       throw error;
     }
   };
@@ -245,7 +256,9 @@ function HeroSection({ onLearnMoreClick }) {
         error.message || "Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại!",
         {
           position: "top-right",
-          autoClose: 3000,
+
+          autoClose: 5000,
+
         }
       );
     } finally {
@@ -451,7 +464,9 @@ function HeroSection({ onLearnMoreClick }) {
                       </div>
                     </div>
                     <div className="row">
+
                       <div className="col-md-12 mb-3">
+
                         <label className="form-label fw-semibold">
                           Địa chỉ
                         </label>
@@ -468,6 +483,7 @@ function HeroSection({ onLearnMoreClick }) {
                           disabled={isSubmitting}
                         />
                       </div>
+
                     </div>
                   </div>
 
@@ -484,7 +500,9 @@ function HeroSection({ onLearnMoreClick }) {
                         </label>
                         <select
                           className={`form-select ${
+
                             userData?.bloodType ? "bg-light" : ""
+
                           }`}
                           name="bloodType"
                           value={donationFormData.bloodType}
