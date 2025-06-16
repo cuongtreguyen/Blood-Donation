@@ -7,7 +7,7 @@
 
 // // Hero Section Component
 // function HeroSection({ onLearnMoreClick }) {
-//   const [showDonationForm, setShowDonationForm] = useState(false);  
+//   const [showDonationForm, setShowDonationForm] = useState(false);
 //   const navigate = useNavigate();
 //   const { isAuthenticated, userData } = useAuthCheck('/login', false);
 //   const [donationFormData, setDonationFormData] = useState({
@@ -73,8 +73,6 @@
 //       setShowDonationForm(true);
 //     }
 //   };
-
-  
 
 //   const handleDonationInputChange = (e) => {
 //     const { name, value, type, checked } = e.target;
@@ -631,39 +629,43 @@
 
 // export default HeroSection;
 
-
-
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { FaHeart, FaUser, FaCalendar, FaMapMarkerAlt, FaInfoCircle } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { useAuthCheck } from '../../hook/useAuthCheck';
-import api from '../../config/api';
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import {
+  FaHeart,
+  FaUser,
+  FaCalendar,
+  FaMapMarkerAlt,
+  FaInfoCircle,
+} from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useAuthCheck } from "../../hook/useAuthCheck";
+import api from "../../config/api";
 
 // Hero Section Component
 function HeroSection({ onLearnMoreClick }) {
   const [showDonationForm, setShowDonationForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { isAuthenticated, userData } = useAuthCheck('/login', false);
+  const { isAuthenticated, userData } = useAuthCheck("/login", false);
   const [donationFormData, setDonationFormData] = useState({
-    fullName: userData?.fullName || '',
-    email: userData?.email || '',
-    phone: userData?.phone || '',
-    date_of_birth: userData?.date_of_birth || '',
-    gender: userData?.gender || '',
-    blood_type: userData?.blood_type || '',
-    weight: userData?.weight || '',
-    height: userData?.height || '',
-    address: userData?.address || '',
-    city: userData?.city || '',
-    medical_history: '',
-    last_donation: '',
-    preferred_date: '',
-    preferred_time: '',
-    emergency_contact: userData?.emergency_contact || '',
-    emergency_phone: userData?.emergency_phone || '',
+    fullName: userData?.fullName || "",
+    email: userData?.email || "",
+    phone: userData?.phone || "",
+    date_of_birth: userData?.date_of_birth || "",
+    gender: userData?.gender || "",
+    blood_type: userData?.blood_type || "",
+    weight: userData?.weight || "",
+    height: userData?.height || "",
+    address: userData?.address || "",
+    city: userData?.city || "",
+    medical_history: "",
+    last_donation: "",
+    preferred_date: "",
+    preferred_time: "",
+    emergency_contact: userData?.emergency_contact || "",
+    emergency_phone: userData?.emergency_phone || "",
     has_chronic_disease: false,
     is_taking_medication: false,
     has_recent_surgery: false,
@@ -672,39 +674,40 @@ function HeroSection({ onLearnMoreClick }) {
 
   // Update form data when user data changes
   useEffect(() => {
-     setDonationFormData({
-    fullName: userData?.fullName || '',
-    email: userData?.email || '',
-    phone: userData?.phone || '',
-    date_of_birth: userData?.date_of_birth || '',
-    gender: userData?.gender || '',
-    blood_type: userData?.blood_type || '',
-    weight: userData?.weight || '',
-    height: userData?.height || '',
-    address: userData?.address || '',
-    city: userData?.city || '',
-    medical_history: '',
-    last_donation: '',
-    preferred_date: '',
-    preferred_time: '',
-    emergency_contact: userData?.emergency_contact || '',
-    emergency_phone: userData?.emergency_phone || '',
-    has_chronic_disease: false,
-    is_taking_medication: false,
-    has_recent_surgery: false,
-    agrees_to_terms: false,
-  })}, [userData]);
+    setDonationFormData({
+      fullName: userData?.fullName || "",
+      email: userData?.email || "",
+      phone: userData?.phone || "",
+      date_of_birth: userData?.date_of_birth || "",
+      gender: userData?.gender || "",
+      blood_type: userData?.blood_type || "",
+      weight: userData?.weight || "",
+      height: userData?.height || "",
+      address: userData?.address || "",
+      city: userData?.city || "",
+      medical_history: "",
+      last_donation: "",
+      preferred_date: "",
+      preferred_time: "",
+      emergency_contact: userData?.emergency_contact || "",
+      emergency_phone: userData?.emergency_phone || "",
+      has_chronic_disease: false,
+      is_taking_medication: false,
+      has_recent_surgery: false,
+      agrees_to_terms: false,
+    });
+  }, [userData]);
 
   // Xử lý đăng ký hiến máu - kiểm tra đăng nhập trước
   const handleDonateClick = () => {
     if (!isAuthenticated) {
       // Nếu chưa đăng nhập, lưu đường dẫn hiện tại và chuyển hướng
-      localStorage.setItem('redirectAfterLogin', '/');
-      toast.error('Vui lòng đăng nhập để đăng ký hiến máu!', {
+      localStorage.setItem("redirectAfterLogin", "/");
+      toast.error("Vui lòng đăng nhập để đăng ký hiến máu!", {
         position: "top-right",
-        autoClose: 3000
+        autoClose: 3000,
       });
-      navigate('/login');
+      navigate("/login");
     } else {
       // Nếu đã đăng nhập, hiển thị form
       setShowDonationForm(true);
@@ -716,42 +719,44 @@ function HeroSection({ onLearnMoreClick }) {
 
     // Always allow changes for these fields
     const alwaysEditableFields = [
-      'emergency_contact',
-      'emergency_phone',
-      'agrees_to_terms',
-      'medical_history',
-      'last_donation',
-      'preferred_date',
-      'preferred_time',
-      'has_chronic_disease',
-      'is_taking_medication',
-      'has_recent_surgery',
+      "emergency_contact",
+      "emergency_phone",
+      "agrees_to_terms",
+      "medical_history",
+      "last_donation",
+      "preferred_date",
+      "preferred_time",
+      "has_chronic_disease",
+      "is_taking_medication",
+      "has_recent_surgery",
     ];
 
     // Allow changes for user-related fields if they are empty in userData
     const userRelatedFields = [
-      'fullName',
-      'email',
-      'phone',
-      'date_of_birth',
-      'gender',
-      'blood_type',
-      'weight',
-      'height',
-      'address',
-      'city',
+      "fullName",
+      "email",
+      "phone",
+      "date_of_birth",
+      "gender",
+      "blood_type",
+      "weight",
+      "height",
+      "address",
+      "city",
     ];
 
     // Check if the field is user-related and its value is empty in userData
     const isUserRelatedAndEmpty =
       userRelatedFields.includes(name) &&
-      (userData[name] === undefined || userData[name] === null || userData[name] === '');
+      (userData[name] === undefined ||
+        userData[name] === null ||
+        userData[name] === "");
 
     // Allow change if the field is always editable or user-related and empty
     if (alwaysEditableFields.includes(name) || isUserRelatedAndEmpty) {
       setDonationFormData((prev) => ({
         ...prev,
-        [name]: type === 'checkbox' ? checked : value,
+        [name]: type === "checkbox" ? checked : value,
       }));
     }
   };
@@ -760,9 +765,9 @@ function HeroSection({ onLearnMoreClick }) {
   const transformToApiFormat = (formData) => {
     // Map gender values
     const genderMap = {
-      'male': 'MALE',
-      'female': 'FEMALE',
-      'other': 'OTHER'
+      male: "MALE",
+      female: "FEMALE",
+      other: "OTHER",
     };
 
     // Convert preferred_time to HH:MM:SS format
@@ -783,26 +788,26 @@ function HeroSection({ onLearnMoreClick }) {
       wantedDate: formData.preferred_date || null,
       wantedHour: formatTime(formData.preferred_time),
       emergencyName: formData.emergency_contact || null,
-      emergencyPhone: formData.emergency_phone || null
+      emergencyPhone: formData.emergency_phone || null,
     };
   };
 
   // API call function
   const submitDonationRequest = async (apiData) => {
     try {
-      const response = await api.post("blood-register", apiData)
-      console.log(response.data)
-      setShowDonationForm(false)
-      toast.success("Đắng Ký Máu Thành Công Chờ phê Duyệt")
+      const response = await api.post("blood-register", apiData);
+      console.log(response.data);
+      setShowDonationForm(false);
+      toast.success("Đăng Ký Máu Thành Công Chờ Phê Duyệt");
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Đã xảy ra lỗi khi đăng ký');
+        throw new Error(errorData.message || "Đã xảy ra lỗi khi đăng ký");
       }
 
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error('API Error:', error);
+      console.error("API Error:", error);
       throw error;
     }
   };
@@ -814,12 +819,16 @@ function HeroSection({ onLearnMoreClick }) {
     try {
       // Validation
       if (!donationFormData.agrees_to_terms) {
-        toast.error('Vui lòng đồng ý với các điều khoản và điều kiện!');
+        toast.error("Vui lòng đồng ý với các điều khoản và điều kiện!");
         return;
       }
 
-      if (!donationFormData.fullName || !donationFormData.email || !donationFormData.phone) {
-        toast.error('Vui lòng điền đầy đủ thông tin bắt buộc!');
+      if (
+        !donationFormData.fullName ||
+        !donationFormData.email ||
+        !donationFormData.phone
+      ) {
+        toast.error("Vui lòng điền đầy đủ thông tin bắt buộc!");
         return;
       }
 
@@ -830,28 +839,28 @@ function HeroSection({ onLearnMoreClick }) {
         const age = today.getFullYear() - birthDate.getFullYear();
 
         if (age < 18 || age > 60) {
-          toast.error('Tuổi hiến máu phải từ 18 đến 60 tuổi!');
+          toast.error("Tuổi hiến máu phải từ 18 đến 60 tuổi!");
           return;
         }
       }
 
       if (donationFormData.weight && parseInt(donationFormData.weight) < 45) {
-        toast.error('Cân nặng tối thiểu để hiến máu là 45kg!');
+        toast.error("Cân nặng tối thiểu để hiến máu là 45kg!");
         return;
       }
 
       // Transform data to API format
       const apiData = transformToApiFormat(donationFormData);
-      console.log('API Data:', apiData);
+      console.log("API Data:", apiData);
 
       // Submit to API
       const result = await submitDonationRequest(apiData);
-      
+
       toast.success(
         `Cảm ơn ${donationFormData.fullName}! Đăng ký hiến máu thành công. Chúng tôi sẽ liên hệ với bạn trong vòng 24h để xác nhận lịch hẹn.`,
         {
           position: "top-right",
-          autoClose: 5000
+          autoClose: 5000,
         }
       );
 
@@ -859,22 +868,24 @@ function HeroSection({ onLearnMoreClick }) {
       // Reset only non-user fields
       setDonationFormData((prev) => ({
         ...prev,
-        medical_history: '',
-        last_donation: '',
-        preferred_date: '',
-        preferred_time: '',
+        medical_history: "",
+        last_donation: "",
+        preferred_date: "",
+        preferred_time: "",
         has_chronic_disease: false,
         is_taking_medication: false,
         has_recent_surgery: false,
         agrees_to_terms: false,
       }));
-
     } catch (error) {
-      console.error('Submission error:', error);
-      toast.error(error.message || 'Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại!', {
-        position: "top-right",
-        autoClose: 5000
-      });
+      console.error("Submission error:", error);
+      toast.error(
+        error.message || "Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại!",
+        {
+          position: "top-right",
+          autoClose: 5000,
+        }
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -889,7 +900,10 @@ function HeroSection({ onLearnMoreClick }) {
       <section
         id="home"
         className="hero-section bg-gradient-danger text-white py-5"
-        style={{ marginTop: '80px', background: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)' }}
+        style={{
+          marginTop: "80px",
+          background: "linear-gradient(135deg, #dc3545 0%, #c82333 100%)",
+        }}
       >
         <div className="container py-5">
           <div className="row align-items-center min-vh-75">
@@ -900,7 +914,8 @@ function HeroSection({ onLearnMoreClick }) {
                 <span className="text-warning">Chia Sẻ Yêu Thương</span>
               </h1>
               <p className="lead mb-4">
-                Mỗi lần hiến máu của bạn có thể cứu sống đến 3 người. Hãy tham gia cùng chúng tôi trong sứ mệnh cao quý này.
+                Mỗi lần hiến máu của bạn có thể cứu sống đến 3 người. Hãy tham
+                gia cùng chúng tôi trong sứ mệnh cao quý này.
               </p>
               <div className="d-flex flex-wrap gap-3">
                 <button
@@ -922,7 +937,7 @@ function HeroSection({ onLearnMoreClick }) {
                 src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                 alt="Blood Donation"
                 className="img-fluid rounded-3 shadow-lg"
-                style={{ maxHeight: '500px', objectFit: 'cover' }}
+                style={{ maxHeight: "500px", objectFit: "cover" }}
               />
             </div>
           </div>
@@ -931,7 +946,10 @@ function HeroSection({ onLearnMoreClick }) {
 
       {/* Donation Registration Modal */}
       {showDonationForm && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div
+          className="modal fade show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-dialog-centered modal-xl">
             <div className="modal-content border-0 shadow-lg">
               <div className="modal-header border-0 pb-0 bg-danger text-white">
@@ -950,7 +968,9 @@ function HeroSection({ onLearnMoreClick }) {
                 {userData && Object.keys(userData).length > 0 && (
                   <div className="alert alert-success mb-4">
                     <FaUser className="me-2" />
-                    Xin chào <strong>{userData.fullName || 'Người dùng'}</strong>! Thông tin cá nhân của bạn đã được điền sẵn.
+                    Xin chào{" "}
+                    <strong>{userData.fullName || "Người dùng"}</strong>! Thông
+                    tin cá nhân của bạn đã được điền sẵn.
                   </div>
                 )}
 
@@ -976,11 +996,13 @@ function HeroSection({ onLearnMoreClick }) {
                     </h6>
                     <div className="row">
                       <div className="col-md-6 mb-3">
-                        <label className="form-label fw-semibold">Họ và tên *</label>
+                        <label className="form-label fw-semibold">
+                          Họ và tên *
+                        </label>
                         <input
                           type="text"
                           className={`form-control ${
-                            userData?.fullName ? 'bg-light' : ''
+                            userData?.fullName ? "bg-light" : ""
                           }`}
                           name="fullName"
                           value={donationFormData.fullName}
@@ -992,11 +1014,13 @@ function HeroSection({ onLearnMoreClick }) {
                         />
                       </div>
                       <div className="col-md-6 mb-3">
-                        <label className="form-label fw-semibold">Email *</label>
+                        <label className="form-label fw-semibold">
+                          Email *
+                        </label>
                         <input
                           type="email"
                           className={`form-control ${
-                            userData?.email ? 'bg-light' : ''
+                            userData?.email ? "bg-light" : ""
                           }`}
                           name="email"
                           value={donationFormData.email}
@@ -1010,11 +1034,13 @@ function HeroSection({ onLearnMoreClick }) {
                     </div>
                     <div className="row">
                       <div className="col-md-4 mb-3">
-                        <label className="form-label fw-semibold">Số điện thoại *</label>
+                        <label className="form-label fw-semibold">
+                          Số điện thoại *
+                        </label>
                         <input
                           type="tel"
                           className={`form-control ${
-                            userData?.phone ? 'bg-light' : ''
+                            userData?.phone ? "bg-light" : ""
                           }`}
                           name="phone"
                           value={donationFormData.phone}
@@ -1026,11 +1052,13 @@ function HeroSection({ onLearnMoreClick }) {
                         />
                       </div>
                       <div className="col-md-4 mb-3">
-                        <label className="form-label fw-semibold">Ngày sinh *</label>
+                        <label className="form-label fw-semibold">
+                          Ngày sinh *
+                        </label>
                         <input
                           type="date"
                           className={`form-control ${
-                            userData?.date_of_birth ? 'bg-light' : ''
+                            userData?.date_of_birth ? "bg-light" : ""
                           }`}
                           name="date_of_birth"
                           value={donationFormData.date_of_birth}
@@ -1041,10 +1069,12 @@ function HeroSection({ onLearnMoreClick }) {
                         />
                       </div>
                       <div className="col-md-4 mb-3">
-                        <label className="form-label fw-semibold">Giới tính</label>
+                        <label className="form-label fw-semibold">
+                          Giới tính
+                        </label>
                         <select
                           className={`form-select ${
-                            userData?.gender ? 'bg-light' : ''
+                            userData?.gender ? "bg-light" : ""
                           }`}
                           name="gender"
                           value={donationFormData.gender}
@@ -1060,11 +1090,13 @@ function HeroSection({ onLearnMoreClick }) {
                     </div>
                     <div className="row">
                       <div className="col-md-8 mb-3">
-                        <label className="form-label fw-semibold">Địa chỉ</label>
+                        <label className="form-label fw-semibold">
+                          Địa chỉ
+                        </label>
                         <input
                           type="text"
                           className={`form-control ${
-                            userData?.address ? 'bg-light' : ''
+                            userData?.address ? "bg-light" : ""
                           }`}
                           name="address"
                           value={donationFormData.address}
@@ -1075,11 +1107,13 @@ function HeroSection({ onLearnMoreClick }) {
                         />
                       </div>
                       <div className="col-md-4 mb-3">
-                        <label className="form-label fw-semibold">Thành phố</label>
+                        <label className="form-label fw-semibold">
+                          Thành phố
+                        </label>
                         <input
                           type="text"
                           className={`form-control ${
-                            userData?.city ? 'bg-light' : ''
+                            userData?.city ? "bg-light" : ""
                           }`}
                           name="city"
                           value={donationFormData.city}
@@ -1100,10 +1134,12 @@ function HeroSection({ onLearnMoreClick }) {
                     </h6>
                     <div className="row">
                       <div className="col-md-4 mb-3">
-                        <label className="form-label fw-semibold">Nhóm máu</label>
+                        <label className="form-label fw-semibold">
+                          Nhóm máu
+                        </label>
                         <select
                           className={`form-select ${
-                            userData?.blood_type ? 'bg-light' : ''
+                            userData?.blood_type ? "bg-light" : ""
                           }`}
                           name="blood_type"
                           value={donationFormData.blood_type}
@@ -1123,11 +1159,13 @@ function HeroSection({ onLearnMoreClick }) {
                         </select>
                       </div>
                       <div className="col-md-4 mb-3">
-                        <label className="form-label fw-semibold">Cân nặng (kg) *</label>
+                        <label className="form-label fw-semibold">
+                          Cân nặng (kg) *
+                        </label>
                         <input
                           type="number"
                           className={`form-control ${
-                            userData?.weight ? 'bg-light' : ''
+                            userData?.weight ? "bg-light" : ""
                           }`}
                           name="weight"
                           value={donationFormData.weight}
@@ -1141,11 +1179,13 @@ function HeroSection({ onLearnMoreClick }) {
                         />
                       </div>
                       <div className="col-md-4 mb-3">
-                        <label className="form-label fw-semibold">Chiều cao (cm)</label>
+                        <label className="form-label fw-semibold">
+                          Chiều cao (cm)
+                        </label>
                         <input
                           type="number"
                           className={`form-control ${
-                            userData?.height ? 'bg-light' : ''
+                            userData?.height ? "bg-light" : ""
                           }`}
                           name="height"
                           value={donationFormData.height}
@@ -1159,7 +1199,9 @@ function HeroSection({ onLearnMoreClick }) {
                       </div>
                     </div>
                     <div className="mb-3">
-                      <label className="form-label fw-semibold">Lần hiến máu gần nhất</label>
+                      <label className="form-label fw-semibold">
+                        Lần hiến máu gần nhất
+                      </label>
                       <input
                         type="date"
                         className="form-control"
@@ -1168,10 +1210,14 @@ function HeroSection({ onLearnMoreClick }) {
                         onChange={handleDonationInputChange}
                         disabled={isSubmitting}
                       />
-                      <div className="form-text">Để trống nếu lần đầu hiến máu</div>
+                      <div className="form-text">
+                        Để trống nếu lần đầu hiến máu
+                      </div>
                     </div>
                     <div className="mb-3">
-                      <label className="form-label fw-semibold">Tiền sử bệnh (nếu có)</label>
+                      <label className="form-label fw-semibold">
+                        Tiền sử bệnh (nếu có)
+                      </label>
                       <textarea
                         className="form-control"
                         name="medical_history"
@@ -1193,7 +1239,9 @@ function HeroSection({ onLearnMoreClick }) {
                             onChange={handleDonationInputChange}
                             disabled={isSubmitting}
                           />
-                          <label className="form-check-label">Có bệnh mãn tính</label>
+                          <label className="form-check-label">
+                            Có bệnh mãn tính
+                          </label>
                         </div>
                       </div>
                       <div className="col-md-4">
@@ -1206,7 +1254,9 @@ function HeroSection({ onLearnMoreClick }) {
                             onChange={handleDonationInputChange}
                             disabled={isSubmitting}
                           />
-                          <label className="form-check-label">Đang dùng thuốc</label>
+                          <label className="form-check-label">
+                            Đang dùng thuốc
+                          </label>
                         </div>
                       </div>
                       <div className="col-md-4">
@@ -1219,7 +1269,9 @@ function HeroSection({ onLearnMoreClick }) {
                             onChange={handleDonationInputChange}
                             disabled={isSubmitting}
                           />
-                          <label className="form-check-label">Phẫu thuật gần đây</label>
+                          <label className="form-check-label">
+                            Phẫu thuật gần đây
+                          </label>
                         </div>
                       </div>
                     </div>
@@ -1233,19 +1285,23 @@ function HeroSection({ onLearnMoreClick }) {
                     </h6>
                     <div className="row">
                       <div className="col-md-4 mb-3">
-                        <label className="form-label fw-semibold">Ngày mong muốn</label>
+                        <label className="form-label fw-semibold">
+                          Ngày mong muốn
+                        </label>
                         <input
                           type="date"
                           className="form-control"
                           name="preferred_date"
                           value={donationFormData.preferred_date}
                           onChange={handleDonationInputChange}
-                          min={new Date().toISOString().split('T')[0]}
+                          min={new Date().toISOString().split("T")[0]}
                           disabled={isSubmitting}
                         />
                       </div>
                       <div className="col-md-4 mb-3">
-                        <label className="form-label fw-semibold">Giờ mong muốn</label>
+                        <label className="form-label fw-semibold">
+                          Giờ mong muốn
+                        </label>
                         <select
                           className="form-select"
                           name="preferred_time"
@@ -1271,8 +1327,13 @@ function HeroSection({ onLearnMoreClick }) {
                       <div className="d-flex align-items-start">
                         <FaMapMarkerAlt className="text-danger me-2 mt-1" />
                         <div>
-                          <strong className="text-danger">Địa điểm hiến máu:</strong>
-                          <div className="mt-1">Bệnh viện Chợ Rẫy - 201B Nguyễn Chí Thanh, Quận 5, TP.HCM</div>
+                          <strong className="text-danger">
+                            Địa điểm hiến máu:
+                          </strong>
+                          <div className="mt-1">
+                            Bệnh viện Chợ Rẫy - 201B Nguyễn Chí Thanh, Quận 5,
+                            TP.HCM
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1297,7 +1358,9 @@ function HeroSection({ onLearnMoreClick }) {
                         />
                       </div>
                       <div className="col-md-6 mb-3">
-                        <label className="form-label fw-semibold">Số điện thoại</label>
+                        <label className="form-label fw-semibold">
+                          Số điện thoại
+                        </label>
                         <input
                           type="tel"
                           className="form-control"
@@ -1323,14 +1386,15 @@ function HeroSection({ onLearnMoreClick }) {
                       required
                     />
                     <label className="form-check-label">
-                      Tôi xác nhận rằng tất cả thông tin trên là chính xác và đồng ý với{' '}
+                      Tôi xác nhận rằng tất cả thông tin trên là chính xác và
+                      đồng ý với{" "}
                       <a href="#" className="text-decoration-none text-danger">
                         điều khoản hiến máu
-                      </a>{' '}
-                      và{' '}
+                      </a>{" "}
+                      và{" "}
                       <a href="#" className="text-decoration-none text-danger">
                         chính sách bảo mật
-                      </a>{' '}
+                      </a>{" "}
                       *
                     </label>
                   </div>
@@ -1344,14 +1408,18 @@ function HeroSection({ onLearnMoreClick }) {
                     >
                       Hủy
                     </button>
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       className="btn btn-danger btn-lg px-4"
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? (
                         <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          ></span>
                           Đang xử lý...
                         </>
                       ) : (

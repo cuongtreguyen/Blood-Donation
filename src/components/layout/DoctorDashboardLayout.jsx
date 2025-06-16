@@ -20,7 +20,11 @@ function DoctorDashboardLayout() {
   const menuItems = [
     { to: "/doctor", label: "Tổng Quan", icon: <FaTachometerAlt /> },
     { to: "/doctor/donors", label: "Người Hiến Máu", icon: <FaUser /> },
-    { to: "/doctor/medical-records", label: "Hồ Sơ Y Tế", icon: <FaNotesMedical /> },
+    {
+      to: "/doctor/medical-records",
+      label: "Hồ Sơ Y Tế",
+      icon: <FaNotesMedical />,
+    },
     { to: "/doctor/blood-inventory", label: "Kho Máu", icon: <FaTint /> },
     { to: "/doctor/reports", label: "Báo Cáo", icon: <FaFileAlt /> },
     { to: "/doctor/profile", label: "Hồ Sơ Cá Nhân", icon: <FaUserCircle /> },
@@ -28,14 +32,14 @@ function DoctorDashboardLayout() {
 
   useEffect(() => {
     // Redirect if not logged in or not authorized
-    if (!user || user.role !== 'STAFF') {
-      navigate('/login');
+    if (!user || user.role !== "STAFF") {
+      navigate("/login");
     }
   }, [user, navigate]);
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/');
+    navigate("/");
   };
 
   return (
@@ -67,13 +71,13 @@ function DoctorDashboardLayout() {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-xl font-semibold mb-1">
-                Xin chào, BS. {user?.full_name || user?.name}
+                Xin chào, BS. {user?.fullName}
               </h2>
               <p className="text-gray-600">
                 {user?.location && `Phòng khám: ${user.location}`}
               </p>
             </div>
-            <button 
+            <button
               onClick={handleLogout}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
             >
