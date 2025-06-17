@@ -151,11 +151,20 @@ const AdminSettingsPage = () => {
             label="Tần suất nhắc nhở hiến máu (ngày)"
             rules={[
               { required: true, message: 'Vui lòng nhập tần suất nhắc nhở!' },
-              { type: 'number', min: 1, message: 'Tần suất nhắc nhở phải là số nguyên dương!' },
-              { 
+              {
                 validator: (_, value) => {
-                  if (value && !Number.isInteger(Number(value))) {
-                    return Promise.reject(new Error('Tần suất nhắc nhở phải là số nguyên!'));
+                  const num = Number(value);
+                  if (value === undefined || value === null || value === '') {
+                    return Promise.reject(new Error('Không được để trống!'));
+                  }
+                  if (isNaN(num)) {
+                    return Promise.reject(new Error('Phải là số!'));
+                  }
+                  if (!Number.isInteger(num)) {
+                    return Promise.reject(new Error('Phải là số nguyên!'));
+                  }
+                  if (num <= 0) {
+                    return Promise.reject(new Error('Phải lớn hơn 0!'));
                   }
                   return Promise.resolve();
                 }
@@ -169,11 +178,20 @@ const AdminSettingsPage = () => {
             label="Thời gian phục hồi sau hiến máu (tháng)"
             rules={[
               { required: true, message: 'Vui lòng nhập thời gian phục hồi!' },
-              { type: 'number', min: 1, message: 'Thời gian phục hồi phải là số nguyên dương!' },
-              { 
+              {
                 validator: (_, value) => {
-                  if (value && !Number.isInteger(Number(value))) {
-                    return Promise.reject(new Error('Thời gian phục hồi phải là số nguyên!'));
+                  const num = Number(value);
+                  if (value === undefined || value === null || value === '') {
+                    return Promise.reject(new Error('Không được để trống!'));
+                  }
+                  if (isNaN(num)) {
+                    return Promise.reject(new Error('Phải là số!'));
+                  }
+                  if (!Number.isInteger(num)) {
+                    return Promise.reject(new Error('Phải là số nguyên!'));
+                  }
+                  if (num <= 0) {
+                    return Promise.reject(new Error('Phải lớn hơn 0!'));
                   }
                   return Promise.resolve();
                 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm, DatePicker, Tooltip } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined, SafetyOutlined, UserOutlined, PhoneOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined, SafetyOutlined, UserOutlined, PhoneOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dayjs from 'dayjs';
@@ -9,60 +9,62 @@ import api from '../../config/api';
 const { Option } = Select;
 const { TextArea } = Input;
 
-const EmergencyBloodRequestsPage = () => {
-  const [requests, setRequests] = useState([
-    {
-      key: 'REQ001',
-      id: 'REQ001',
-      patientName: 'Nguyễn Văn A',
-      bloodType: 'A+',
-      component: 'Whole Blood',
-      quantity: 2,
-      priority: 'High',
-      requestDate: '2024-05-01',
-      dueDate: '2024-05-02',
-      status: 'Pending',
-      contactInfo: '0901234567',
-      hospital: 'Bệnh viện Chợ Rẫy',
-      reason: 'Phẫu thuật khẩn cấp'
-    },
-    {
-      key: 'REQ002',
-      id: 'REQ002',
-      patientName: 'Trần Thị B',
-      bloodType: 'O-',
-      component: 'Plasma',
-      quantity: 1,
-      priority: 'Medium',
-      requestDate: '2024-04-28',
-      dueDate: '2024-05-05',
-      status: 'Approved',
-      contactInfo: '0908765432',
-      hospital: 'Bệnh viện Nhân dân 115',
-      reason: 'Thiếu máu cấp tính'
-    },
-    {
-      key: 'REQ003',
-      id: 'REQ003',
-      patientName: 'Lê Văn C',
-      bloodType: 'B+',
-      component: 'Red Blood Cells',
-      quantity: 3,
-      priority: 'Urgent',
-      requestDate: '2024-05-02',
-      dueDate: '2024-05-02',
-      status: 'Rejected',
-      contactInfo: '0912345678',
-      hospital: 'Bệnh viện Đại học Y Dược',
-      reason: 'Tai nạn giao thông'
-    },
-  ]);
+const mockRequests = [
+  {
+    key: 'REQ001',
+    id: 'REQ001',
+    patientName: 'Nguyễn Văn A',
+    bloodType: 'A+',
+    component: 'Whole Blood',
+    quantity: 2,
+    priority: 'High',
+    requestDate: '2024-05-01',
+    dueDate: '2024-05-02',
+    status: 'Pending',
+    contactInfo: '0901234567',
+    hospital: 'Bệnh viện Chợ Rẫy',
+    reason: 'Phẫu thuật khẩn cấp'
+  },
+  {
+    key: 'REQ002',
+    id: 'REQ002',
+    patientName: 'Trần Thị B',
+    bloodType: 'O-',
+    component: 'Plasma',
+    quantity: 1,
+    priority: 'Medium',
+    requestDate: '2024-04-28',
+    dueDate: '2024-05-05',
+    status: 'Approved',
+    contactInfo: '0908765432',
+    hospital: 'Bệnh viện Nhân dân 115',
+    reason: 'Thiếu máu cấp tính'
+  },
+  {
+    key: 'REQ003',
+    id: 'REQ003',
+    patientName: 'Lê Văn C',
+    bloodType: 'B+',
+    component: 'Red Blood Cells',
+    quantity: 3,
+    priority: 'Urgent',
+    requestDate: '2024-05-02',
+    dueDate: '2024-05-02',
+    status: 'Rejected',
+    contactInfo: '0912345678',
+    hospital: 'Bệnh viện Đại học Y Dược',
+    reason: 'Tai nạn giao thông'
+  },
+];
 
+const EmergencyBloodRequestsPage = () => {
+  const [requests, setRequests] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const showModal = (mode, request = null) => {
     setModalMode(mode);
@@ -214,13 +216,6 @@ const EmergencyBloodRequestsPage = () => {
       width: 120,
     },
     {
-      title: 'Bệnh viện',
-      dataIndex: 'hospital',
-      key: 'hospital',
-      width: 180,
-      ellipsis: true,
-    },
-    {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
@@ -246,49 +241,81 @@ const EmergencyBloodRequestsPage = () => {
     {
       title: 'Hành động',
       key: 'action',
-      width: 150,
+      width: 180,
       render: (_, record) => (
         <Space size="small">
-          <Tooltip title="Sửa">
-            <Button
-              icon={<EditOutlined style={{ color: 'white' }} />}
-              onClick={() => showModal('edit', record)}
-              type="primary"
-              size="small"
-              style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
-              shape="circle"
-            />
-          </Tooltip>
-          <Popconfirm
-            title="Bạn có chắc chắn muốn xóa yêu cầu này?"
-            onConfirm={() => handleDelete(record.key)}
-            okText="Xóa"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
-          >
-            <Tooltip title="Xóa">
-              <Button
-                danger
-                icon={<DeleteOutlined />}
-                size="small"
-                shape="circle"
-              />
-            </Tooltip>
-          </Popconfirm>
+          {record.status === 'Pending' && (
+            <>
+              <Popconfirm
+                title="Bạn có chắc chắn muốn duyệt yêu cầu này?"
+                onConfirm={() => handleUpdateStatus(record.id, 'Approved')}
+                okText="Duyệt"
+                cancelText="Hủy"
+                okButtonProps={{ type: 'primary', style: { background: '#52c41a', borderColor: '#52c41a' } }}
+              >
+                <Tooltip title="Duyệt">
+                  <Button
+                    icon={<SafetyOutlined style={{ color: 'white' }} />}
+                    type="primary"
+                    size="small"
+                    style={{ background: '#52c41a', borderColor: '#52c41a' }}
+                    shape="circle"
+                  />
+                </Tooltip>
+              </Popconfirm>
+              <Popconfirm
+                title="Bạn có chắc chắn muốn từ chối yêu cầu này?"
+                onConfirm={() => handleUpdateStatus(record.id, 'Rejected')}
+                okText="Từ chối"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+              >
+                <Tooltip title="Từ chối">
+                  <Button
+                    danger
+                    icon={<CloseCircleOutlined />}
+                    size="small"
+                    shape="circle"
+                  />
+                </Tooltip>
+              </Popconfirm>
+            </>
+          )}
+          {record.status !== 'Pending' && (
+            <Tag color={record.status === 'Approved' ? 'green' : 'red'}>
+              {record.status === 'Approved' ? 'Đã duyệt' : 'Đã từ chối'}
+            </Tag>
+          )}
         </Space>
       ),
     },
   ];
 
-  const [registers, setRegisters] = useState([]);
-
   useEffect(() => {
     const fetchData = async () => {
-      const response = await api.get('/api/blood-register/list-all');
-      setRegisters(response.data);
+      setLoading(true);
+      try {
+        const response = await api.get('/api/blood-register/list-all');
+        setRequests(response.data);
+      } catch (err) {
+        setRequests(mockRequests);
+        toast.warn('Không thể lấy dữ liệu thật, đang hiển thị dữ liệu mẫu!');
+      }
+      setLoading(false);
     };
     fetchData();
   }, []);
+
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      await api.patch(`/api/blood-register/update-status/${id}`, { status });
+      setRequests((prev) => prev.map(r => r.id === id ? { ...r, status } : r));
+      toast.success('Cập nhật trạng thái thành công!');
+    } catch (err) {
+      setRequests((prev) => prev.map(r => r.id === id ? { ...r, status } : r));
+      toast.error('API lỗi, chỉ cập nhật trên dữ liệu mẫu!');
+    }
+  };
 
   return (
     <div style={{ padding: '24px' }}>
@@ -331,6 +358,7 @@ const EmergencyBloodRequestsPage = () => {
         okText={modalMode === 'add' ? 'Thêm' : 'Lưu'}
         cancelText="Hủy"
         width={700}
+        okButtonProps={{ style: { background: '#d32f2f', borderColor: '#d32f2f' } }}
       >
         <Form form={form} layout="vertical">
           <Form.Item 
@@ -342,16 +370,6 @@ const EmergencyBloodRequestsPage = () => {
             ]}
           >
             <Input prefix={<UserOutlined />} placeholder="Tên bệnh nhân" />
-          </Form.Item>
-          <Form.Item 
-            name="hospital" 
-            label="Bệnh viện" 
-            rules={[
-              { required: true, message: 'Vui lòng nhập tên bệnh viện!' },
-              { min: 3, message: 'Tên bệnh viện phải có ít nhất 3 ký tự!' }
-            ]}
-          >
-            <Input prefix={<SafetyOutlined />} placeholder="Tên bệnh viện" />
           </Form.Item>
           <Form.Item 
             name="contactInfo" 
@@ -498,34 +516,6 @@ const EmergencyBloodRequestsPage = () => {
           )}
         </Form>
       </Modal>
-
-      <div className="mt-4">
-        <h2>Danh sách đăng ký hiến máu</h2>
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Status</th>
-              <th>Wanted Date</th>
-              <th>Wanted Hour</th>
-            </tr>
-          </thead>
-          <tbody>
-            {registers.map((item) => (
-              <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.status}</td>
-                <td>{item.wantedDate}</td>
-                <td>
-                  {item.wantedHour
-                    ? `${item.wantedHour.hour}:${item.wantedHour.minute}:${item.wantedHour.second}`
-                    : ''}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 };

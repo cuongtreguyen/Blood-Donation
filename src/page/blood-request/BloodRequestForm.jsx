@@ -417,25 +417,22 @@ function BloodRequestForm() {
                   </Select>
                 </Form.Item>
               </Col>
-
-              <Col xs={24} md={8}>
+            </Row>
+            <Row gutter={16}>
+              <Col xs={24} md={24}>
                 <Form.Item
                   name="preferred_location"
                   label="Địa điểm"
+                  initialValue="Bệnh viện Chợ Rẫy - 201B Nguyễn Chí Thanh, Quận 5, TP.HCM"
                   rules={[
                     { required: true, message: "Vui lòng chọn địa điểm" },
                   ]}
                 >
-                  <Select placeholder="Chọn địa điểm">
-                    <Option value="hospital_1">Bệnh viện Chợ Rẫy</Option>
-                    <Option value="hospital_2">
-                      Bệnh viện Đa khoa Sài Gòn
-                    </Option>
-                    <Option value="hospital_3">Bệnh viện Thống Nhất</Option>
-                    <Option value="hospital_4">
-                      Viện Huyết học Truyền máu TW
-                    </Option>
-                  </Select>
+                  <Input
+                    value="Bệnh viện Chợ Rẫy - 201B Nguyễn Chí Thanh, Quận 5, TP.HCM"
+                    disabled
+                    style={{ width: '100%', color: 'rgba(0,0,0,0.88)', background: '#fff' }}
+                  />
                 </Form.Item>
               </Col>
             </Row>

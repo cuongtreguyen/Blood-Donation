@@ -1,68 +1,94 @@
-import React, { useState } from 'react';
-import { Table, Tag, Button, Input, Space, Card, Popconfirm, Tooltip } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Table, Tag, Button, Input, Space, Card, Popconfirm, Tooltip, Spin } from 'antd';
 import { SearchOutlined, CheckCircleOutlined, CloseCircleOutlined, UserOutlined, CalendarOutlined, HeartOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dayjs from 'dayjs';
+import api from '../../config/api';
+
+const mockData = [
+  {
+    key: 'D001',
+    id: 'D001',
+    donorName: 'Nguyễn Thị A',
+    bloodType: 'A+',
+    component: 'Whole Blood',
+    collectionDate: '2024-04-25',
+    quantity: '350ml',
+    status: 'Pending',
+  },
+  {
+    key: 'D002',
+    id: 'D002',
+    donorName: 'Trần Văn B',
+    bloodType: 'B-',
+    component: 'Plasma',
+    collectionDate: '2024-04-20',
+    quantity: '200ml',
+    status: 'Approved',
+  },
+  {
+    key: 'D003',
+    id: 'D003',
+    donorName: 'Lê Thị C',
+    bloodType: 'O+',
+    component: 'Red Blood Cells',
+    collectionDate: '2024-04-22',
+    quantity: '450ml',
+    status: 'Pending',
+  },
+  {
+    key: 'D004',
+    id: 'D004',
+    donorName: 'Phạm Văn D',
+    bloodType: 'AB+',
+    component: 'Platelets',
+    collectionDate: '2024-04-18',
+    quantity: '100ml',
+    status: 'Rejected',
+  },
+];
 
 const DonationConfirmationPage = () => {
-  const [donations, setDonations] = useState([
-    {
-      key: 'D001',
-      id: 'D001',
-      donorName: 'Nguyễn Thị A',
-      bloodType: 'A+',
-      component: 'Whole Blood',
-      collectionDate: '2024-04-25',
-      quantity: '350ml',
-      status: 'Pending',
-    },
-    {
-      key: 'D002',
-      id: 'D002',
-      donorName: 'Trần Văn B',
-      bloodType: 'B-',
-      component: 'Plasma',
-      collectionDate: '2024-04-20',
-      quantity: '200ml',
-      status: 'Approved',
-    },
-    {
-      key: 'D003',
-      id: 'D003',
-      donorName: 'Lê Thị C',
-      bloodType: 'O+',
-      component: 'Red Blood Cells',
-      collectionDate: '2024-04-22',
-      quantity: '450ml',
-      status: 'Pending',
-    },
-    {
-      key: 'D004',
-      id: 'D004',
-      donorName: 'Phạm Văn D',
-      bloodType: 'AB+',
-      component: 'Platelets',
-      collectionDate: '2024-04-18',
-      quantity: '100ml',
-      status: 'Rejected',
-    },
-  ]);
-
+  const [donations, setDonations] = useState([]);
   const [searchText, setSearchText] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const handleApprove = (key) => {
-    setDonations(donations.map(donation =>
-      donation.key === key ? { ...donation, status: 'Approved' } : donation
-    ));
-    toast.success('Duyệt hiến máu thành công!');
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get('/api/blood-register/list-all');
+        setDonations(res.data);
+      } catch (err) {
+        setDonations(mockData);
+        toast.warn('Không thể lấy dữ liệu thật, đang hiển thị dữ liệu mẫu!');
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  const handleApprove = async (id) => {
+    try {
+      await api.patch(`/api/blood-register/update-status/${id}`, { status: 'Approved' });
+      setDonations((prev) => prev.map(d => d.id === id ? { ...d, status: 'Approved' } : d));
+      toast.success('Duyệt thành công!');
+    } catch (err) {
+      setDonations((prev) => prev.map(d => d.id === id ? { ...d, status: 'Approved' } : d));
+      toast.error('API lỗi, chỉ cập nhật trên dữ liệu mẫu!');
+    }
   };
 
-  const handleReject = (key) => {
-    setDonations(donations.map(donation =>
-      donation.key === key ? { ...donation, status: 'Rejected' } : donation
-    ));
-    toast.error('Từ chối hiến máu thành công!');
+  const handleReject = async (id) => {
+    try {
+      await api.patch(`/api/blood-register/update-status/${id}`, { status: 'Rejected' });
+      setDonations((prev) => prev.map(d => d.id === id ? { ...d, status: 'Rejected' } : d));
+      toast.success('Từ chối thành công!');
+    } catch (err) {
+      setDonations((prev) => prev.map(d => d.id === id ? { ...d, status: 'Rejected' } : d));
+      toast.error('API lỗi, chỉ cập nhật trên dữ liệu mẫu!');
+    }
   };
 
   const handleSearch = (e) => {
@@ -70,10 +96,11 @@ const DonationConfirmationPage = () => {
   };
 
   const filteredDonations = donations.filter(donation => {
-    const matchesSearch = donation.donorName.toLowerCase().includes(searchText.toLowerCase()) ||
-                          donation.bloodType.toLowerCase().includes(searchText.toLowerCase()) ||
-                          donation.component.toLowerCase().includes(searchText.toLowerCase()) ||
-                          donation.id.toLowerCase().includes(searchText.toLowerCase());
+    const matchesSearch =
+      (donation.donorName || '').toLowerCase().includes(searchText.toLowerCase()) ||
+      (donation.bloodType || '').toLowerCase().includes(searchText.toLowerCase()) ||
+      (donation.component || '').toLowerCase().includes(searchText.toLowerCase()) ||
+      (donation.id || '').toLowerCase().includes(searchText.toLowerCase());
     return matchesSearch;
   });
 
@@ -82,14 +109,14 @@ const DonationConfirmationPage = () => {
       title: 'ID Lần hiến',
       dataIndex: 'id',
       key: 'id',
-      sorter: (a, b) => a.id.localeCompare(b.id),
+      sorter: (a, b) => (a.id || '').localeCompare(b.id || ''),
       width: 100,
     },
     {
       title: 'Tên người hiến',
       dataIndex: 'donorName',
       key: 'donorName',
-      sorter: (a, b) => a.donorName.localeCompare(b.donorName),
+      sorter: (a, b) => (a.donorName || '').localeCompare(b.donorName || ''),
       width: 130,
       ellipsis: true,
     },
@@ -123,8 +150,8 @@ const DonationConfirmationPage = () => {
       title: 'Ngày hiến',
       dataIndex: 'collectionDate',
       key: 'collectionDate',
-      render: (date) => date ? dayjs(date).format('DD/MM/YYYY') : 'N/A',
-      sorter: (a, b) => dayjs(a.collectionDate).unix() - dayjs(b.collectionDate).unix(),
+      render: (date) => date ? new Date(date).toLocaleDateString('vi-VN') : 'N/A',
+      sorter: (a, b) => new Date(a.collectionDate).getTime() - new Date(b.collectionDate).getTime(),
       width: 100,
     },
     {
@@ -145,13 +172,9 @@ const DonationConfirmationPage = () => {
       onFilter: (value, record) => record.status === value,
       render: (status) => {
         let color = '';
-        if (status === 'Pending') {
-          color = 'orange';
-        } else if (status === 'Approved') {
-          color = 'green';
-        } else if (status === 'Rejected') {
-          color = 'red';
-        }
+        if (status === 'Pending') color = 'orange';
+        else if (status === 'Approved') color = 'green';
+        else if (status === 'Rejected') color = 'red';
         return <Tag color={color}>{status === 'Pending' ? 'Đang chờ' : status === 'Approved' ? 'Đã duyệt' : 'Đã từ chối'}</Tag>;
       },
       width: 90,
@@ -165,7 +188,7 @@ const DonationConfirmationPage = () => {
             <>
               <Popconfirm
                 title="Bạn có chắc chắn muốn duyệt lần hiến máu này?"
-                onConfirm={() => handleApprove(record.key)}
+                onConfirm={() => handleApprove(record.id)}
                 okText="Duyệt"
                 cancelText="Hủy"
                 okButtonProps={{ type: 'primary', style: { background: '#52c41a', borderColor: '#52c41a' } }}
@@ -182,7 +205,7 @@ const DonationConfirmationPage = () => {
               </Popconfirm>
               <Popconfirm
                 title="Bạn có chắc chắn muốn từ chối lần hiến máu này?"
-                onConfirm={() => handleReject(record.key)}
+                onConfirm={() => handleReject(record.id)}
                 okText="Từ chối"
                 cancelText="Hủy"
                 okButtonProps={{ danger: true }}
@@ -225,12 +248,19 @@ const DonationConfirmationPage = () => {
           </Space>
         }
       >
-        <Table
-          columns={columns}
-          dataSource={filteredDonations}
-          pagination={{ pageSize: 10 }}
-          bordered
-        />
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <Spin size="large" tip="Đang tải..." />
+          </div>
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={filteredDonations}
+            pagination={{ pageSize: 10 }}
+            bordered
+            rowKey="id"
+          />
+        )}
       </Card>
     </div>
   );

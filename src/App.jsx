@@ -25,7 +25,6 @@ import AdminDashboard from "./page/admin/AdminDashboard";
 
 // Admin Pages
 import AdminUsersPage from "./page/admin/AdminUsersPage";
-import AdminBloodBanksPage from "./page/admin/AdminBloodBanksPage";
 import AdminStatisticsPage from "./page/admin/AdminStatisticsPage";
 import AdminSettingsPage from "./page/admin/AdminSettingsPage";
 import AdminProfilePage from "./page/admin/AdminProfilePage";
@@ -69,7 +68,6 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <AdminDashboard /> },
       { path: "users", element: <AdminUsersPage /> },
-      { path: "blood-banks", element: <AdminBloodBanksPage /> },
       { path: "blood-units", element: <BloodUnitsManagement /> },
       { path: "statistics", element: <AdminStatisticsPage /> },
       { path: "settings", element: <AdminSettingsPage /> },
@@ -77,6 +75,7 @@ const router = createBrowserRouter([
       { path: "notifications", element: <AdminNotificationsPage /> },
       { path: "blogs", element: <BlogPage /> },
       { path: "blood-requests", element: <EmergencyBloodRequestsPage /> },
+      { path: "donation-confirmation", element: <DonationConfirmationPage /> },
     ],
   },
   {

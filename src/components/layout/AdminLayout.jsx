@@ -89,19 +89,9 @@ function AdminLayout() {
       label: 'Quản lý người dùng',
     },
     {
-      key: 'blood-management',
+      key: '/admin/blood-units',
       icon: <BankOutlined />,
-      label: 'Quản lý kho máu',
-      children: [
-        {
-          key: '/admin/blood-banks',
-          label: 'Ngân hàng máu',
-        },
-        {
-          key: '/admin/blood-units',
-          label: 'Đơn vị máu',
-        },
-      ],
+      label: 'Đơn vị máu',
     },
     {
       key: '/admin/statistics',

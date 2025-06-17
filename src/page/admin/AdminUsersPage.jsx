@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm } from 'antd';
+import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm, message } from 'antd';
 import SearchOutlined from '@ant-design/icons/lib/icons/SearchOutlined';
 import UserOutlined from '@ant-design/icons/lib/icons/UserOutlined';
 import EditOutlined from '@ant-design/icons/lib/icons/EditOutlined';
@@ -87,8 +87,9 @@ function AdminUsersPage() {
     }
   };
 
-  const handleOk = () => {
-    form.validateFields().then(values => {
+  const handleOk = async () => {
+    try {
+      const values = await form.validateFields();
       if (modalMode === 'add') {
         // Add new user
         const newUser = {
@@ -99,6 +100,7 @@ function AdminUsersPage() {
           lastLogin: '-',
         };
         setUsers([...users, newUser]);
+        await api.post('/api/users', newUser);
         toast.success('Thêm người dùng thành công!');
       } else {
         // Update existing user
@@ -106,10 +108,14 @@ function AdminUsersPage() {
           user.key === selectedUser.key ? { ...user, ...values } : user
         );
         setUsers(updatedUsers);
+        await api.put(`/api/users/${selectedUser.id}`, values);
         toast.success('Cập nhật thông tin thành công!');
       }
       setIsModalVisible(false);
-    });
+    } catch (error) {
+      console.error('Lỗi khi cập nhật người dùng:', error);
+      toast.error('Cập nhật thông tin người dùng thất bại. Vui lòng thử lại sau!');
+    }
   };
 
   const handleCancel = () => {
@@ -117,7 +123,7 @@ function AdminUsersPage() {
     form.resetFields();
   };
 
-  const handleDelete = (key) => {
+  const handleDelete = async (key) => {
     try {
       // Tìm user cần xóa từ danh sách users
       const userToDelete = users.find(user => user.key === key);
@@ -129,10 +135,11 @@ function AdminUsersPage() {
       // Cập nhật state để xóa user
       const updatedUsers = users.filter(user => user.key !== key);
       setUsers(updatedUsers);
+      await api.delete(`/api/users/${userToDelete.id}`);
       toast.success('Xóa người dùng thành công!');
     } catch (error) {
       console.error('Lỗi khi xóa người dùng:', error);
-      toast.error('Xóa người dùng thất bại. Vui lòng thử lại!');
+      toast.error('Xóa người dùng thất bại. Vui lòng thử lại sau!');
     }
   };
 
