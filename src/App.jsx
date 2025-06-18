@@ -34,6 +34,7 @@ import BloodUnitsManagement from "./page/admin/BloodUnitsManagement";
 import EmergencyBloodRequestsPage from "./page/admin/EmergencyBloodRequestsPage";
 import DonationConfirmationPage from "./page/admin/DonationConfirmationPage";
 import AdminProtectedRoute from "./components/auth/AdminProtectedRoute";
+import BloodDonationApprovalPage from "./page/admin/BloodDonationApprovalPage";
 
 // Doctor Pages
 import DoctorDashboardPage from "./page/doctorpage/doctor/DashboardPage";
@@ -76,6 +77,7 @@ const router = createBrowserRouter([
       { path: "blogs", element: <BlogPage /> },
       { path: "blood-requests", element: <EmergencyBloodRequestsPage /> },
       { path: "donation-confirmation", element: <DonationConfirmationPage /> },
+      { path: "blood-donation-approval", element: <BloodDonationApprovalPage /> },
     ],
   },
   {
