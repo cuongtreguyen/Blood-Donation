@@ -53,16 +53,50 @@ const DonationConfirmationPage = () => {
   const [donations, setDonations] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [usingMock, setUsingMock] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await api.get('/api/blood-register/list-all');
-        setDonations(res.data);
+        // Lấy token từ localStorage
+        const token = localStorage.getItem("token");
+        if (!token) {
+          toast.error("Không tìm thấy token xác thực!");
+          setDonations(mockData);
+          setUsingMock(true);
+          toast.warning("Không thể lấy dữ liệu thật, đang hiển thị dữ liệu mẫu!", {
+            toastId: "mock-data-warning",
+            position: "top-right"
+          });
+          setLoading(false);
+          return;
+        }
+        // Gọi API lấy danh sách các lần hiến máu với 3 trạng thái: APPROVED, PENDING, REJECTED
+        // Truyền nhiều status vào query string để backend lọc theo tất cả các trạng thái này
+        const res = await api.get(
+          "/api/blood-register/list-by-status?status=APPROVED&status=PENDING&status=REJECTED",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.data || res.data.length === 0) {
+          setDonations(mockData);
+          setUsingMock(true);
+          toast.warning("Không thể lấy dữ liệu thật, đang hiển thị dữ liệu mẫu!", {
+            toastId: "mock-data-warning",
+            position: "top-right"
+          });
+        } else {
+          setDonations(res.data);
+          setUsingMock(false);
+          toast.dismiss("mock-data-warning");
+        }
       } catch (err) {
         setDonations(mockData);
-        toast.warn('Không thể lấy dữ liệu thật, đang hiển thị dữ liệu mẫu!');
+        setUsingMock(true);
+        toast.warning("Không thể lấy dữ liệu thật, đang hiển thị dữ liệu mẫu!", {
+          toastId: "mock-data-warning",
+          position: "top-right"
+        });
       }
       setLoading(false);
     };
@@ -71,23 +105,39 @@ const DonationConfirmationPage = () => {
 
   const handleApprove = async (id) => {
     try {
-      await api.patch(`/api/blood-register/update-status/${id}`, { status: 'Approved' });
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Không tìm thấy token xác thực!");
+        return;
+      }
+      await api.patch(
+        `/api/blood-register/update-status/${id}?status=APPROVED`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setDonations((prev) => prev.map(d => d.id === id ? { ...d, status: 'Approved' } : d));
-      toast.success('Duyệt thành công!');
+      toast.success('Đã duyệt yêu cầu hiến máu thành công!', { toastId: 'approve-success' });
     } catch (err) {
-      setDonations((prev) => prev.map(d => d.id === id ? { ...d, status: 'Approved' } : d));
-      toast.error('API lỗi, chỉ cập nhật trên dữ liệu mẫu!');
+      toast.error('Không thể duyệt yêu cầu hiến máu!', { toastId: 'approve-error' });
     }
   };
 
   const handleReject = async (id) => {
     try {
-      await api.patch(`/api/blood-register/update-status/${id}`, { status: 'Rejected' });
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Không tìm thấy token xác thực!");
+        return;
+      }
+      await api.patch(
+        `/api/blood-register/update-status/${id}?status=REJECTED`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setDonations((prev) => prev.map(d => d.id === id ? { ...d, status: 'Rejected' } : d));
-      toast.success('Từ chối thành công!');
+      toast.success('Đã từ chối yêu cầu hiến máu thành công!', { toastId: 'reject-success' });
     } catch (err) {
-      setDonations((prev) => prev.map(d => d.id === id ? { ...d, status: 'Rejected' } : d));
-      toast.error('API lỗi, chỉ cập nhật trên dữ liệu mẫu!');
+      toast.error('Không thể từ chối yêu cầu hiến máu!', { toastId: 'reject-error' });
     }
   };
 

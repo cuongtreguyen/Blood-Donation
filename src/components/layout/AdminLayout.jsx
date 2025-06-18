@@ -104,9 +104,14 @@ function AdminLayout() {
       label: 'Quản lý yêu cầu máu khẩn cấp',
     },
     {
+      key: '/admin/blood-donation-approval',
+      icon: <ExclamationCircleOutlined />,
+      label: 'Xác nhận yêu cầu nhận máu',
+    },
+    {
       key: '/admin/donation-confirmation',
       icon: <HeartOutlined />,
-      label: 'Duyệt / Xác nhận Hiến máu',
+      label: 'Xác nhận yêu cầu hiến máu',
     },
     {
       key: '/admin/blogs',
