@@ -5,43 +5,20 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import api from '../../config/api';
 
-const mockData = [
+// Dữ liệu mẫu trả về từ API blood-receive/list-all (tham khảo)
+const value = [
   {
-    key: 'R001',
-    id: 'R001',
-    patientName: 'Nguyễn Văn A',
-    bloodType: 'A+',
-    quantity: 2,
-    requestDate: '2024-05-01',
-    dueDate: '2024-05-10',
-    status: 'Pending',
-    reason: 'Phẫu thuật tim',
-    contactInfo: '0123456789',
-  },
-  {
-    key: 'R002',
-    id: 'R002',
-    patientName: 'Trần Thị B',
-    bloodType: 'O-',
-    quantity: 1,
-    requestDate: '2024-05-03',
-    dueDate: '2024-05-12',
-    status: 'Approved',
-    reason: 'Chấn thương nặng',
-    contactInfo: '0987654321',
-  },
-  {
-    key: 'R003',
-    id: 'R003',
-    patientName: 'Lê Văn C',
-    bloodType: 'B+',
-    quantity: 3,
-    requestDate: '2024-05-05',
-    dueDate: '2024-05-15',
-    status: 'Rejected',
-    reason: 'Không đủ điều kiện',
-    contactInfo: '0111222333',
-  },
+    id: 9007199254740991,
+    status: "PENDING",
+    wantedDate: "2025-06-19",
+    wantedHour: {
+      hour: 1073741824,
+      minute: 1073741824,
+      second: 1073741824,
+      nano: 1073741824
+    },
+    emergency: true
+  }
 ];
 
 const BloodDonationApprovalPage = () => {
@@ -49,36 +26,33 @@ const BloodDonationApprovalPage = () => {
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          toast.error("Không tìm thấy token xác thực!");
-          setDonations(mockData);
-          toast.warning("Không thể lấy dữ liệu thật, đang hiển thị dữ liệu mẫu!", { toastId: "mock-data-warning" });
-          setLoading(false);
-          return;
-        }
-        const res = await api.get("/api/blood-receive/list-all", { headers: { Authorization: `Bearer ${token}` } });
-        if (!res.data || res.data.length === 0) {
-          setDonations(mockData);
-          toast.warning("Không thể lấy dữ liệu thật, đang hiển thị dữ liệu mẫu!", { toastId: "mock-data-warning" });
-        } else {
-          setDonations(res.data.map(item => ({
-            ...item,
-            status: item.status === 'APPROVED' ? 'Approved' : item.status === 'REJECTED' ? 'Rejected' : 'Pending'
-          })));
-          toast.dismiss("mock-data-warning");
-        }
-      } catch (err) {
-        setDonations(mockData);
-        toast.warning("Không thể lấy dữ liệu thật, đang hiển thị dữ liệu mẫu!", { toastId: "mock-data-warning" });
+  // Fetch blood receive list
+  const fetchBloodReceiveList = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Không tìm thấy token xác thực!");
+        setDonations([]);
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    };
-    fetchData();
+      const res = await api.get("/blood-receive/list-all", { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.data || res.data.length === 0) {
+        setDonations([]);
+        toast.warning("Không có dữ liệu nhận máu nào!", { toastId: "no-data-warning" });
+      } else {
+        setDonations(res.data);
+      }
+    } catch (err) {
+      setDonations([]);
+      toast.error("Không thể lấy dữ liệu từ máy chủ!", { toastId: "fetch-error" });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchBloodReceiveList();
   }, []);
 
   const handleApprove = async (id) => {
@@ -88,8 +62,8 @@ const BloodDonationApprovalPage = () => {
         toast.error("Không tìm thấy token xác thực!");
         return;
       }
-      await api.patch(`/api/blood-receive/${id}/status?status=APPROVED`, {}, { headers: { Authorization: `Bearer ${token}` } });
-      setDonations(prev => prev.map(d => d.id === id ? { ...d, status: 'Approved' } : d));
+      await api.patch(`/blood-receive/${id}/status?status=APPROVED`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      setDonations(prev => prev.map(d => d.id === id ? { ...d, status: 'APPROVED' } : d));
       toast.success('Đã duyệt yêu cầu nhận máu thành công!', { toastId: 'approve-success' });
     } catch (err) {
       toast.error('Không thể duyệt yêu cầu nhận máu!', { toastId: 'approve-error' });
@@ -103,8 +77,8 @@ const BloodDonationApprovalPage = () => {
         toast.error("Không tìm thấy token xác thực!");
         return;
       }
-      await api.patch(`/api/blood-receive/${id}/status?status=REJECTED`, {}, { headers: { Authorization: `Bearer ${token}` } });
-      setDonations(prev => prev.map(d => d.id === id ? { ...d, status: 'Rejected' } : d));
+      await api.patch(`/blood-receive/${id}/status?status=REJECTED`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      setDonations(prev => prev.map(d => d.id === id ? { ...d, status: 'REJECTED' } : d));
       toast.success('Đã từ chối yêu cầu nhận máu thành công!', { toastId: 'reject-success' });
     } catch (err) {
       toast.error('Không thể từ chối yêu cầu nhận máu!', { toastId: 'reject-error' });
@@ -167,17 +141,17 @@ const BloodDonationApprovalPage = () => {
       dataIndex: 'status',
       key: 'status',
       filters: [
-        { text: 'Đang chờ', value: 'Pending' },
-        { text: 'Đã duyệt', value: 'Approved' },
-        { text: 'Đã từ chối', value: 'Rejected' },
+        { text: 'Đang chờ', value: 'PENDING' },
+        { text: 'Đã duyệt', value: 'APPROVED' },
+        { text: 'Đã từ chối', value: 'REJECTED' },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => {
         let color = '';
-        if (status === 'Pending') color = 'orange';
-        else if (status === 'Approved') color = 'green';
-        else if (status === 'Rejected') color = 'red';
-        return <Tag color={color}>{status === 'Pending' ? 'Đang chờ' : status === 'Approved' ? 'Đã duyệt' : 'Đã từ chối'}</Tag>;
+        if (status === 'PENDING') color = 'orange';
+        else if (status === 'APPROVED') color = 'green';
+        else if (status === 'REJECTED') color = 'red';
+        return <Tag color={color}>{status === 'PENDING' ? 'Đang chờ' : status === 'APPROVED' ? 'Đã duyệt' : 'Đã từ chối'}</Tag>;
       },
       width: 120,
     },
@@ -186,7 +160,7 @@ const BloodDonationApprovalPage = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="small">
-          {record.status === 'Pending' && (
+          {record.status === 'PENDING' && (
             <>
               <Popconfirm
                 title="Bạn có chắc chắn muốn duyệt yêu cầu này?"
@@ -223,9 +197,9 @@ const BloodDonationApprovalPage = () => {
               </Popconfirm>
             </>
           )}
-          {record.status !== 'Pending' && (
-            <Tag color={record.status === 'Approved' ? 'green' : 'red'}>
-              {record.status === 'Approved' ? 'Đã duyệt' : 'Đã từ chối'}
+          {record.status !== 'PENDING' && (
+            <Tag color={record.status === 'APPROVED' ? 'green' : 'red'}>
+              {record.status === 'APPROVED' ? 'Đã duyệt' : 'Đã từ chối'}
             </Tag>
           )}
         </Space>
