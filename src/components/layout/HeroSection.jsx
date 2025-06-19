@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import {
@@ -23,7 +22,7 @@ function HeroSection({ onLearnMoreClick }) {
     fullName: userData?.fullName || "",
     email: userData?.email || "",
     phone: userData?.phone || "",
-    date_of_birth: userData?.date_of_birth || "",
+    birthdate: userData?.birthdate || "",
     gender: userData?.gender || "",
 
     bloodType: userData?.bloodType || "",
@@ -35,8 +34,8 @@ function HeroSection({ onLearnMoreClick }) {
     last_donation: "",
     preferred_date: "",
     preferred_time: "",
-    emergency_contact: userData?.emergency_contact || "",
-    emergency_phone: userData?.emergency_phone || "",
+    emergencyName: userData?.emergencyName || "",
+    emergencyPhone: userData?.emergencyPhone || "",
     has_chronic_disease: false,
     is_taking_medication: false,
     has_recent_surgery: false,
@@ -49,8 +48,8 @@ function HeroSection({ onLearnMoreClick }) {
       fullName: userData?.fullName || "",
       email: userData?.email || "",
       phone: userData?.phone || "",
-      date_of_birth: userData?.date_of_birth || "",
-      gender: userData?.gender || "",
+      birthdate: userData?.birthdate || "",
+      gender: userData?.gender?.toLowerCase?.() || "",
 
       bloodType: userData?.bloodType || "",
       weight: userData?.weight || "",
@@ -61,8 +60,8 @@ function HeroSection({ onLearnMoreClick }) {
       last_donation: "",
       preferred_date: "",
       preferred_time: "",
-      emergency_contact: userData?.emergency_contact || "",
-      emergency_phone: userData?.emergency_phone || "",
+      emergencyName: userData?.emergencyName || "",
+      emergencyPhone: userData?.emergencyPhone || "",
       has_chronic_disease: false,
       is_taking_medication: false,
       has_recent_surgery: false,
@@ -91,8 +90,8 @@ function HeroSection({ onLearnMoreClick }) {
 
     // Always allow changes for these fields
     const alwaysEditableFields = [
-      "emergency_contact",
-      "emergency_phone",
+      "emergencyName",
+      "emergencyPhone",
       "agrees_to_terms",
       "medical_history",
       "last_donation",
@@ -108,14 +107,13 @@ function HeroSection({ onLearnMoreClick }) {
       "fullName",
       "email",
       "phone",
-      "date_of_birth",
+      "birthdate",
       "gender",
 
       "bloodType",
       "weight",
       "height",
       "address",
-
     ];
 
     // Check if the field is user-related and its value is empty in userData
@@ -152,7 +150,7 @@ function HeroSection({ onLearnMoreClick }) {
 
     return {
       gender: genderMap[formData.gender] || null,
-      birthdate: formData.date_of_birth || null,
+      birthdate: formData.birthdate || null,
       height: formData.height ? parseFloat(formData.height) / 100 : null, // Convert cm to meters
       weight: formData.weight ? parseFloat(formData.weight) : null,
       last_donation: formData.last_donation || null,
@@ -160,11 +158,10 @@ function HeroSection({ onLearnMoreClick }) {
       bloodType: formData.bloodType || null,
       wantedDate: formData.preferred_date || null,
       wantedHour: formatTime(formData.preferred_time),
-      emergencyName: formData.emergency_contact || null,
-      emergencyPhone: formData.emergency_phone || null,
+      emergencyName: formData.emergencyName || null,
+      emergencyPhone: formData.emergencyPhone || null,
 
       location: "Bệnh viện Chợ Rẫy - 201B Nguyễn Chí Thanh, Quận 5, TP.HCM",
-
     };
   };
 
@@ -206,9 +203,9 @@ function HeroSection({ onLearnMoreClick }) {
       }
 
       // Calculate age
-      if (donationFormData.date_of_birth) {
+      if (donationFormData.birthdate) {
         const today = new Date();
-        const birthDate = new Date(donationFormData.date_of_birth);
+        const birthDate = new Date(donationFormData.birthdate);
         const age = today.getFullYear() - birthDate.getFullYear();
 
         if (age < 18 || age > 60) {
@@ -258,7 +255,6 @@ function HeroSection({ onLearnMoreClick }) {
           position: "top-right",
 
           autoClose: 5000,
-
         }
       );
     } finally {
@@ -433,12 +429,12 @@ function HeroSection({ onLearnMoreClick }) {
                         <input
                           type="date"
                           className={`form-control ${
-                            userData?.date_of_birth ? "bg-light" : ""
+                            userData?.birthdate ? "bg-light" : ""
                           }`}
-                          name="date_of_birth"
-                          value={donationFormData.date_of_birth}
+                          name="birthdate"
+                          value={donationFormData.birthdate}
                           onChange={handleDonationInputChange}
-                          readOnly={!!userData?.date_of_birth}
+                          readOnly={!!userData?.birthdate}
                           disabled={isSubmitting}
                           required
                         />
@@ -464,9 +460,7 @@ function HeroSection({ onLearnMoreClick }) {
                       </div>
                     </div>
                     <div className="row">
-
                       <div className="col-md-12 mb-3">
-
                         <label className="form-label fw-semibold">
                           Địa chỉ
                         </label>
@@ -483,7 +477,6 @@ function HeroSection({ onLearnMoreClick }) {
                           disabled={isSubmitting}
                         />
                       </div>
-
                     </div>
                   </div>
 
@@ -500,9 +493,7 @@ function HeroSection({ onLearnMoreClick }) {
                         </label>
                         <select
                           className={`form-select ${
-
                             userData?.bloodType ? "bg-light" : ""
-
                           }`}
                           name="bloodType"
                           value={donationFormData.bloodType}
@@ -713,8 +704,8 @@ function HeroSection({ onLearnMoreClick }) {
                         <input
                           type="text"
                           className="form-control"
-                          name="emergency_contact"
-                          value={donationFormData.emergency_contact}
+                          name="emergencyName"
+                          value={donationFormData.emergencyName}
                           onChange={handleDonationInputChange}
                           placeholder="Tên người thân"
                           disabled={isSubmitting}
@@ -727,8 +718,8 @@ function HeroSection({ onLearnMoreClick }) {
                         <input
                           type="tel"
                           className="form-control"
-                          name="emergency_phone"
-                          value={donationFormData.emergency_phone}
+                          name="emergencyPhone"
+                          value={donationFormData.emergencyPhone}
                           onChange={handleDonationInputChange}
                           placeholder="Số điện thoại người thân"
                           disabled={isSubmitting}
