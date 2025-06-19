@@ -14,7 +14,7 @@ const HistoryComponent = () => {
       } catch (error) {
         setDonationHistory([
           {
-            date: "05-07-2023",
+            date: "05-19-2023",
             location: "Bệnh Viện Chợ Rẫy",
             amount: "210ml",
           },
