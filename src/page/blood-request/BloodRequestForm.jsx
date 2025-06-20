@@ -431,7 +431,11 @@ function BloodRequestForm() {
                   <Input
                     value="Bệnh viện Chợ Rẫy - 201B Nguyễn Chí Thanh, Quận 5, TP.HCM"
                     disabled
-                    style={{ width: '100%', color: 'rgba(0,0,0,0.88)', background: '#fff' }}
+                    style={{
+                      width: "100%",
+                      color: "rgba(0,0,0,0.88)",
+                      background: "#fff",
+                    }}
                   />
                 </Form.Item>
               </Col>
@@ -518,5 +522,3 @@ function BloodRequestForm() {
 }
 
 export default BloodRequestForm;
-
-
