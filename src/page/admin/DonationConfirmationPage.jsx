@@ -3,7 +3,6 @@ import { Table, Tag, Button, Input, Space, Card, Popconfirm, Tooltip, Spin } fro
 import { SearchOutlined, CheckCircleOutlined, CloseCircleOutlined, UserOutlined, CalendarOutlined, HeartOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import dayjs from 'dayjs';
 import api from '../../config/api';
 
 // Dữ liệu mẫu trả về từ API (dùng để test hoặc tham khảo)
@@ -55,7 +54,7 @@ const DonationConfirmationPage = () => {
       } else {
         setDonations(allResults);
       }
-    } catch (err) {
+    } catch(err) {
       setDonations([]);
       toast.error("Không thể lấy dữ liệu từ máy chủ!", {
         toastId: "fetch-error",
@@ -68,6 +67,10 @@ const DonationConfirmationPage = () => {
   useEffect(() => {
     fetchBloodRegisterList();
   }, []);
+
+  useEffect(() => {
+    console.log('Donations:', donations);
+  }, [donations]);
 
   const handleApprove = async (id) => {
     try {
@@ -116,30 +119,82 @@ const DonationConfirmationPage = () => {
       (donation.donorName || '').toLowerCase().includes(searchText.toLowerCase()) ||
       (donation.bloodType || '').toLowerCase().includes(searchText.toLowerCase()) ||
       (donation.component || '').toLowerCase().includes(searchText.toLowerCase()) ||
-      (donation.id || '').toLowerCase().includes(searchText.toLowerCase());
+      (donation.id ? donation.id.toString().toLowerCase().includes(searchText.toLowerCase()) : false);
     return matchesSearch;
   });
 
-  // Tạo columns động dựa trên dữ liệu thực tế
-  const dynamicColumns = donations[0]
-    ? Object.keys(donations[0]).map(key => ({
-        title: key,
-        dataIndex: key,
-        key,
-        render: value => {
-          // Nếu là object, stringify
-          if (typeof value === 'object' && value !== null) {
-            return <pre style={{whiteSpace: 'pre-wrap'}}>{JSON.stringify(value, null, 2)}</pre>;
-          }
-          // Nếu là ngày dạng yyyy-mm-dd
-          if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
-            return new Date(value).toLocaleDateString('vi-VN');
-          }
-          // Nếu là số lớn, hiển thị bình thường
-          return value;
-        }
-      }))
-    : [];
+  // Format wantedHour
+  const formatWantedHour = (wantedHour) => {
+    if (!wantedHour || typeof wantedHour !== 'object') return '';
+    const { hour, minute, second } = wantedHour;
+    if (
+      typeof hour === 'number' &&
+      typeof minute === 'number' &&
+      typeof second === 'number'
+    ) {
+      // Pad to 2 digits
+      const pad = (n) => n.toString().padStart(2, '0');
+      return `${pad(hour)}:${pad(minute)}:${pad(second)}`;
+    }
+    return JSON.stringify(wantedHour);
+  };
+
+  const columns = [
+    { title: 'id', dataIndex: 'id', key: 'id' },
+    { title: 'status', dataIndex: 'status', key: 'status' },
+    { 
+      title: 'wanted_date', 
+      dataIndex: 'wanted_date', 
+      key: 'wanted_date',
+      render: value => value ? new Date(value).toLocaleDateString('vi-VN') : ''
+    },
+    { 
+      title: 'wanted_hour', 
+      dataIndex: 'wanted_hour', 
+      key: 'wanted_hour',
+      render: value => formatWantedHour(value)
+    },
+    { title: 'user_id', dataIndex: 'user_id', key: 'user_id' },
+    { title: 'Người liên hệ khẩn cấp', dataIndex: 'emergency_contact', key: 'emergency_contact' },
+    { title: 'SĐT khẩn cấp', dataIndex: 'emergency_phone', key: 'emergency_phone' },
+    {
+      title: 'Hành động',
+      key: 'action',
+      render: (_, record) => (
+        <Space>
+          <Popconfirm
+            title="Bạn có chắc chắn muốn duyệt yêu cầu này?"
+            onConfirm={() => handleApprove(record.id)}
+            okText="Duyệt"
+            cancelText="Hủy"
+            okButtonProps={{ type: 'primary', style: { background: '#4CAF50', borderColor: '#4CAF50' } }}
+          >
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<CheckCircleOutlined style={{ fontSize: 24 }} />}
+              disabled={record.status === 'APPROVED'}
+              style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', boxShadow: '0 2px 8px #b2f2bb' }}
+            />
+          </Popconfirm>
+          <Popconfirm
+            title="Bạn có chắc chắn muốn từ chối yêu cầu này?"
+            onConfirm={() => handleReject(record.id)}
+            okText="Từ chối"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+          >
+            <Button
+              shape="circle"
+              icon={<CloseCircleOutlined style={{ fontSize: 24, color: '#f44336' }} />}
+              disabled={record.status === 'REJECTED'}
+              style={{ borderColor: '#f44336', backgroundColor: 'white', boxShadow: '0 2px 8px #ffc9c9' }}
+            />
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <div style={{ padding: '24px' }}>
@@ -163,13 +218,8 @@ const DonationConfirmationPage = () => {
           </div>
         ) : (
           <Table
-            columns={dynamicColumns}
-            dataSource={donations.filter(donation => {
-              // Lọc theo searchText trên tất cả các trường dạng string
-              return Object.values(donation).some(val =>
-                typeof val === 'string' && val.toLowerCase().includes(searchText.toLowerCase())
-              );
-            })}
+            columns={columns}
+            dataSource={filteredDonations}
             pagination={{ pageSize: 10 }}
             bordered
             rowKey="id"

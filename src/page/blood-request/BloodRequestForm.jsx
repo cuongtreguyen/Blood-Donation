@@ -27,6 +27,9 @@ import api from "../../config/api";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { useAuthCheck } from "../../hook/useAuthCheck";
+import dayjs from "dayjs";
+import { useDispatch } from "react-redux";
+import { login } from "../../redux/features/userSlice";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -36,17 +39,28 @@ function BloodRequestForm() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, userData } = useAuthCheck("/login", true);
   const [submitting, setSubmitting] = useState(false);
+  const dispatch = useDispatch();
 
   // Điền thông tin từ dữ liệu người dùng
   useEffect(() => {
     if (userData) {
       const formData = {
-        full_name:
-          userData.fullName || userData.full_name || userData.name || "",
+        full_name: userData.fullName || userData.full_name || userData.name || "",
         email: userData.email || "",
         phone: userData.phone || userData.phoneNumber || "",
-        gender: userData.gender || "",
+        gender: userData.gender ? userData.gender.toUpperCase() : "",
         blood_type: userData.bloodType || userData.blood_type || "",
+        date_of_birth: userData.date_of_birth
+          ? dayjs(userData.date_of_birth)
+          : userData.birthdate
+          ? dayjs(userData.birthdate)
+          : null,
+        address: userData.address || "",
+        city: userData.city || "",
+        height: userData.height || "",
+        weight: userData.weight || "",
+        emergencyName: userData.emergencyName || "",
+        emergencyPhone: userData.emergencyPhone || "",
       };
       form.setFieldsValue(formData);
     }
@@ -68,18 +82,16 @@ function BloodRequestForm() {
       setSubmitting(true); // Bắt đầu trạng thái loading
 
       // Map form values to API-compatible field names
-      const formData = {
-        request_type: values.requestType,
-        full_name: values.full_name,
-        email: values.email,
-        phone: values.phone,
-        date_of_birth: values.date_of_birth
-          ? moment(values.date_of_birth).format("YYYY-MM-DD")
-          : "",
-        gender: values.gender,
-        address: values.address,
-        city: values.city,
-        blood_type: values.blood_type,
+      const mergedValues = {
+        ...values,
+        full_name: userData.fullName || userData.full_name || userData.name || values.full_name,
+        email: userData.email || values.email,
+        phone: userData.phone || userData.phoneNumber || values.phone,
+        date_of_birth: userData.date_of_birth || values.date_of_birth,
+        gender: userData.gender || values.gender,
+        address: userData.address || values.address,
+        city: userData.city || values.city,
+        blood_type: userData.bloodType || userData.blood_type || values.blood_type,
         weight: values.weight,
         height: values.height,
         last_donation_date: values.last_donation_date
@@ -94,22 +106,24 @@ function BloodRequestForm() {
           : "",
         preferred_time: values.preferred_time,
         preferred_location: values.preferred_location,
-        emergency_contact: values.emergency_contact,
-        emergency_phone: values.emergency_phone,
+        emergencyName: values.emergencyName,
+        emergencyPhone: values.emergencyPhone,
         agrees_to_terms: values.agreement,
       };
 
       // gắn /api/blood-register
-      const response = await api.post("/blood-requests", formData);
+      const response = await api.post("/blood-receive", mergedValues);
 
       // Hiển thị thông báo thành công
       toast.success("Yêu cầu nhận máu đã được gửi thành công!");
 
+      // Chuyển hướng về trang chủ sau 1.5 giây
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
+
       // Reset form
       form.resetFields();
-
-      // Chuyển hướng đến trang xác nhận
-      navigate("/request-success");
     } catch (error) {
       console.error("Lỗi khi gửi yêu cầu:", error);
 
@@ -143,6 +157,18 @@ function BloodRequestForm() {
   if (!isAuthenticated) {
     return null;
   }
+
+  const bloodTypeMap = {
+    A_POSITIVE: "A+",
+    A_NEGATIVE: "A-",
+    B_POSITIVE: "B+",
+    B_NEGATIVE: "B-",
+    AB_POSITIVE: "AB+",
+    AB_NEGATIVE: "AB-",
+    O_POSITIVE: "O+",
+    O_NEGATIVE: "O-",
+    unknown: "Chưa biết"
+  };
 
   return (
     <div className="py-6 px-4">
@@ -189,6 +215,8 @@ function BloodRequestForm() {
                   <Input
                     prefix={<UserOutlined />}
                     placeholder="Nhập họ và tên"
+                    readOnly
+                    value={userData.fullName || userData.full_name || userData.name || ''}
                   />
                 </Form.Item>
               </Col>
@@ -205,6 +233,8 @@ function BloodRequestForm() {
                   <Input
                     prefix={<MailOutlined />}
                     placeholder="Email liên hệ"
+                    readOnly
+                    value={userData.email || ''}
                   />
                 </Form.Item>
               </Col>
@@ -226,23 +256,32 @@ function BloodRequestForm() {
                   <Input
                     prefix={<PhoneOutlined />}
                     placeholder="Số điện thoại"
+                    readOnly
+                    value={userData.phone || userData.phoneNumber || ''}
                   />
                 </Form.Item>
               </Col>
 
               <Col xs={24} md={8}>
                 <Form.Item
-                  name="date_of_birth"
+                  name="birthdate"
                   label="Ngày sinh"
-                  rules={[
-                    { required: true, message: "Vui lòng chọn ngày sinh" },
-                  ]}
+                  rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
                 >
-                  <DatePicker
-                    placeholder="Ngày/Tháng/Năm"
-                    style={{ width: "100%" }}
-                    format="DD/MM/YYYY"
-                  />
+                  {userData?.birthdate ? (
+                    <div className="ant-form-item-control-input-content" style={{ padding: '7px 11px', background: '#f5f5f5', borderRadius: 4 }}>
+                      {dayjs(userData.birthdate).format("DD/MM/YYYY")}
+                    </div>
+                  ) : (
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="birthdate"
+                      value={form.getFieldValue("birthdate") || ""}
+                      onChange={e => form.setFieldsValue({ birthdate: e.target.value })}
+                      required
+                    />
+                  )}
                 </Form.Item>
               </Col>
 
@@ -250,15 +289,23 @@ function BloodRequestForm() {
                 <Form.Item
                   name="gender"
                   label="Giới tính"
-                  rules={[
-                    { required: true, message: "Vui lòng chọn giới tính" },
-                  ]}
+                  rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
                 >
-                  <Select placeholder="Chọn giới tính">
-                    <Option value="male">Nam</Option>
-                    <Option value="female">Nữ</Option>
-                    <Option value="other">Khác</Option>
-                  </Select>
+                  {(() => {
+                    let genderValue = (userData?.gender || "").toLowerCase();
+                    let genderDisplay = "";
+                    if (["nam", "male", "nam giới", "m"].includes(genderValue)) genderDisplay = "Nam";
+                    else if (["nữ", "nu", "female", "nữ giới", "f"].includes(genderValue)) genderDisplay = "Nữ";
+                    else if (["khác", "other", "o"].includes(genderValue)) genderDisplay = "Khác";
+                    if (genderDisplay) {
+                      return (
+                        <div className="ant-form-item-control-input-content" style={{ padding: '7px 11px', background: '#f5f5f5', borderRadius: 4 }}>
+                          {genderDisplay}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </Form.Item>
               </Col>
             </Row>
@@ -273,19 +320,9 @@ function BloodRequestForm() {
                   <Input
                     prefix={<EnvironmentOutlined />}
                     placeholder="Địa chỉ liên hệ"
+                    readOnly
+                    value={userData.address || ''}
                   />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={8}>
-                <Form.Item
-                  name="city"
-                  label="Thành phố"
-                  rules={[
-                    { required: true, message: "Vui lòng nhập thành phố" },
-                  ]}
-                >
-                  <Input placeholder="Thành phố" />
                 </Form.Item>
               </Col>
             </Row>
@@ -302,20 +339,26 @@ function BloodRequestForm() {
                 <Form.Item
                   name="blood_type"
                   label="Nhóm máu"
-                  rules={[
-                    { required: true, message: "Vui lòng chọn nhóm máu" },
-                  ]}
+                  rules={[{ required: true, message: "Vui lòng chọn nhóm máu" }]}
                 >
-                  <Select placeholder="Chọn nhóm máu">
-                    <Option value="A_POSITIVE">A+</Option>
-                    <Option value="A_NEGATIVE">A-</Option>
-                    <Option value="B_POSITIVE">B+</Option>
-                    <Option value="B_NEGATIVE">B-</Option>
-                    <Option value="AB_POSITIVE">AB+</Option>
-                    <Option value="AB_NEGATIVE">AB-</Option>
-                    <Option value="O_POSITIVE">O+</Option>
-                    <Option value="O_NEGATIVE">O-</Option>
-                  </Select>
+                  <select
+                    className={`form-select ${userData?.bloodType || userData?.blood_type ? "bg-light" : ""}`}
+                    name="blood_type"
+                    value={(userData?.bloodType || userData?.blood_type || form.getFieldValue("blood_type") || "")}
+                    onChange={e => form.setFieldsValue({ blood_type: e.target.value })}
+                    disabled={!!(userData?.bloodType || userData?.blood_type)}
+                  >
+                    <option value="">Chọn nhóm máu</option>
+                    <option value="A_POSITIVE">A+</option>
+                    <option value="A_NEGATIVE">A-</option>
+                    <option value="B_POSITIVE">B+</option>
+                    <option value="B_NEGATIVE">B-</option>
+                    <option value="AB_POSITIVE">AB+</option>
+                    <option value="AB_NEGATIVE">AB-</option>
+                    <option value="O_POSITIVE">O+</option>
+                    <option value="O_NEGATIVE">O-</option>
+                    <option value="unknown">Chưa biết</option>
+                  </select>
                 </Form.Item>
               </Col>
 
@@ -332,6 +375,8 @@ function BloodRequestForm() {
                     placeholder="Cân nặng"
                     min={0}
                     max={200}
+                    readOnly
+                    value={userData.weight || ''}
                   />
                 </Form.Item>
               </Col>
@@ -343,6 +388,8 @@ function BloodRequestForm() {
                     placeholder="Chiều cao"
                     min={0}
                     max={250}
+                    readOnly
+                    value={userData.height || ''}
                   />
                 </Form.Item>
               </Col>
@@ -431,11 +478,7 @@ function BloodRequestForm() {
                   <Input
                     value="Bệnh viện Chợ Rẫy - 201B Nguyễn Chí Thanh, Quận 5, TP.HCM"
                     disabled
-                    style={{
-                      width: "100%",
-                      color: "rgba(0,0,0,0.88)",
-                      background: "#fff",
-                    }}
+                    style={{ width: '100%', color: 'rgba(0,0,0,0.88)', background: '#fff' }}
                   />
                 </Form.Item>
               </Col>
@@ -451,32 +494,26 @@ function BloodRequestForm() {
             <Row gutter={16}>
               <Col xs={24} md={12}>
                 <Form.Item
-                  name="emergency_contact"
+                  name="emergencyName"
                   label="Người liên hệ khẩn cấp"
                   rules={[
-                    {
-                      required: true,
-                      message: "Vui lòng nhập tên người liên hệ",
-                    },
+                    { required: true, message: "Vui lòng nhập tên người liên hệ" },
                   ]}
                 >
-                  <Input placeholder="Họ tên người liên hệ" />
+                  <Input placeholder="Họ tên người liên hệ" readOnly />
                 </Form.Item>
               </Col>
 
               <Col xs={24} md={12}>
                 <Form.Item
-                  name="emergency_phone"
+                  name="emergencyPhone"
                   label="Số điện thoại"
                   rules={[
                     { required: true, message: "Vui lòng nhập số điện thoại" },
-                    {
-                      pattern: /^[0-9]{10}$/,
-                      message: "Số điện thoại phải có 10 chữ số",
-                    },
+                    { pattern: /^[0-9]{10}$/, message: "Số điện thoại phải có 10 chữ số" },
                   ]}
                 >
-                  <Input placeholder="Số điện thoại liên hệ" />
+                  <Input placeholder="Số điện thoại liên hệ" readOnly />
                 </Form.Item>
               </Col>
             </Row>
