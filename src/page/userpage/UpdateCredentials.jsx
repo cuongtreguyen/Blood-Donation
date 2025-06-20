@@ -32,15 +32,15 @@ const UpdateCredentials = ({ onClose }) => {
       return;
     }
 
-    const updatePayload = { currentPassword };
     let isChangingEmail = false;
     let isChangingPassword = false;
 
+    // Kiểm tra xem có thay đổi email không
     if (email && email !== userData.email) {
-      updatePayload.email = email;
       isChangingEmail = true;
     }
 
+    // Kiểm tra xem có thay đổi password không
     if (newPassword || confirmPassword) {
       if (!newPassword || !confirmPassword) {
         toast.error("Vui lòng nhập đầy đủ mật khẩu mới và xác nhận!");
@@ -58,8 +58,6 @@ const UpdateCredentials = ({ onClose }) => {
         toast.error("Mật khẩu mới phải khác mật khẩu hiện tại!");
         return;
       }
-
-      updatePayload.newPassword = newPassword;
       isChangingPassword = true;
     }
 
@@ -70,10 +68,22 @@ const UpdateCredentials = ({ onClose }) => {
 
     setIsLoading(true);
     try {
+      // Chuẩn bị payload theo format API: chỉ email và password
+      const updatePayload = {};
+      
+      if (isChangingEmail) {
+        updatePayload.email = email;
+      }
+      
+      if (isChangingPassword) {
+        updatePayload.password = newPassword; // API nhận 'password', không phải 'newPassword'
+      }
+
       await api.put("/update-user/email-password", updatePayload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      // Cập nhật Redux store nếu email thay đổi
       if (isChangingEmail) {
         const updatedUser = { ...userData, email };
         dispatch(login(updatedUser));
