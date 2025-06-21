@@ -18,7 +18,7 @@ function EmergencyBanner() {
       <strong>🚨 KHẨN CẤP:</strong> Cần gấp nhóm máu O- và AB+. 
       
       {/* Link đăng ký hiến máu */}
-      <a href="#donate" className="alert-link fw-bold ms-2">Đăng ký ngay!</a>
+      <a href="#home" className="alert-link fw-bold ms-2">Đăng ký ngay!</a>
       
       {/* Nút đóng banner */}
       <button 

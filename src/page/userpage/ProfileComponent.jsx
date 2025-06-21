@@ -391,6 +391,22 @@ const ProfileComponent = () => {
         toast.error("Không tìm thấy token xác thực!");
         return;
       }
+      const formatDateForAPI = (dateString) => {
+    if (!dateString || dateString.trim() === "") return null;
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        console.error("Invalid date:", dateString);
+        return null;
+      }
+      // Trả về format YYYY-MM-DD
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return null;
+    }
+  };
 
       const response = await api.put(
         "/update-user",
@@ -402,7 +418,8 @@ const ProfileComponent = () => {
           birthdate: formData.birthdate || null,
           height: formData.height ? parseFloat(formData.height) : null,
           weight: formData.weight ? parseFloat(formData.weight) : null,
-          lastDonation: formData.lastDonation || null,
+          // lastDonation: formData.lastDonation || null,
+          lastDonation: formatDateForAPI(formData.lastDonation),
           medicalHistory: formData.medicalHistory || null,
           emergencyName: formData.emergencyName || null,
           emergencyPhone: formData.emergencyPhone || null,
