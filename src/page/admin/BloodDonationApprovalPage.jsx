@@ -4,6 +4,7 @@ import { SearchOutlined, SafetyOutlined, CloseCircleOutlined } from '@ant-design
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import api from '../../config/api';
+import dayjs from "dayjs";
 
 // Dữ liệu mẫu trả về từ API blood-receive/list-all (tham khảo)
 const value = [
@@ -20,6 +21,36 @@ const value = [
     emergency: true
   }
 ];
+
+const bloodTypeMap = {
+  A_POSITIVE: "A+",
+  A_NEGATIVE: "A-",
+  B_POSITIVE: "B+",
+  B_NEGATIVE: "B-",
+  AB_POSITIVE: "AB+",
+  AB_NEGATIVE: "AB-",
+  O_POSITIVE: "O+",
+  O_NEGATIVE: "O-",
+  unknown: "Chưa biết"
+};
+
+const getFormattedBirthdate = (date_of_birth) => {
+  if (!date_of_birth) return "";
+  if (!isNaN(date_of_birth) && String(date_of_birth).length >= 8) {
+    return dayjs(Number(date_of_birth)).format("D/M/YYYY");
+  }
+  return dayjs(date_of_birth).format("D/M/YYYY");
+};
+
+const getFormattedGender = (gender) => {
+  if (!gender) return "";
+  if (gender === "male" || gender === "MALE") return "Nam";
+  if (gender === "female" || gender === "FEMALE") return "Nữ";
+  if (gender === "other" || gender === "OTHER") return "Khác";
+  return gender;
+};
+
+const getFormattedBloodType = (blood_type) => bloodTypeMap[blood_type] || "";
 
 const BloodDonationApprovalPage = () => {
   const [donations, setDonations] = useState([]);
@@ -44,7 +75,7 @@ const BloodDonationApprovalPage = () => {
       } else {
         setDonations(res.data);
       }
-    } catch (err) {
+    } catch (err){
       setDonations([]);
       toast.error("Không thể lấy dữ liệu từ máy chủ!", { toastId: "fetch-error" });
     }
@@ -167,15 +198,14 @@ const BloodDonationApprovalPage = () => {
                 onConfirm={() => handleApprove(record.id)}
                 okText="Duyệt"
                 cancelText="Hủy"
-                okButtonProps={{ type: 'primary', style: { background: '#52c41a', borderColor: '#52c41a' } }}
+                okButtonProps={{ type: 'primary', style: { background: '#4CAF50', borderColor: '#4CAF50' } }}
               >
                 <Tooltip title="Duyệt">
                   <Button
-                    icon={<SafetyOutlined style={{ color: 'white' }} />}
                     type="primary"
-                    size="small"
-                    style={{ background: '#52c41a', borderColor: '#52c41a' }}
                     shape="circle"
+                    icon={<SafetyOutlined style={{ fontSize: 24 }} />}
+                    style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', boxShadow: '0 2px 8px #b2f2bb' }}
                   />
                 </Tooltip>
               </Popconfirm>
@@ -188,10 +218,9 @@ const BloodDonationApprovalPage = () => {
               >
                 <Tooltip title="Từ chối">
                   <Button
-                    danger
-                    icon={<CloseCircleOutlined />}
-                    size="small"
                     shape="circle"
+                    icon={<CloseCircleOutlined style={{ fontSize: 24, color: '#f44336' }} />}
+                    style={{ borderColor: '#f44336', backgroundColor: 'white', boxShadow: '0 2px 8px #ffc9c9' }}
                   />
                 </Tooltip>
               </Popconfirm>
