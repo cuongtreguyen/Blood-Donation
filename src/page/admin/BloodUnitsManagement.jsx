@@ -1,433 +1,297 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Space, Card, Modal, Form, Select, Popconfirm, DatePicker, Tooltip, Input, Alert, Spin } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { Table, Tag, Card, Input, Spin, Row, Col, Statistic, Button, Modal, Form, Select, Popconfirm, Tooltip, Space, InputNumber } from 'antd';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import dayjs from 'dayjs';
-import SearchOutlined from '@ant-design/icons/lib/icons/SearchOutlined';
-import { BarChartOutlined } from '@ant-design/icons';
-import { Row, Col, Statistic } from 'antd';
-import { WarningOutlined } from '@ant-design/icons';
+import { SearchOutlined, BarChartOutlined, WarningOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import api from '../../config/api';
 
 const { Option } = Select;
 
-const mockBloodUnits = [
-  {
-    key: 'BU001', id: 'BU001', bloodType: 'A+', component: 'Whole Blood', 
-    collectionDate: '2023-01-01', expirationDate: '2023-02-12', status: 'available' 
-  },
-  {
-    key: 'BU002', id: 'BU002', bloodType: 'B-', component: 'Plasma', 
-    collectionDate: '2023-01-05', expirationDate: '2023-03-05', status: 'available' 
-  },
-  {
-    key: 'BU003', id: 'BU003', bloodType: 'O+', component: 'Red Blood Cells', 
-    collectionDate: '2023-01-10', expirationDate: '2023-02-20', status: 'available' 
-  },
-];
+const bloodTypeMap = {
+  A_POSITIVE: 'A+',
+  A_NEGATIVE: 'A-',
+  B_POSITIVE: 'B+',
+  B_NEGATIVE: 'B-',
+  AB_POSITIVE: 'AB+',
+  AB_NEGATIVE: 'AB-',
+  O_POSITIVE: 'O+',
+  O_NEGATIVE: 'O-',
+  UNKNOWN: 'Chưa xác định'
+};
 
 const BloodUnitsManagement = () => {
   const [bloodUnits, setBloodUnits] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const [bloodBanks] = useState([
-    { id: 'BB001', name: 'Bệnh viện Chợ Rẫy' },
-    { id: 'BB002', name: 'Bệnh viện Nhân dân 115' },
-    { id: 'BB003', name: 'Bệnh viện Đại học Y Dược' },
-  ]);
-
-  // Tính toán số lượng máu theo nhóm và thành phần
-  const bloodSummary = bloodUnits.reduce((acc, unit) => {
-    // Theo nhóm máu
-    acc.byBloodType[unit.bloodType] = (acc.byBloodType[unit.bloodType] || 0) + 1;
-    // Theo thành phần
-    acc.byComponent[unit.component] = (acc.byComponent[unit.component] || 0) + 1;
-    return acc;
-  }, { byBloodType: {}, byComponent: {} });
-
-  // Tính toán cảnh báo hạn sử dụng
-  const today = dayjs();
-  const expiringSoonThreshold = 30; // Cảnh báo nếu còn 30 ngày nữa hết hạn
-
-  const expiredUnits = bloodUnits.filter(unit => 
-    unit.expirationDate && dayjs(unit.expirationDate).isBefore(today, 'day')
-  ).length;
-
-  const expiringSoonUnits = bloodUnits.filter(unit => {
-    if (!unit.expirationDate) return false;
-    const expirationDate = dayjs(unit.expirationDate);
-    return expirationDate.isAfter(today, 'day') && expirationDate.diff(today, 'day') <= expiringSoonThreshold;
-  }).length;
-
-  // Cảnh báo lượng máu thấp
-  const lowBloodThreshold = 5; // Ví dụ: ngưỡng cảnh báo máu thấp là 5 đơn vị
-  const isLowBlood = bloodUnits.length <= lowBloodThreshold;
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalMode, setModalMode] = useState('add');
-  const [selectedUnit, setSelectedUnit] = useState(null);
-  const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
+  const [selectedUnitId, setSelectedUnitId] = useState(null);
+  const [form] = Form.useForm();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get('/api/blood-inventory');
-        // Nếu API trả về mảng, gán key/id cho từng phần tử nếu chưa có
-        const data = Array.isArray(res.data)
-          ? res.data.map((item, idx) => ({
-              ...item,
-              key: item.id || `BU${idx + 1}`,
-            }))
-          : [];
-        setBloodUnits(data);
-      } catch (err) {
-        setBloodUnits(mockBloodUnits);
-        toast.warn('Không thể lấy dữ liệu thật, đang hiển thị dữ liệu mẫu!');
+  const fetchBloodInventory = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Yêu cầu xác thực. Vui lòng đăng nhập lại.");
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
 
-  const showModal = (mode, unit = null) => {
-    setModalMode(mode);
-    setSelectedUnit(unit);
-    setIsModalVisible(true);
-
-    if (mode === 'edit' && unit) {
-      form.setFieldsValue({
-        ...unit,
-        collectionDate: unit.collectionDate ? dayjs(unit.collectionDate) : null,
-        expirationDate: unit.expirationDate ? dayjs(unit.expirationDate) : null,
+      const res = await api.get('/blood-inventory', {
+        headers: { Authorization: `Bearer ${token}` }
       });
-    } else {
-      form.resetFields();
+      
+      setBloodUnits(res.data && Array.isArray(res.data) ? res.data : []);
+
+    } catch (err) {
+      setBloodUnits([]);
+      toast.error("Không thể tải dữ liệu kho máu từ máy chủ.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleOk = () => {
-    form.validateFields().then(values => {
-      const newUnit = {
-        ...values,
-        collectionDate: values.collectionDate ? values.collectionDate.format('YYYY-MM-DD') : null,
-        expirationDate: values.expirationDate ? values.expirationDate.format('YYYY-MM-DD') : null,
-      };
+  useEffect(() => {
+    fetchBloodInventory();
+  }, []);
 
-      if (modalMode === 'add') {
-        const newId = `BU${String(bloodUnits.length + 1).padStart(3, '0')}`;
-        setBloodUnits([...bloodUnits, { key: newId, id: newId, ...newUnit }]);
-        toast.success('Thêm đơn vị máu thành công!');
-      } else {
-        setBloodUnits(bloodUnits.map(unit => 
-          unit.key === selectedUnit.key ? { ...unit, ...newUnit } : unit
-        ));
-        toast.success('Cập nhật đơn vị máu thành công!');
-      }
-      setIsModalVisible(false);
+  const showModal = (mode, record = null) => {
+    setModalMode(mode);
+    if (mode === 'edit' && record) {
+      setSelectedUnitId(record.id);
+      form.setFieldsValue({
+        bloodType: record.bloodType,
+        unitsAvailable: record.totalUnitsAvailable,
+      });
+    } else {
       form.resetFields();
-    });
+      setSelectedUnitId(null);
+    }
+    setIsModalVisible(true);
   };
-
+  
   const handleCancel = () => {
     setIsModalVisible(false);
     form.resetFields();
   };
-
-  const handleDelete = (key) => {
-    setBloodUnits(bloodUnits.filter(unit => unit.key !== key));
-    toast.success('Xóa đơn vị máu thành công!');
+  
+  const handleOk = async () => {
+    try {
+      const values = await form.validateFields();
+      const token = localStorage.getItem("token");
+      const headers = { Authorization: `Bearer ${token}` };
+      
+      if (modalMode === 'add') {
+        await api.post('/blood-inventory', values, { headers });
+        toast.success('Thêm đơn vị máu thành công!');
+      } else {
+        if (!selectedUnitId || selectedUnitId <= 0) {
+          toast.error('ID của đơn vị máu không hợp lệ. Không thể cập nhật.');
+          return;
+        }
+        const originalUnit = bloodUnits.find(unit => unit.id === selectedUnitId);
+        if (originalUnit) {
+          const payload = {
+            bloodType: originalUnit.bloodType,
+            unitsAvailable: values.unitsAvailable,
+          };
+          await api.put(`/blood-inventory/${selectedUnitId}`, payload, { headers });
+          toast.success('Cập nhật đơn vị máu thành công!');
+        } else {
+          toast.error('Không thể tìm thấy đơn vị máu để cập nhật.');
+        }
+      }
+      
+      setIsModalVisible(false);
+      fetchBloodInventory(); // Refresh data
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Thao tác thất bại. Vui lòng thử lại.');
+    }
   };
 
-  // Hàm xử lý tìm kiếm
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await api.delete(`/blood-inventory/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Xóa đơn vị máu thành công!');
+      fetchBloodInventory(); // Refresh data
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Không thể xóa đơn vị máu.');
+    }
+  };
+
+
   const handleSearch = (e) => {
-    setSearchText(e.target.value);
+    setSearchText(e.target.value.toLowerCase());
   };
 
-  // Lọc dữ liệu chỉ dựa trên searchText trước khi truyền vào Table
   const filteredBloodUnits = bloodUnits.filter(unit => {
-    const bloodBankName = bloodBanks.find(bank => bank.id === unit.bloodBankId)?.name || '';
-    const matchesSearch = unit.id.toLowerCase().includes(searchText.toLowerCase()) ||
-                          bloodBankName.toLowerCase().includes(searchText.toLowerCase()) ||
-                          unit.bloodType.toLowerCase().includes(searchText.toLowerCase()) ||
-                          unit.component.toLowerCase().includes(searchText.toLowerCase());
-    return matchesSearch;
+    const bloodTypeName = bloodTypeMap[unit.bloodType] || unit.bloodType;
+    return (
+      (unit.id ? unit.id.toString().toLowerCase().includes(searchText) : false) ||
+      (bloodTypeName ? bloodTypeName.toLowerCase().includes(searchText) : false)
+    );
   });
+
+  const totalUnits = filteredBloodUnits.reduce((acc, unit) => acc + (unit.totalUnitsAvailable || 0), 0);
+  const lowStockThreshold = 10;
+  const bloodTypeCounts = filteredBloodUnits.reduce((acc, unit) => {
+    acc[unit.bloodType] = (acc[unit.bloodType] || 0) + (unit.totalUnitsAvailable || 0);
+    return acc;
+  }, {});
 
   const columns = [
     {
-      title: 'ID Đơn vị',
+      title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      sorter: (a, b) => a.id.localeCompare(b.id),
-      width: 100,
+      sorter: (a, b) => a.id - b.id,
     },
     {
       title: 'Nhóm Máu',
       dataIndex: 'bloodType',
       key: 'bloodType',
-      sorter: (a, b) => a.bloodType.localeCompare(b.bloodType),
-      filters: [
-        { text: 'A+', value: 'A+' }, { text: 'A-', value: 'A-' },
-        { text: 'B+', value: 'B+' }, { text: 'B-', value: 'B-' },
-        { text: 'AB+', value: 'AB+' }, { text: 'AB-', value: 'AB-' },
-        { text: 'O+', value: 'O+' }, { text: 'O-', value: 'O-' },
-      ],
-      onFilter: (value, record) => record.bloodType === value,
-      width: 100,
-    },
-    {
-      title: 'Thành Phần',
-      dataIndex: 'component',
-      key: 'component',
-      sorter: (a, b) => a.component.localeCompare(b.component),
-      filters: [
-        { text: 'Whole Blood', value: 'Whole Blood' },
-        { text: 'Plasma', value: 'Plasma' },
-        { text: 'Red Blood Cells', value: 'Red Blood Cells' },
-        { text: 'Platelets', value: 'Platelets' },
-      ],
-      onFilter: (value, record) => record.component === value,
-      width: 150,
-    },
-    {
-      title: 'Ngày Thu Thập',
-      dataIndex: 'collectionDate',
-      key: 'collectionDate',
-      render: (date) => date ? new Date(date).toLocaleDateString('vi-VN') : 'N/A',
-      sorter: (a, b) => new Date(a.collectionDate).getTime() - new Date(b.collectionDate).getTime(),
-      width: 120,
-    },
-    {
-      title: 'Ngày Hết Hạn',
-      dataIndex: 'expirationDate',
-      key: 'expirationDate',
-      render: (date) => date ? new Date(date).toLocaleDateString('vi-VN') : 'N/A',
-      sorter: (a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime(),
-      width: 120,
-    },
-    {
-      title: 'Trạng Thái',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => {
-        let color = '';
-        if (status === 'available') {
-          color = 'green';
-        } else if (status === 'used') {
-          color = 'blue';
-        } else if (status === 'expired') {
-          color = 'red';
-        }
-        return <Tag color={color}>{status === 'available' ? 'Khả dụng' : status === 'used' ? 'Đã sử dụng' : 'Hết hạn'}</Tag>;
+      render: (type) => {
+        const bloodInfo = bloodTypeMap[type];
+        let color = 'blue';
+        if (type && (type.includes('A') || type.includes('B'))) color = 'geekblue';
+        if (type && type.includes('O')) color = 'volcano';
+        return <Tag color={color}>{bloodInfo || type}</Tag>;
       },
-      filters: [
-        { text: 'Khả dụng', value: 'available' },
-        { text: 'Đã sử dụng', value: 'used' },
-        { text: 'Hết hạn', value: 'expired' },
-      ],
-      onFilter: (value, record) => record.status === value,
-      width: 100,
+      sorter: (a, b) => (bloodTypeMap[a.bloodType] || a.bloodType).localeCompare(bloodTypeMap[b.bloodType] || b.bloodType),
+    },
+    {
+      title: 'Số Lượng Hiện Có (ml)',
+      dataIndex: 'totalUnitsAvailable',
+      key: 'totalUnitsAvailable',
+      sorter: (a, b) => (a.totalUnitsAvailable || 0) - (b.totalUnitsAvailable || 0),
+      render: (units) => (units || 0).toLocaleString(),
     },
     {
       title: 'Hành động',
       key: 'action',
       render: (_, record) => (
-        <Space size="small">
+        <Space size="middle">
           <Tooltip title="Sửa">
-            <Button
-              icon={<EditOutlined style={{ color: 'white' }} />}
-              onClick={() => showModal('edit', record)}
-              type="primary"
-              size="small"
-              style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
-            />
+            <Button icon={<EditOutlined />} onClick={() => showModal('edit', record)} />
           </Tooltip>
           <Popconfirm
-            title="Bạn có chắc chắn muốn xóa đơn vị máu này?"
-            onConfirm={() => handleDelete(record.key)}
+            title="Bạn có chắc chắn muốn xóa?"
+            onConfirm={() => handleDelete(record.id)}
             okText="Xóa"
             cancelText="Hủy"
-            okButtonProps={{ danger: true }}
           >
             <Tooltip title="Xóa">
-              <Button
-                danger
-                icon={<DeleteOutlined />}
-                size="small"
-              />
+              <Button icon={<DeleteOutlined />} danger />
             </Tooltip>
           </Popconfirm>
         </Space>
       ),
-      width: 110,
     },
   ];
 
   return (
     <div style={{ padding: '24px' }}>
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <Spin size="large" tip="Đang tải..." />
-        </div>
-      ) : (
-        <>
-          {isLowBlood && (
-            <Alert
-              message="Cảnh Báo Lượng Máu Thấp!"
-              description={`Tổng số đơn vị máu hiện tại là ${bloodUnits.length}, đang dưới ngưỡng an toàn là ${lowBloodThreshold} đơn vị. Vui lòng bổ sung ngay!`}
-              type="error"
-              showIcon
-              closable
-              style={{ marginBottom: '24px' }}
-            />
-          )}
-          <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-            <Col xs={24} sm={12} md={8}>
-              <Card bordered={false} style={{ backgroundColor: '#fff0f6' }}>
+      <Card title="Thống kê Kho Máu" style={{ marginBottom: 24 }}>
+        <Row gutter={16}>
+          <Col span={8}>
+            <Statistic title="Tổng số đơn vị máu (ml)" value={totalUnits.toLocaleString()} prefix={<BarChartOutlined />} />
+          </Col>
+          {Object.entries(bloodTypeCounts).map(([type, count]) => (
+            count < lowStockThreshold && (
+              <Col span={8} key={type}>
                 <Statistic
-                  title="Đơn vị máu hết hạn"
-                  value={expiredUnits}
-                  prefix={<WarningOutlined style={{ color: '#cf1322' }} />}
+                  title={`Cảnh báo: ${bloodTypeMap[type] || type} sắp hết`}
+                  value={count.toLocaleString()}
                   valueStyle={{ color: '#cf1322' }}
-                  suffix="đơn vị"
+                  prefix={<WarningOutlined />}
+                  suffix="ml"
                 />
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} md={8}>
-              <Card bordered={false} style={{ backgroundColor: '#fffbe6' }}>
-                <Statistic
-                  title={`Sắp hết hạn (trong ${expiringSoonThreshold} ngày)`}
-                  value={expiringSoonUnits}
-                  prefix={<WarningOutlined style={{ color: '#faad14' }} />}
-                  valueStyle={{ color: '#faad14' }}
-                  suffix="đơn vị"
-                />
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} md={8}>
-              <Card bordered={false} style={{ backgroundColor: '#e6fffb' }}>
-                <Statistic
-                  title="Tổng số đơn vị máu"
-                  value={bloodUnits.length}
-                  prefix={<BarChartOutlined style={{ color: '#52c41a' }} />}
-                  valueStyle={{ color: '#52c41a' }}
-                  suffix="đơn vị"
-                />
-              </Card>
-            </Col>
-          </Row>
-          <Card
-            title="Quản Lý Đơn Vị Máu"
-            bordered={false}
-            extra={
-              <Space>
-                {/* Input Tìm kiếm */}
-                <Input
-                  placeholder="Tìm kiếm theo ID, Ngân hàng, Nhóm máu, Thành phần..."
-                  prefix={<SearchOutlined />}
-                  value={searchText}
-                  onChange={handleSearch}
-                  style={{ width: 400 }}
-                />
-                {/* Nút Thêm Đơn Vị Máu */}
-                <Button 
-                  type="primary" 
-                  icon={<PlusOutlined />} 
-                  style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
-                  onClick={() => showModal('add')}
-                >
-                  Thêm Đơn Vị Máu
-                </Button>
-              </Space>
-            }
-          >
-            <Table
-              columns={columns}
-              dataSource={filteredBloodUnits}
-              pagination={{ pageSize: 10 }}
-              bordered
-              scroll={{ x: 1200 }}
+              </Col>
+            )
+          ))}
+        </Row>
+      </Card>
+      
+      <Card
+        title="Quản lý Kho Máu"
+        extra={
+          <Space>
+            <Input
+              placeholder="Tìm kiếm theo ID, nhóm máu..."
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={handleSearch}
+              style={{ width: 300 }}
             />
-          </Card>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => showModal('add')} style={{ backgroundColor: '#d32f2f', borderColor: '#d32f2f' }}>
+              Thêm mới
+            </Button>
+          </Space>
+        }
+      >
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <Spin size="large" tip="Đang tải dữ liệu..." />
+          </div>
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={filteredBloodUnits}
+            rowKey="id"
+            pagination={{ pageSize: 10 }}
+            bordered
+            summary={pageData => {
+              let totalPageUnits = 0;
+              pageData.forEach(({ totalUnitsAvailable }) => {
+                totalPageUnits += (totalUnitsAvailable || 0);
+              });
 
-          <Card title="Thống Kê Kho Máu" bordered={false} style={{ marginTop: '24px' }}>
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={12}>
-                <Card title="Theo Nhóm Máu" size="small">
-                  <Row gutter={[16, 16]}>
-                    {Object.entries(bloodSummary.byBloodType).map(([type, count]) => (
-                      <Col key={type} xs={12} sm={8} md={6}>
-                        <Statistic title={type} value={count} suffix="đơn vị" />
-                      </Col>
-                    ))}
-                  </Row>
-                </Card>
-              </Col>
-              <Col xs={24} md={12}>
-                <Card title="Theo Thành Phần" size="small">
-                  <Row gutter={[16, 16]}>
-                    {Object.entries(bloodSummary.byComponent).map(([component, count]) => (
-                      <Col key={component} xs={12} sm={8} md={6}>
-                        <Statistic title={component} value={count} suffix="đơn vị" />
-                      </Col>
-                    ))}
-                  </Row>
-                </Card>
-              </Col>
-            </Row>
-          </Card>
-
-          <Modal
-            title={modalMode === 'add' ? 'Thêm Đơn Vị Máu Mới' : 'Chỉnh Sửa Đơn Vị Máu'}
-            visible={isModalVisible}
-            onOk={handleOk}
-            onCancel={handleCancel}
-            okText={modalMode === 'add' ? 'Thêm' : 'Lưu'}
-            cancelText="Hủy"
-            width={600}
-            okButtonProps={{ style: { background: '#d32f2f', borderColor: '#d32f2f' } }}
+              return (
+                <Table.Summary.Row>
+                  <Table.Summary.Cell index={0} colSpan={2}><b>Tổng cộng trên trang này</b></Table.Summary.Cell>
+                  <Table.Summary.Cell index={3}>
+                    <b style={{ color: '#d32f2f' }}>{totalPageUnits.toLocaleString()} ml</b>
+                  </Table.Summary.Cell>
+                </Table.Summary.Row>
+              );
+            }}
+          />
+        )}
+      </Card>
+      <Modal
+        title={modalMode === 'add' ? 'Thêm đơn vị máu' : 'Chỉnh sửa đơn vị máu'}
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        okText={modalMode === 'add' ? 'Thêm' : 'Lưu'}
+        cancelText="Hủy"
+        okButtonProps={{ style: { backgroundColor: '#d32f2f', borderColor: '#d32f2f' } }}
+      >
+        <Form form={form} layout="vertical" name="bloodUnitForm">
+          <Form.Item
+            name="bloodType"
+            label="Nhóm Máu"
+            rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
           >
-            <Form form={form} layout="vertical">
-              <Form.Item name="bloodType" label="Nhóm Máu" rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}>
-                <Select placeholder="Chọn nhóm máu">
-                  <Option value="A+">A+</Option>
-                  <Option value="A-">A-</Option>
-                  <Option value="B+">B+</Option>
-                  <Option value="B-">B-</Option>
-                  <Option value="AB+">AB+</Option>
-                  <Option value="AB-">AB-</Option>
-                  <Option value="O+">O+</Option>
-                  <Option value="O-">O-</Option>
-                </Select>
-              </Form.Item>
-              <Form.Item name="component" label="Thành Phần" rules={[{ required: true, message: 'Vui lòng chọn thành phần!' }]}>
-                <Select placeholder="Chọn thành phần">
-                  <Option value="Whole Blood">Whole Blood</Option>
-                  <Option value="Plasma">Plasma</Option>
-                  <Option value="Red Blood Cells">Red Blood Cells</Option>
-                  <Option value="Platelets">Platelets</Option>
-                </Select>
-              </Form.Item>
-              <Form.Item name="collectionDate" label="Ngày Thu Thập" rules={[{ required: true, message: 'Vui lòng chọn ngày thu thập!' }]}>
-                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
-              </Form.Item>
-              <Form.Item name="expirationDate" label="Ngày Hết Hạn" rules={[{ required: true, message: 'Vui lòng chọn ngày hết hạn!' }]}>
-                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
-              </Form.Item>
-              <Form.Item name="status" label="Trạng Thái" rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}>
-                <Select placeholder="Chọn trạng thái">
-                  <Option value="available">Khả dụng</Option>
-                  <Option value="used">Đã sử dụng</Option>
-                  <Option value="expired">Hết hạn</Option>
-                </Select>
-              </Form.Item>
-            </Form>
-          </Modal>
-        </>
-      )}
+            <Select placeholder="Chọn nhóm máu" disabled={modalMode === 'edit'}>
+              {Object.entries(bloodTypeMap).filter(([key]) => key !== 'UNKNOWN').map(([key, value]) => (
+                <Option key={key} value={key}>{value}</Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="unitsAvailable"
+            label="Số Lượng (ml)"
+            rules={[{ required: true, message: 'Vui lòng nhập số lượng!' }]}
+          >
+            <InputNumber min={0} style={{ width: '100%' }} placeholder="Nhập số lượng ml" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

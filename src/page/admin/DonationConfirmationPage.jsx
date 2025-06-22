@@ -4,21 +4,18 @@ import { SearchOutlined, CheckCircleOutlined, CloseCircleOutlined, UserOutlined,
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import api from '../../config/api';
+import dayjs from 'dayjs'; // Bạn cần cài đặt dayjs nếu chưa có: npm install dayjs
 
-// Dữ liệu mẫu trả về từ API (dùng để test hoặc tham khảo)
-const value = [
-  {
-    id: 9007199254740991,
-    status: "PENDING",
-    wantedDate: "2025-06-19",
-    wantedHour: {
-      hour: 1073741824,
-      minute: 1073741824,
-      second: 1073741824,
-      nano: 1073741824
-    }
-  }
-];
+const bloodTypeMap = {
+  A_POSITIVE: "A+",
+  A_NEGATIVE: "A-",
+  B_POSITIVE: "B+",
+  B_NEGATIVE: "B-",
+  AB_POSITIVE: "AB+",
+  AB_NEGATIVE: "AB-",
+  O_POSITIVE: "O+",
+  O_NEGATIVE: "O-",
+};
 
 const DonationConfirmationPage = () => {
   const [donations, setDonations] = useState([]);
@@ -115,16 +112,19 @@ const DonationConfirmationPage = () => {
   };
 
   const filteredDonations = donations.filter(donation => {
-    const matchesSearch =
-      (donation.donorName || '').toLowerCase().includes(searchText.toLowerCase()) ||
-      (donation.bloodType || '').toLowerCase().includes(searchText.toLowerCase()) ||
-      (donation.component || '').toLowerCase().includes(searchText.toLowerCase()) ||
-      (donation.id ? donation.id.toString().toLowerCase().includes(searchText.toLowerCase()) : false);
-    return matchesSearch;
+    const searchLower = searchText.toLowerCase();
+    return (
+      (donation.id ? donation.id.toString().includes(searchLower) : false) ||
+      (donation.status ? donation.status.toLowerCase().includes(searchLower) : false) ||
+      (donation.blood && donation.blood.bloodType ? (bloodTypeMap[donation.blood.bloodType] || '').toLowerCase().includes(searchLower) : false)
+    );
   });
 
   // Format wantedHour
   const formatWantedHour = (wantedHour) => {
+    if (typeof wantedHour === 'string') {
+      return wantedHour.split('.')[0];
+    }
     if (!wantedHour || typeof wantedHour !== 'object') return '';
     const { hour, minute, second } = wantedHour;
     if (
@@ -140,59 +140,95 @@ const DonationConfirmationPage = () => {
   };
 
   const columns = [
-    { title: 'id', dataIndex: 'id', key: 'id' },
-    { title: 'status', dataIndex: 'status', key: 'status' },
     { 
-      title: 'wanted_date', 
-      dataIndex: 'wanted_date', 
-      key: 'wanted_date',
+      title: 'ID', 
+      dataIndex: 'id', 
+      key: 'id',
+      sorter: (a, b) => a.id - b.id,
+      sortDirections: ['descend', 'ascend'],
+    },
+    { 
+      title: 'Trạng thái', 
+      dataIndex: 'status', 
+      key: 'status',
+      sorter: (a, b) => a.status.localeCompare(b.status),
+      sortDirections: ['descend', 'ascend'],
+      render: (status) => {
+        let color;
+        let text;
+        switch (status) {
+          case 'APPROVED':
+            color = 'green';
+            text = 'Đã duyệt';
+            break;
+          case 'PENDING':
+            color = 'gold';
+            text = 'Chờ duyệt';
+            break;
+          case 'REJECTED':
+            color = 'red';
+            text = 'Đã từ chối';
+            break;
+          default:
+            color = 'default';
+            text = status;
+        }
+        return <Tag color={color}>{text}</Tag>;
+      }
+    },
+    { 
+      title: 'Ngày đăng ký', 
+      dataIndex: 'wantedDate', 
+      key: 'wantedDate',
+      sorter: (a, b) => new Date(a.wantedDate) - new Date(b.wantedDate),
+      sortDirections: ['descend', 'ascend'],
       render: value => value ? new Date(value).toLocaleDateString('vi-VN') : ''
     },
     { 
-      title: 'wanted_hour', 
-      dataIndex: 'wanted_hour', 
-      key: 'wanted_hour',
+      title: 'Giờ đăng ký', 
+      dataIndex: 'wantedHour', 
+      key: 'wantedHour',
       render: value => formatWantedHour(value)
     },
-    { title: 'user_id', dataIndex: 'user_id', key: 'user_id' },
-    { title: 'Người liên hệ khẩn cấp', dataIndex: 'emergency_contact', key: 'emergency_contact' },
-    { title: 'SĐT khẩn cấp', dataIndex: 'emergency_phone', key: 'emergency_phone' },
     {
       title: 'Hành động',
       key: 'action',
-      render: (_, record) => (
-        <Space>
-          <Popconfirm
-            title="Bạn có chắc chắn muốn duyệt yêu cầu này?"
-            onConfirm={() => handleApprove(record.id)}
-            okText="Duyệt"
-            cancelText="Hủy"
-            okButtonProps={{ type: 'primary', style: { background: '#4CAF50', borderColor: '#4CAF50' } }}
-          >
-            <Button
-              type="primary"
-              shape="circle"
-              icon={<CheckCircleOutlined style={{ fontSize: 24 }} />}
-              disabled={record.status === 'APPROVED'}
-              style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', boxShadow: '0 2px 8px #b2f2bb' }}
-            />
-          </Popconfirm>
-          <Popconfirm
-            title="Bạn có chắc chắn muốn từ chối yêu cầu này?"
-            onConfirm={() => handleReject(record.id)}
-            okText="Từ chối"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
-          >
-            <Button
-              shape="circle"
-              icon={<CloseCircleOutlined style={{ fontSize: 24, color: '#f44336' }} />}
-              disabled={record.status === 'REJECTED'}
-              style={{ borderColor: '#f44336', backgroundColor: 'white', boxShadow: '0 2px 8px #ffc9c9' }}
-            />
-          </Popconfirm>
-        </Space>
-      ),
+      render: (_, record) => {
+        if (record.status === 'PENDING') {
+          return (
+            <Space>
+              <Popconfirm
+                title="Bạn có chắc chắn muốn duyệt yêu cầu này?"
+                onConfirm={() => handleApprove(record.id)}
+                okText="Duyệt"
+                cancelText="Hủy"
+                okButtonProps={{ type: 'primary', style: { background: '#4CAF50', borderColor: '#4CAF50' } }}
+              >
+                <Button
+                  type="primary"
+                  shape="circle"
+                  icon={<CheckCircleOutlined style={{ fontSize: 24 }} />}
+                  style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', boxShadow: '0 2px 8px #b2f2bb' }}
+                />
+              </Popconfirm>
+              <Popconfirm
+                title="Bạn có chắc chắn muốn từ chối yêu cầu này?"
+                onConfirm={() => handleReject(record.id)}
+                okText="Từ chối"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+              >
+                <Button
+                  shape="circle"
+                  icon={<CloseCircleOutlined style={{ fontSize: 24, color: '#f44336' }} />}
+                  style={{ borderColor: '#f44336', backgroundColor: 'white', boxShadow: '0 2px 8px #ffc9c9' }}
+                />
+              </Popconfirm>
+            </Space>
+          );
+        }
+        return null; // Không hiển thị gì nếu trạng thái không phải PENDING
+      },
     },
   ];
 
@@ -203,20 +239,16 @@ const DonationConfirmationPage = () => {
         extra={
           <Space>
             <Input
-              placeholder="Tìm kiếm theo ID, Tên người hiến..."
+              placeholder="Tìm kiếm theo ID, trạng thái, nhóm máu..."
               prefix={<SearchOutlined />}
               value={searchText}
-              onChange={e => setSearchText(e.target.value)}
+              onChange={handleSearch}
               style={{ width: 300 }}
             />
           </Space>
         }
       >
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <Spin size="large" tip="Đang tải..." />
-          </div>
-        ) : (
+        <Spin spinning={loading} tip="Đang tải..." size="large">
           <Table
             columns={columns}
             dataSource={filteredDonations}
@@ -224,7 +256,7 @@ const DonationConfirmationPage = () => {
             bordered
             rowKey="id"
           />
-        )}
+        </Spin>
       </Card>
     </div>
   );
