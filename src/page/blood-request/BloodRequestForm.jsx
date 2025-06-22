@@ -50,7 +50,7 @@ function BloodRequestForm() {
         phone: userData.phone || userData.phoneNumber || "",
         gender: userData.gender ? userData.gender.toUpperCase() : "",
         blood_type: userData.bloodType || userData.blood_type || "",
-        date_of_birth: userData.date_of_birth
+        birthdate: userData.date_of_birth
           ? dayjs(userData.date_of_birth)
           : userData.birthdate
           ? dayjs(userData.birthdate)
@@ -80,42 +80,34 @@ function BloodRequestForm() {
   // Sử dụng submitting và setSubmitting trong quá trình gửi form
   const onFinish = async (values) => {
     try {
-      setSubmitting(true); // Bắt đầu trạng thái loading
+      setSubmitting(true);
 
-      // Map form values to API-compatible field names
-      const mergedValues = {
-        ...values,
-        full_name: userData.fullName || userData.full_name || userData.name || values.full_name,
-        email: userData.email || values.email,
-        phone: userData.phone || userData.phoneNumber || values.phone,
-        date_of_birth: userData.date_of_birth || values.date_of_birth,
-        gender: userData.gender || values.gender,
-        address: userData.address || values.address,
-        city: userData.city || values.city,
-        blood_type: userData.bloodType || userData.blood_type || values.blood_type,
-        weight: values.weight,
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Bạn cần đăng nhập để thực hiện chức năng này!");
+        setSubmitting(false);
+        return;
+      }
+      
+      const payload = {
+        name: values.full_name,
+        birthdate: values.birthdate ? values.birthdate.format("YYYY-MM-DD") : null,
         height: values.height,
-        last_donation_date: values.last_donation_date
-          ? moment(values.last_donation_date).format("YYYY-MM-DD")
-          : "",
-        medical_history: values.medical_history || "",
-        has_chronic_disease: values.chronic_disease || false,
-        is_taking_medication: values.taking_medication || false,
-        has_recent_surgery: values.recent_surgery || false,
-        preferred_date: values.preferred_date
-          ? moment(values.preferred_date).format("YYYY-MM-DD")
-          : "",
-        preferred_time: values.preferred_time,
-        preferred_location: values.preferred_location,
+        weight: values.weight,
+        lastDonation: values.last_donation_date ? values.last_donation_date.format("YYYY-MM-DD") : null,
+        medicalHistory: values.medical_history,
+        bloodType: values.blood_type,
+        wantedDate: values.wantedDate ? values.wantedDate.format("YYYY-MM-DD") : null,
+        wantedHour: values.wantedHour ? `${values.wantedHour}:00` : null,
         emergencyName: values.emergencyName,
         emergencyPhone: values.emergencyPhone,
-        agrees_to_terms: values.agreement,
+        isEmergency: values.requestType === 'emergency',
       };
+      
+      await api.post("/blood-receive", payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-      // gắn /api/blood-register
-      const response = await api.post("/blood-receive", mergedValues);
-
-      // Hiển thị thông báo thành công
       toast.success("Yêu cầu nhận máu đã được gửi thành công!");
 
       // Chuyển hướng về trang chủ sau 1.5 giây
@@ -267,22 +259,9 @@ function BloodRequestForm() {
                 <Form.Item
                   name="birthdate"
                   label="Ngày sinh"
-                  rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
+                  rules={!userData?.date_of_birth && !userData?.birthdate ? [{ required: true, message: "Vui lòng chọn ngày sinh" }] : []}
                 >
-                  {userData?.birthdate ? (
-                    <div className="ant-form-item-control-input-content" style={{ padding: '7px 11px', background: '#f5f5f5', borderRadius: 4 }}>
-                      {dayjs(userData.birthdate).format("DD/MM/YYYY")}
-                    </div>
-                  ) : (
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="birthdate"
-                      value={form.getFieldValue("birthdate") || ""}
-                      onChange={e => form.setFieldsValue({ birthdate: e.target.value })}
-                      required
-                    />
-                  )}
+                  <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" disabled />
                 </Form.Item>
               </Col>
 
@@ -377,7 +356,6 @@ function BloodRequestForm() {
                     min={0}
                     max={200}
                     readOnly
-                    value={userData.weight || ''}
                   />
                 </Form.Item>
               </Col>
@@ -390,11 +368,14 @@ function BloodRequestForm() {
                     min={0}
                     max={250}
                     readOnly
-                    value={userData.height || ''}
                   />
                 </Form.Item>
               </Col>
             </Row>
+
+            <Form.Item name="last_donation_date" label="Ngày hiến máu gần nhất">
+              <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+            </Form.Item>
 
             <Form.Item name="medical_history" label="Tiền sử bệnh">
               <TextArea
@@ -433,7 +414,7 @@ function BloodRequestForm() {
             <Row gutter={16}>
               <Col xs={24} md={8}>
                 <Form.Item
-                  name="preferred_date"
+                  name="wantedDate"
                   label="Ngày mong muốn"
                   rules={[{ required: true, message: "Vui lòng chọn ngày" }]}
                 >
@@ -441,7 +422,7 @@ function BloodRequestForm() {
                     style={{ width: "100%" }}
                     format="DD/MM/YYYY"
                     disabledDate={(current) =>
-                      current && current < moment().startOf("day")
+                      current && current < dayjs().startOf("day")
                     }
                   />
                 </Form.Item>
@@ -449,7 +430,7 @@ function BloodRequestForm() {
 
               <Col xs={24} md={8}>
                 <Form.Item
-                  name="preferred_time"
+                  name="wantedHour"
                   label="Thời gian"
                   rules={[
                     { required: true, message: "Vui lòng chọn thời gian" },
