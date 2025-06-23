@@ -154,7 +154,7 @@ const LoginPage = () => {
             </Form.Item>
 
             <Link
-              to="/otp"
+              to="/verify-otp"
               style={{ color: "red", textDecoration: "none" }}
               className="text-sm font-medium text-red-600 hover:text-red-500"
             >
