@@ -1,28 +1,33 @@
 import React, { useState } from 'react';
-import { Card, Form, Input, Button, Row, Col, Avatar, Upload, message, Divider, DatePicker } from 'antd';
-import { UserOutlined, EditOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
-import { useUser } from '../../contexts/UserContext';
-import moment from 'moment';
+import { Card, Form, Input, Button, Row, Col, Avatar, Upload, message, Divider, Modal } from 'antd';
+import { UserOutlined, EditOutlined, SaveOutlined, UploadOutlined, LockOutlined } from '@ant-design/icons';
+import { useAuth } from '../../../hook/useAuth';
+import authService from '../../../services/authService';
 
 const ProfilePage = () => {
-  const { user, setUser } = useUser();
+  const { user, refreshUser } = useAuth();
   const [form] = Form.useForm();
+  const [passwordForm] = Form.useForm();
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  if (!user) {
+    return <div>Đang tải thông tin người dùng...</div>;
+  }
 
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      // Giả lập API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setUser(prev => ({
-        ...prev,
-        ...values,
-      }));
-      
-      message.success('Đã cập nhật thông tin thành công');
-      setEditing(false);
+      const result = await authService.updateUser({ ...user, ...values });
+      if (result.success) {
+        await refreshUser();
+        message.success('Đã cập nhật thông tin thành công');
+        setEditing(false);
+      } else {
+        message.error(result.error || 'Có lỗi xảy ra khi cập nhật thông tin');
+      }
     } catch {
       message.error('Có lỗi xảy ra khi cập nhật thông tin');
     } finally {
@@ -30,13 +35,61 @@ const ProfilePage = () => {
     }
   };
 
+  const handlePasswordChange = async (values) => {
+    setPasswordLoading(true);
+    try {
+      const result = await authService.updatePassword({
+        email: user.email,
+        oldPassword: values.oldPassword,
+        newPassword: values.newPassword,
+      });
+
+      if (result.success) {
+        message.success('Đổi mật khẩu thành công!');
+        setIsPasswordModalVisible(false);
+        passwordForm.resetFields();
+      } else {
+        message.error(result.error || 'Có lỗi xảy ra khi đổi mật khẩu');
+      }
+    } catch {
+      message.error('Có lỗi xảy ra khi đổi mật khẩu');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   const handleEdit = () => {
-    form.setFieldsValue({
-      ...user,
-      joinDate: moment(user.joinDate)
-    });
+    form.setFieldsValue(user);
     setEditing(true);
   };
+
+  const handleCancelEdit = () => {
+    setEditing(false);
+    form.resetFields();
+  }
+
+  // Giả lập upload ảnh, bạn có thể thay thế bằng logic upload thật
+  const handleAvatarUpload = (file) => {
+    const isImage = file.type.startsWith('image/');
+    if (!isImage) {
+      message.error('Chỉ được tải lên file ảnh!');
+      return false;
+    }
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      // Giả lập lưu avatar và cập nhật user
+      const result = await authService.updateUser({ ...user, avatar: e.target.result });
+      if (result.success) {
+        await refreshUser();
+        message.success('Cập nhật ảnh đại diện thành công!');
+      } else {
+        message.error('Cập nhật ảnh đại diện thất bại!');
+      }
+    };
+    reader.readAsDataURL(file);
+    return false;
+  };
+
 
   return (
     <div>
@@ -49,28 +102,12 @@ const ProfilePage = () => {
               <Avatar
                 size={120}
                 icon={<UserOutlined />}
-                src={user.avatar}
+                src={user.avatarUrl || user.avatar} // Support avatarUrl from backend
                 style={{ marginBottom: 16 }}
               />
               <Upload
                 showUploadList={false}
-                beforeUpload={(file) => {
-                  const isImage = file.type.startsWith('image/');
-                  if (!isImage) {
-                    message.error('Chỉ được tải lên file ảnh!');
-                    return false;
-                  }
-                  // Giả lập upload ảnh
-                  const reader = new FileReader();
-                  reader.onload = (e) => {
-                    setUser(prev => ({
-                      ...prev,
-                      avatar: e.target.result
-                    }));
-                  };
-                  reader.readAsDataURL(file);
-                  return false;
-                }}
+                beforeUpload={handleAvatarUpload}
               >
                 <Button icon={<UploadOutlined />}>Tải ảnh lên</Button>
               </Upload>
@@ -79,9 +116,9 @@ const ProfilePage = () => {
             <Divider />
 
             <div>
-              <p><strong>Vai trò:</strong> {user.position}</p>
-              <p><strong>Ngày vào làm:</strong> {moment(user.joinDate).format('DD/MM/YYYY')}</p>
-              <p><strong>Khoa/Phòng:</strong> {user.department}</p>
+              <p><strong>Vai trò:</strong> {user.role}</p>
+              <p><strong>Ngày vào làm:</strong> {user.joinDate ? new Date(user.joinDate).toLocaleDateString('vi-VN') : 'N/A'}</p>
+              <p><strong>ID Cơ sở:</strong> {user.institutionId || 'N/A'}</p>
             </div>
           </Card>
         </Col>
@@ -105,15 +142,12 @@ const ProfilePage = () => {
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
-              initialValues={{
-                ...user,
-                joinDate: moment(user.joinDate)
-              }}
+              initialValues={user}
             >
               <Row gutter={16}>
                 <Col span={12}>
                   <Form.Item
-                    name="name"
+                    name="fullName"
                     label="Họ và tên"
                     rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
                   >
@@ -124,12 +158,8 @@ const ProfilePage = () => {
                   <Form.Item
                     name="email"
                     label="Email"
-                    rules={[
-                      { required: true, message: 'Vui lòng nhập email' },
-                      { type: 'email', message: 'Email không hợp lệ' }
-                    ]}
                   >
-                    <Input disabled={!editing} />
+                    <Input disabled={true} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -139,17 +169,16 @@ const ProfilePage = () => {
                   <Form.Item
                     name="phone"
                     label="Số điện thoại"
-                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
                   >
                     <Input disabled={!editing} />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                 <Col span={12}>
                   <Form.Item
-                    name="department"
-                    label="Khoa/Phòng"
+                    name="gender"
+                    label="Giới tính"
                   >
-                    <Input disabled={true} />
+                    <Input disabled={!editing} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -164,7 +193,7 @@ const ProfilePage = () => {
               {editing && (
                 <Form.Item>
                   <div style={{ textAlign: 'right', gap: 8, display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button onClick={() => setEditing(false)}>
+                    <Button onClick={handleCancelEdit}>
                       Hủy
                     </Button>
                     <Button
@@ -182,12 +211,60 @@ const ProfilePage = () => {
           </Card>
 
           <Card title="Bảo mật" style={{ marginTop: 16 }}>
-            <Button type="primary" danger>
+            <Button type="primary" danger onClick={() => setIsPasswordModalVisible(true)}>
               Đổi mật khẩu
             </Button>
           </Card>
         </Col>
       </Row>
+      <Modal
+        title="Đổi mật khẩu"
+        visible={isPasswordModalVisible}
+        onCancel={() => setIsPasswordModalVisible(false)}
+        footer={[
+          <Button key="back" onClick={() => setIsPasswordModalVisible(false)}>
+            Hủy
+          </Button>,
+          <Button key="submit" type="primary" loading={passwordLoading} onClick={() => passwordForm.submit()}>
+            Đổi mật khẩu
+          </Button>,
+        ]}
+      >
+        <Form form={passwordForm} layout="vertical" onFinish={handlePasswordChange}>
+          <Form.Item
+            name="oldPassword"
+            label="Mật khẩu cũ"
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu cũ!' }]}
+          >
+            <Input.Password prefix={<LockOutlined />} />
+          </Form.Item>
+          <Form.Item
+            name="newPassword"
+            label="Mật khẩu mới"
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu mới!' }]}
+          >
+            <Input.Password prefix={<LockOutlined />} />
+          </Form.Item>
+          <Form.Item
+            name="confirmPassword"
+            label="Xác nhận mật khẩu mới"
+            dependencies={['newPassword']}
+            rules={[
+              { required: true, message: 'Vui lòng xác nhận mật khẩu mới!' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('newPassword') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password prefix={<LockOutlined />} />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
