@@ -40,11 +40,10 @@ import BloodDonationApprovalPage from "./page/admin/BloodDonationApprovalPage";
 import DoctorDashboardPage from "./page/doctorpage/doctor/DashboardPage";
 import DoctorDonorsPage from "./page/doctorpage/doctor/DonorsPage";
 import DoctorMedicalRecordsPage from "./page/doctorpage/doctor/MedicalRecordsPage";
-import DoctorBloodInventoryPage from "./page/doctorpage/doctor/BloodInventoryPage";
 import DoctorReportsPage from "./page/doctorpage/doctor/ReportsPage";
-import DoctorProfilePage from "./page/doctorpage/doctor/ProfilePage";
 import ForgotPassword from "./page/loginpage/ForgotPassword";
 import DonateUser from "./page/userpage/DonateUser";
+import DoctorBloodInventoryPage from "./page/doctorpage/dashboard/BloodInventoryPage";
 
 const router = createBrowserRouter([
   {
@@ -87,9 +86,8 @@ const router = createBrowserRouter([
       { index: true, element: <DoctorDashboardPage /> },
       { path: "donors", element: <DoctorDonorsPage /> },
       { path: "medical-records", element: <DoctorMedicalRecordsPage /> },
-      { path: "blood-inventory", element: <DoctorBloodInventoryPage /> },
       { path: "reports", element: <DoctorReportsPage /> },
-      { path: "profile", element: <DoctorProfilePage /> },
+      { path: "blood-inventory", element: <DoctorBloodInventoryPage /> },
     ],
   },
 ]);

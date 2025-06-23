@@ -1,226 +1,98 @@
 import React, { useState } from "react";
-import {
-  Table,
-  Card,
-  Button,
-  Tag,
-  Space,
-  Input,
-  Modal,
-  Descriptions,
-} from "antd";
-import { SearchOutlined, UserOutlined } from "@ant-design/icons";
+import { Table, Input, Select, Row, Col, Card } from "antd";
+const { Option } = Select;
 
-const { Search } = Input;
+// Dữ liệu mock mẫu
+const mockDonors = [
+  {
+    id: 1,
+    name: "Nguyễn Văn A",
+    phone: "0901234567",
+    bloodType: "A+",
+    donationCount: 5,
+    lastDonation: "2024-05-01",
+    email: "a.nguyen@email.com",
+  },
+  {
+    id: 2,
+    name: "Trần Thị B",
+    phone: "0912345678",
+    bloodType: "O-",
+    donationCount: 2,
+    lastDonation: "2024-04-15",
+    email: "b.tran@email.com",
+  },
+  {
+    id: 3,
+    name: "Lê Văn C",
+    phone: "0987654321",
+    bloodType: "B+",
+    donationCount: 7,
+    lastDonation: "2024-03-20",
+    email: "c.le@email.com",
+  },
+];
 
-function DonorsPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDonor, setSelectedDonor] = useState(null);
-  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-  const [historyDonor, setHistoryDonor] = useState(null);
-
-  const donors = [
-    {
-      id: "1",
-      name: "Nguyễn Văn A",
-      bloodType: "A+",
-      lastDonation: "2024-03-01",
-      donationCount: 5,
-      healthStatus: "good",
-      nextEligibleDate: "2024-06-01",
-    },
-    {
-      id: "2",
-      name: "Trần Thị B",
-      bloodType: "O-",
-      lastDonation: "2024-02-15",
-      donationCount: 3,
-      healthStatus: "attention",
-      nextEligibleDate: "2024-05-15",
-    },
-    {
-      id: "3",
-      name: "Lê Văn C",
-      bloodType: "B+",
-      lastDonation: "2024-03-10",
-      donationCount: 8,
-      healthStatus: "good",
-      nextEligibleDate: "2024-06-10",
-    },
-  ];
+const DonorsPage = () => {
   const [searchText, setSearchText] = useState("");
-  const [filteredDonors, setFilteredDonors] = useState(donors);
+  const [filterBloodType, setFilterBloodType] = useState("all");
 
-  const handleViewProfile = (donor) => {
-    setSelectedDonor(donor);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedDonor(null);
-  };
-
-  const handleViewHistory = (donor) => {
-    setHistoryDonor(donor);
-    setIsHistoryModalOpen(true);
-  };
-  const handleSearch = (value) => {
-    setSearchText(value);
-    const filtered = donors.filter(
-      (donor) =>
-        donor.name.toLowerCase().includes(value.toLowerCase()) ||
-        donor.id.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredDonors(filtered);
-  };
+  const filteredDonors = mockDonors.filter((donor) => {
+    const matchName = donor.name.toLowerCase().includes(searchText.toLowerCase());
+    const matchBlood = filterBloodType === "all" ? true : donor.bloodType === filterBloodType;
+    return matchName && matchBlood;
+  });
 
   const columns = [
-    {
-      title: "Mã số",
-      dataIndex: "id",
-      key: "id",
-    },
-    {
-      title: "Họ và tên",
-      dataIndex: "name",
-      key: "name",
-      render: (text) => (
-        <Space>
-          <UserOutlined />
-          {text}
-        </Space>
-      ),
-    },
-    {
-      title: "Nhóm máu",
-      dataIndex: "bloodType",
-      key: "bloodType",
-      render: (text) => <Tag color="red">{text}</Tag>,
-    },
-    {
-      title: "Lần hiến gần nhất",
-      dataIndex: "lastDonation",
-      key: "lastDonation",
-    },
-    {
-      title: "Số lần hiến",
-      dataIndex: "donationCount",
-      key: "donationCount",
-    },
-    {
-      title: "Tình trạng sức khỏe",
-      dataIndex: "healthStatus",
-      key: "healthStatus",
-      render: (status) => (
-        <Tag color={status === "good" ? "green" : "orange"}>
-          {status === "good" ? "Tốt" : "Cần chú ý"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Ngày đủ điều kiện tiếp",
-      dataIndex: "nextEligibleDate",
-      key: "nextEligibleDate",
-    },
-    {
-      title: "Thao tác",
-      key: "action",
-      render: (_, record) => (
-        <Space>
-          <Button onClick={() => handleViewProfile(record)} type="primary">
-            Xem hồ sơ
-          </Button>
-          <Button onClick={() => handleViewHistory(record)}>
-            Lịch sử hiến máu
-          </Button>
-        </Space>
-      ),
-    },
+    { title: "Họ tên", dataIndex: "name", key: "name" },
+    { title: "SĐT", dataIndex: "phone", key: "phone" },
+    { title: "Nhóm máu", dataIndex: "bloodType", key: "bloodType" },
+    { title: "Số lần hiến", dataIndex: "donationCount", key: "donationCount" },
+    { title: "Ngày hiến gần nhất", dataIndex: "lastDonation", key: "lastDonation" },
+    { title: "Email", dataIndex: "email", key: "email" },
   ];
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">Quản lý người hiến máu</h2>
-
-      <Card>
-        <div className="mb-4">
-          <Search
-            placeholder="Tìm kiếm theo tên hoặc mã số"
+      <h1>Danh sách người hiến máu</h1>
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col>
+          <Input
+            placeholder="Tìm kiếm theo tên..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
             allowClear
-            enterButton={<SearchOutlined />}
-            size="large"
-            style={{ maxWidth: 400 }}
-            onSearch={handleSearch}
+            style={{ width: 200 }}
           />
-        </div>
-
+        </Col>
+        <Col>
+          <Select
+            value={filterBloodType}
+            onChange={setFilterBloodType}
+            style={{ width: 150 }}
+          >
+            <Option value="all">Tất cả nhóm máu</Option>
+            <Option value="A+">A+</Option>
+            <Option value="A-">A-</Option>
+            <Option value="B+">B+</Option>
+            <Option value="B-">B-</Option>
+            <Option value="O+">O+</Option>
+            <Option value="O-">O-</Option>
+            <Option value="AB+">AB+</Option>
+            <Option value="AB-">AB-</Option>
+          </Select>
+        </Col>
+      </Row>
+      <Card>
         <Table
           columns={columns}
           dataSource={filteredDonors}
           rowKey="id"
-          pagination={{
-            total: filteredDonors.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showTotal: (total) => `Tổng số ${total} người hiến máu`,
-          }}
+          pagination={{ pageSize: 5 }}
         />
       </Card>
-      <Modal
-        title="Lịch sử hiến máu"
-        open={isHistoryModalOpen}
-        onCancel={() => setIsHistoryModalOpen(false)}
-        footer={[
-          <Button key="close" onClick={() => setIsHistoryModalOpen(false)}>
-            Đóng
-          </Button>,
-        ]}
-      >
-        {historyDonor && (
-          <Descriptions column={1} bordered>
-            <Descriptions.Item label="Họ tên">
-              {historyDonor.name}
-            </Descriptions.Item>
-            <Descriptions.Item label="Lần hiến gần nhất">
-              {historyDonor.lastDonation}
-            </Descriptions.Item>
-            <Descriptions.Item label="Số lần hiến">
-              {historyDonor.donationCount}
-            </Descriptions.Item>
-          </Descriptions>
-        )}
-      </Modal>
-
-      <Modal
-        title="Chi tiết hồ sơ người hiến máu"
-        open={isModalOpen}
-        onCancel={handleCloseModal}
-        footer={[
-          <Button key="close" onClick={handleCloseModal}>
-            Đóng
-          </Button>,
-        ]}
-      >
-        {selectedDonor && (
-          <Descriptions column={1} bordered>
-            <Descriptions.Item label="Họ tên">
-              {selectedDonor.name}
-            </Descriptions.Item>
-            <Descriptions.Item label="Nhóm máu">
-              {selectedDonor.bloodType}
-            </Descriptions.Item>
-            <Descriptions.Item label="Tình trạng sức khỏe">
-              {selectedDonor.healthStatus === "good" ? "Tốt" : "Cần chú ý"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Ngày đủ điều kiện tiếp">
-              {selectedDonor.nextEligibleDate}
-            </Descriptions.Item>
-          </Descriptions>
-        )}
-      </Modal>
     </div>
   );
-}
+};
 
 export default DonorsPage;
