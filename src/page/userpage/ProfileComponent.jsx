@@ -409,7 +409,7 @@ const ProfileComponent = () => {
   };
 
       const response = await api.put(
-        "/update-user",
+        "/user/update-user",
         {
           fullName: formData.fullName,
           phone: formData.phone || null,
