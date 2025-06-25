@@ -22,7 +22,7 @@ export const getAllBloodInventory = async () => {
 //Post : api/blood-inventory
 export const createBloodInventory = async (data) => {
   try {
-    const response = await api.post("/blood-inventory", data);
+    const response = await api.post("/blood-inventory/create", data);
     return response.data;
   } catch (error) {
     console.error("Đã xảy ra lỗi khi khởi tạo kho máu:", error);

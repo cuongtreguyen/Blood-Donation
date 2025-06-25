@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Card, Form, Input, Button, Row, Col, Avatar, Upload, message, Divider, Modal } from 'antd';
 import { UserOutlined, EditOutlined, SaveOutlined, UploadOutlined, LockOutlined } from '@ant-design/icons';
-import { useAuth } from '../../../hook/useAuth';
+import { useAuthCheck } from '../../../hook/useAuthCheck';
 import authService from '../../../services/authService';
 
 const ProfilePage = () => {
-  const { user, refreshUser } = useAuth();
+  const { userData, isLoading: authLoading } = useAuthCheck();
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
   const [editing, setEditing] = useState(false);
@@ -13,16 +13,19 @@ const ProfilePage = () => {
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
-  if (!user) {
+  if (authLoading) {
+    return <div>Đang tải...</div>;
+  }
+
+  if (!userData) {
     return <div>Đang tải thông tin người dùng...</div>;
   }
 
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      const result = await authService.updateUser({ ...user, ...values });
+      const result = await authService.updateUser({ ...userData, ...values });
       if (result.success) {
-        await refreshUser();
         message.success('Đã cập nhật thông tin thành công');
         setEditing(false);
       } else {
@@ -39,7 +42,7 @@ const ProfilePage = () => {
     setPasswordLoading(true);
     try {
       const result = await authService.updatePassword({
-        email: user.email,
+        email: userData.email,
         oldPassword: values.oldPassword,
         newPassword: values.newPassword,
       });
@@ -59,7 +62,7 @@ const ProfilePage = () => {
   };
 
   const handleEdit = () => {
-    form.setFieldsValue(user);
+    form.setFieldsValue(userData);
     setEditing(true);
   };
 
@@ -78,9 +81,8 @@ const ProfilePage = () => {
     const reader = new FileReader();
     reader.onload = async (e) => {
       // Giả lập lưu avatar và cập nhật user
-      const result = await authService.updateUser({ ...user, avatar: e.target.result });
+      const result = await authService.updateUser({ ...userData, avatar: e.target.result });
       if (result.success) {
-        await refreshUser();
         message.success('Cập nhật ảnh đại diện thành công!');
       } else {
         message.error('Cập nhật ảnh đại diện thất bại!');
@@ -102,7 +104,7 @@ const ProfilePage = () => {
               <Avatar
                 size={120}
                 icon={<UserOutlined />}
-                src={user.avatarUrl || user.avatar} // Support avatarUrl from backend
+                src={userData.avatarUrl || userData.avatar} // Support avatarUrl from backend
                 style={{ marginBottom: 16 }}
               />
               <Upload
@@ -116,9 +118,9 @@ const ProfilePage = () => {
             <Divider />
 
             <div>
-              <p><strong>Vai trò:</strong> {user.role}</p>
-              <p><strong>Ngày vào làm:</strong> {user.joinDate ? new Date(user.joinDate).toLocaleDateString('vi-VN') : 'N/A'}</p>
-              <p><strong>ID Cơ sở:</strong> {user.institutionId || 'N/A'}</p>
+              <p><strong>Vai trò:</strong> {userData.role}</p>
+              <p><strong>Ngày vào làm:</strong> {userData.joinDate ? new Date(userData.joinDate).toLocaleDateString('vi-VN') : 'N/A'}</p>
+              <p><strong>ID Cơ sở:</strong> {userData.institutionId || 'N/A'}</p>
             </div>
           </Card>
         </Col>
@@ -142,7 +144,7 @@ const ProfilePage = () => {
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
-              initialValues={user}
+              initialValues={userData}
             >
               <Row gutter={16}>
                 <Col span={12}>

@@ -21,9 +21,10 @@ import {
 } from "@ant-design/icons";
 import {
   getBloodRegisterByStatus,
-  getAllBloodRegister,
   updateBloodRegisterStatus,
+  completeBloodRegister,
 } from "../../../services/bloodRegisterService";
+import { createBloodInventory } from "../../../services/bloodInventoryService";
 import api from "../../../config/api";
 
 const { Title } = Typography;
@@ -33,18 +34,21 @@ const statusColors = {
   COMPLETED: "green",
   REJECTED: "red",
   PENDING: "orange",
+  INCOMPLETED: "gray",
 };
 const statusIcons = {
   APPROVED: <CheckCircleOutlined />,
   COMPLETED: <CheckCircleOutlined />,
   REJECTED: <CloseCircleOutlined />,
   PENDING: <ClockCircleOutlined />,
+  INCOMPLETED: <WarningOutlined />,
 };
 
 const statusOptions = [
   { label: "Tất cả", value: "ALL" },
   { label: "Chờ duyệt", value: "PENDING" },
-  { label: "Hoàn thành", value: "APPROVED" },
+  { label: "Đã duyệt", value: "APPROVED" },
+  { label: "Hoàn thành", value: "COMPLETED" },
   { label: "Từ chối", value: "REJECTED" },
 ];
 
@@ -58,12 +62,25 @@ const DashboardPage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        let res;
+        let res = [];
         if (status === "ALL") {
-          res = await getAllBloodRegister();
+          const allStatuses = statusOptions
+            .map((option) => option.value)
+            .filter((value) => value !== "ALL");
+
+          const responses = await Promise.all(
+            allStatuses.map((s) =>
+              getBloodRegisterByStatus(s).catch((e) => {
+                console.error(`Failed to fetch status ${s}`, e);
+                return [];
+              })
+            )
+          );
+          res = responses.flat();
         } else {
           res = await getBloodRegisterByStatus(status);
         }
+        console.log("API APPROVED response:", res);
         // Mapping dữ liệu từ API
         const dataWithUser = await Promise.all(
           res.map(async (item) => {
@@ -80,10 +97,20 @@ const DashboardPage = () => {
               id: item.id,
               name: userInfo.fullName || item.fullName || item.name || "",
               bloodType:
-                userInfo.bloodType || item.bloodType || item.blood_type || "",
-              quantity: item.quantity || item.amount || 1,
+                item.bloodType ||
+                (item.blood && item.blood.bloodType) ||
+                userInfo.bloodType ||
+                userInfo.blood_type ||
+                "Chưa xác định",
+              quantity:
+                (item.blood && item.blood.unit) ||
+                item.quantity ||
+                item.amount ||
+                1,
+              wantedHour: item.wantedHour || (item.blood && item.blood.wantedHour) || item.hour || "",
               wantedDate:
                 item.wantedDate ||
+                (item.blood && item.blood.donationDate) ||
                 item.registerDate ||
                 item.created_at ||
                 item.date ||
@@ -93,6 +120,7 @@ const DashboardPage = () => {
             };
           })
         );
+        console.log(dataWithUser);
         setData(dataWithUser);
       } catch {
         message.error("Không thể tải danh sách đăng ký!");
@@ -103,25 +131,49 @@ const DashboardPage = () => {
     fetchData();
   }, [status]);
 
-  const handleApprove = async (record) => {
-    console.log("Approve record:", record);
+  const handleComplete = async (record) => {
     try {
-      await updateBloodRegisterStatus(record.id, "APPROVED");
-      message.success("Đã duyệt đơn thành công!");
-      setStatus("ALL");
+      console.log("Completing with:", record);
+      await completeBloodRegister({
+        bloodId: record.id,
+        implementationDate: new Date().toISOString().split("T")[0],
+        unit: record.quantity,
+      });
+      // Sau khi complete, thêm vào kho máu
+      const expiration = new Date();
+      expiration.setDate(expiration.getDate() + 35); // máu toàn phần thường bảo quản 35 ngày
+      await createBloodInventory({
+        bloodType: record.bloodType,
+        unitsAvailable: record.quantity,
+        expirationDate: expiration.toISOString(),
+      });
+      message.success("Đã đánh dấu hoàn thành và thêm vào kho máu!");
+      const updatedData = data.map((item) =>
+        item.id === record.id ? { ...item, status: "COMPLETED" } : item
+      );
+      setData(updatedData);
     } catch (err) {
-      message.error("Duyệt đơn thất bại!");
-      console.error("Approve error:", err?.response?.data || err);
+      console.error("Complete error:", err);
+      message.error(
+        "Lỗi khi hoàn thành đăng ký hoặc thêm vào kho máu: " +
+          (err?.response?.data?.message || "Unknown error")
+      );
     }
   };
 
-  const handleReject = async (record) => {
+  const handleIncomplete = async (record) => {
     try {
-      await updateBloodRegisterStatus(record.id, "REJECTED");
-      message.success("Đã từ chối đơn!");
+      await updateBloodRegisterStatus(record.id, "INCOMPLETED");
+      message.success("Đã đánh dấu chưa hoàn thành!");
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === record.id ? { ...item, status: "INCOMPLETED" } : item
+        )
+      );
       setStatus("ALL");
-    } catch {
-      message.error("Từ chối đơn thất bại!");
+    } catch (err) {
+      message.error("Cập nhật trạng thái thất bại!");
+      console.error("Incomplete error:", err?.response?.data || err);
     }
   };
 
@@ -134,12 +186,32 @@ const DashboardPage = () => {
       render: (id) => <b>{id}</b>,
     },
     {
+      title: "Nhóm máu",
+      dataIndex: "bloodType",
+      key: "bloodType",
+      render: (bloodType) => (
+        <Tag color="magenta" style={{ fontWeight: 500, fontSize: 14 }}>
+          {bloodType || "Chưa xác định"}
+        </Tag>
+      ),
+    },
+    {
       title: "Số lượng (đơn vị)",
       dataIndex: "quantity",
       key: "quantity",
     },
     {
-      title: "Ngày đăng ký",
+      title: "Giờ",
+      dataIndex: "wantedHour",
+      key: "wantedHour",
+      render: (hour) => {
+        if (!hour) return "";
+        const [h, m] = hour.split(":");
+        return `${h}:${m}`;
+      },
+    },
+    {
+      title: "Ngày hiến",
       dataIndex: "wantedDate",
       key: "wantedDate",
       width: 130,
@@ -164,17 +236,21 @@ const DashboardPage = () => {
     {
       title: "Thao tác",
       key: "action",
-      render: (_, record) =>
-        record.status === "PENDING" ? (
-          <Space>
-            <Button type="primary" onClick={() => handleApprove(record)}>
-              Duyệt đơn
-            </Button>
-            <Button danger onClick={() => handleReject(record)}>
-              Từ chối
-            </Button>
-          </Space>
-        ) : null,
+      render: (_, record) => {
+        if (record.status === "APPROVED") {
+          return (
+            <Space>
+              <Button type="primary" onClick={() => handleComplete(record)}>
+                Hoàn thành
+              </Button>
+              <Button danger onClick={() => handleIncomplete(record)}>
+                Chưa hoàn thành
+              </Button>
+            </Space>
+          );
+        }
+        return null;
+      },
     },
   ];
 
