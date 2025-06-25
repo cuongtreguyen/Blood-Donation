@@ -32,7 +32,7 @@ function DoctorDashboardLayout() {
 
   useEffect(() => {
     // Redirect if not logged in or not authorized
-    if (!user || user.role !== "STAFF") {
+    if (!user || (user.role !== "DOCTOR" && user.role !== "STAFF")) {
       navigate("/login");
     }
   }, [user, navigate]);
@@ -46,7 +46,7 @@ function DoctorDashboardLayout() {
     <div className="flex h-screen">
       {/* Sidebar */}
       <div className="w-64 bg-red-600 text-white p-6">
-        <h1 className="text-2xl font-bold mb-8">Bác Sĩ Dashboard</h1>
+        <h1 className="text-2xl font-bold mb-8">{user?.role === "DOCTOR" ? "Bác Sĩ" : "Nhân Viên"} Dashboard</h1>
         <nav className="space-y-2">
           {menuItems.map((item) => (
             <Link
@@ -71,7 +71,7 @@ function DoctorDashboardLayout() {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-xl font-semibold mb-1">
-                Xin chào, BS. {user?.fullName}
+                Xin chào, {user?.role === "DOCTOR" ? "BS." : ""} {user?.fullName}
               </h2>
               <p className="text-gray-600">
                 {user?.location && `Phòng khám: ${user.location}`}

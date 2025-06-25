@@ -44,6 +44,8 @@ import DoctorReportsPage from "./page/doctorpage/doctor/ReportsPage";
 import ForgotPassword from "./page/loginpage/ForgotPassword";
 import DonateUser from "./page/userpage/DonateUser";
 import DoctorBloodInventoryPage from "./page/doctorpage/dashboard/BloodInventoryPage";
+import DoctorProfilePage from "./page/doctorpage/dashboard/ProfilePage";
+import DoctorSettingsPage from "./page/doctorpage/dashboard/SettingsPage";
 
 const router = createBrowserRouter([
   {
@@ -53,9 +55,10 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
+      { path: "forgot-password", element: <ForgotPassword /> },
       { path: "blood-request", element: <BloodRequestForm /> },
       { path: "verify-otp", element: <OtpVerification /> },
-      { path: "/user", element: <DonateUser /> },
+      { path: "user", element: <DonateUser /> },
     ],
   },
   {
@@ -88,6 +91,8 @@ const router = createBrowserRouter([
       { path: "medical-records", element: <DoctorMedicalRecordsPage /> },
       { path: "reports", element: <DoctorReportsPage /> },
       { path: "blood-inventory", element: <DoctorBloodInventoryPage /> },
+      { path: "profile", element: <DoctorProfilePage /> },
+      { path: "settings", element: <DoctorSettingsPage /> },
     ],
   },
 ]);
