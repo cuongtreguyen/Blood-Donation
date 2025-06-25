@@ -26,15 +26,14 @@
 
 // export default MainLayout;
 
-
 // Cách 1: Nếu EmergencyBanner có logic ẩn/hiện riêng
-import React, { useState, useRef, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
-import Header from './Header';
-import Footer from './Footer';
-import EmergencyBanner from './EmergencyBanner';
-import ContactButton from './ContactButton';
-import ChatBox from '../chat/ChatBox';
+import React, { useState, useRef, useEffect } from "react";
+import { Outlet } from "react-router-dom";
+import Header from "./Header";
+import Footer from "./Footer";
+// import EmergencyBanner from './EmergencyBanner';
+// import ContactButton from './ContactButton';
+import ChatBox from "../chat/ChatBox";
 
 const MainLayout = () => {
   const [bannerHeight, setBannerHeight] = useState(100);
@@ -43,8 +42,9 @@ const MainLayout = () => {
   useEffect(() => {
     const checkBannerVisibility = () => {
       if (bannerRef.current) {
-        const isVisible = bannerRef.current.offsetHeight > 0 && 
-                         getComputedStyle(bannerRef.current).display !== 'none';
+        const isVisible =
+          bannerRef.current.offsetHeight > 0 &&
+          getComputedStyle(bannerRef.current).display !== "none";
         setBannerHeight(isVisible ? 100 : 0);
       }
     };
@@ -57,7 +57,7 @@ const MainLayout = () => {
     if (bannerRef.current) {
       observer.observe(bannerRef.current, {
         attributes: true,
-        attributeFilter: ['style', 'class']
+        attributeFilter: ["style", "class"],
       });
     }
 
@@ -66,14 +66,13 @@ const MainLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div style={{ 
-        position: 'relative', 
-        marginTop: `${bannerHeight}px`,
-        transition: 'margin-top 0.3s ease'
-      }}>
-        <div ref={bannerRef}>
-          <EmergencyBanner />
-        </div>
+      <div
+        style={{
+          position: "relative",
+          marginTop: `80px`,
+          transition: "margin-top 0.3s ease",
+        }}
+      >
       </div>
       <Header />
       <main className="flex-grow">
@@ -86,4 +85,3 @@ const MainLayout = () => {
 };
 
 export default MainLayout;
-

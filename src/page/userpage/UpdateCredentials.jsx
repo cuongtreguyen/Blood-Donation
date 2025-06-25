@@ -79,7 +79,7 @@ const UpdateCredentials = ({ onClose }) => {
         updatePayload.password = newPassword; // API nhận 'password', không phải 'newPassword'
       }
 
-      await api.put("/update-user/email-password", updatePayload, {
+      await api.put("/user/update-user/email-password", updatePayload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

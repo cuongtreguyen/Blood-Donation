@@ -272,7 +272,7 @@ function HeroSection({ onLearnMoreClick }) {
         id="home"
         className="hero-section bg-gradient-danger text-white py-5"
         style={{
-          marginTop: "80px",
+          marginTop: "0px",
           background: "linear-gradient(135deg, #dc3545 0%, #c82333 100%)",
         }}
       >
