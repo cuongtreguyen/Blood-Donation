@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Input, Space, Card, Popconfirm, Tooltip, Spin } from 'antd';
+import { Table, Tag, Button, Input, Space, Card, Popconfirm, Tooltip, Spin, Select } from 'antd';
 import { SearchOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -9,6 +9,7 @@ const BloodDonationApprovalPage = () => {
   const [requests, setRequests] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState('ALL');
 
   const fetchBloodReceiveList = async () => {
     setLoading(true);
@@ -39,6 +40,7 @@ const BloodDonationApprovalPage = () => {
     } catch (err) {
       setRequests([]);
       toast.error("Không thể lấy dữ liệu từ máy chủ!", { toastId: "fetch-error" });
+      console.log(err);
     }
     setLoading(false);
   };
@@ -59,6 +61,7 @@ const BloodDonationApprovalPage = () => {
       toast.success(`Đã cập nhật trạng thái thành công!`);
     } catch (err) {
       toast.error(`Không thể cập nhật trạng thái!`);
+      console.log(err);
     }
   };
 
@@ -68,11 +71,13 @@ const BloodDonationApprovalPage = () => {
 
   const filteredRequests = requests.filter(request => {
     const searchLower = searchText.toLowerCase();
-    return (
+    const matchSearch =
       (request.id ? request.id.toString().toLowerCase().includes(searchLower) : false) ||
       (request.name ? request.name.toLowerCase().includes(searchLower) : false) ||
-      (request.status ? request.status.toLowerCase().includes(searchLower) : false)
-    );
+      (request.status ? request.status.toLowerCase().includes(searchLower) : false);
+    const matchStatus =
+      statusFilter === 'ALL' ? true : request.status === statusFilter;
+    return matchSearch && matchStatus;
   });
   
   const formatWantedHour = (wantedHour) => {
@@ -127,6 +132,22 @@ const BloodDonationApprovalPage = () => {
       render: value => formatWantedHour(value),
       sorter: (a, b) => (formatWantedHour(a.wantedHour) || '').localeCompare(formatWantedHour(b.wantedHour) || ''),
     },
+    {
+      title: 'Nhóm máu',
+      dataIndex: 'bloodType',
+      key: 'bloodType',
+      align: 'center',
+      render: (type) => {
+        if (!type) return '';
+        const bloodMap = {
+          'A_POSITIVE': 'A+', 'A_NEGATIVE': 'A-',
+          'B_POSITIVE': 'B+', 'B_NEGATIVE': 'B-',
+          'O_POSITIVE': 'O+', 'O_NEGATIVE': 'O-',
+          'AB_POSITIVE': 'AB+', 'AB_NEGATIVE': 'AB-'
+        };
+        return <Tag color="geekblue" style={{ fontWeight: 500 }}>{bloodMap[type] || type}</Tag>;
+      }
+    },
     { title: 'Khẩn cấp', dataIndex: 'isEmergency', key: 'isEmergency', render: (isEmergency) => (isEmergency ? <Tag color="red">Có</Tag> : <Tag color="blue">Không</Tag>) },
     {
       title: 'Hành động',
@@ -178,13 +199,25 @@ const BloodDonationApprovalPage = () => {
       <Card
         title="Xác nhận Yêu cầu Nhận máu"
         extra={
-          <Input
-            placeholder="Tìm kiếm theo ID, tên, trạng thái..."
-            prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={handleSearch}
-            style={{ width: 300 }}
-          />
+          <Space>
+            <Input
+              placeholder="Tìm kiếm theo ID, tên, trạng thái..."
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={handleSearch}
+              style={{ width: 220 }}
+            />
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              style={{ width: 150 }}
+            >
+              <Select.Option value="ALL">Tất cả</Select.Option>
+              <Select.Option value="APPROVED">Đã duyệt</Select.Option>
+              <Select.Option value="PENDING">Chờ duyệt</Select.Option>
+              <Select.Option value="REJECTED">Đã từ chối</Select.Option>
+            </Select>
+          </Space>
         }
       >
         {loading ? (

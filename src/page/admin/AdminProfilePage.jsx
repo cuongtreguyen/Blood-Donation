@@ -6,10 +6,13 @@ const { Title } = Typography;
 
 const AdminProfilePage = () => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = React.useState(false);
 
   const handleSubmit = (values) => {
     console.log('Admin Profile Submit:', values);
+    setLoading(true);
     // Add logic to save admin profile data
+    setLoading(false);
   };
 
   return (
@@ -42,7 +45,7 @@ const AdminProfilePage = () => {
           </Form.Item>
           {/* Thêm các trường thông tin khác nếu cần */}
           <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ background: '#d32f2f', borderColor: '#d32f2f' }}>
+            <Button type="primary" htmlType="submit" style={{ background: '#d32f2f', borderColor: '#d32f2f' }} loading={loading}>
               Lưu thay đổi
             </Button>
           </Form.Item>
