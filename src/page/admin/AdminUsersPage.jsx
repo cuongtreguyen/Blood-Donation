@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm, message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm, message, Tooltip } from 'antd';
 import SearchOutlined from '@ant-design/icons/lib/icons/SearchOutlined';
 import UserOutlined from '@ant-design/icons/lib/icons/UserOutlined';
 import EditOutlined from '@ant-design/icons/lib/icons/EditOutlined';
@@ -22,52 +22,57 @@ function AdminUsersPage() {
   const [form] = Form.useForm();
 
   // Mock data for users
-  const [users, setUsers] = useState([
-    {
-      key: '1',
-      id: '1',
-      name: 'Nguyễn Văn A',
-      email: 'nguyenvana@example.com',
-      phone: '0901234567',
-      role: 'donor',
-      status: 'active',
-      joinDate: '15/09/2023',
-      lastLogin: '15/10/2023',
-    },
-    {
-      key: '2',
-      id: '2',
-      name: 'Trần Thị B',
-      email: 'tranthib@example.com',
-      phone: '0909876543',
-      role: 'staff',
-      status: 'active',
-      joinDate: '20/08/2023',
-      lastLogin: '14/10/2023',
-    },
-    {
-      key: '3',
-      id: '3',
-      name: 'Lê Văn C',
-      email: 'levanc@example.com',
-      phone: '0912345678',
-      role: 'doctor',
-      status: 'inactive',
-      joinDate: '05/10/2023',
-      lastLogin: '10/10/2023',
-    },
-    {
-      key: '4',
-      id: '4',
-      name: 'Phạm Thị D',
-      email: 'phamthid@example.com',
-      phone: '0987654321',
-      role: 'admin',
-      status: 'active',
-      joinDate: '01/01/2023',
-      lastLogin: '15/10/2023',
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const genderOptions = [
+    { label: 'Nam', value: 'MALE' },
+    { label: 'Nữ', value: 'FEMALE' },
+    { label: 'Khác', value: 'OTHER' },
+  ];
+  const bloodTypeOptions = [
+    'A_POSITIVE', 'A_NEGATIVE', 'B_POSITIVE', 'B_NEGATIVE',
+    'O_POSITIVE', 'O_NEGATIVE', 'AB_POSITIVE', 'AB_NEGATIVE'
+  ];
+
+  useEffect(() => {
+    const fetchUsersByRole = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Lấy token từ localStorage
+        if (!token) {
+          toast.error('Không tìm thấy token xác thực!');
+          return;
+        }
+        const res = await api.get('/user/get-user-by-role', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const usersFromApi = res.data.map((user, idx) => ({
+          key: user.id || idx + 1,
+          id: user.id,
+          name: user.fullName,
+          email: user.email,
+          phone: user.phone,
+          role: user.role === "MEMBER" ? "donor" : user.role?.toLowerCase(),
+          status: "active",
+          joinDate: user.joinDate || (user.birthdate ? new Date(user.birthdate).toLocaleDateString('vi-VN') : "-"),
+          lastLogin: "-",
+          address: user.address || '',
+          gender: user.gender || '',
+          birthdate: user.birthdate || '',
+          height: user.height || '',
+          weight: user.weight || '',
+          lastDonation: user.lastDonation || '',
+          medicalHistory: user.medicalHistory || '',
+          emergencyName: user.emergencyName || '',
+          emergencyPhone: user.emergencyPhone || '',
+          bloodType: user.bloodType || '',
+        }));
+        setUsers(usersFromApi);
+      } catch (err) {
+        console.error('Error fetching users by role:', err);
+        toast.error('Không thể lấy danh sách người dùng!');
+      }
+    };
+    fetchUsersByRole();
+  }, []);
 
   const showModal = (mode, user = null) => {
     setModalMode(mode);
@@ -161,24 +166,39 @@ function AdminUsersPage() {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      sorter: (a, b) => a.id.localeCompare(b.id),
+      sorter: (a, b) => String(a.id).localeCompare(String(b.id)),
+      align: 'center',
+      width: 80,
     },
     {
       title: 'Tên',
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
+      render: (text) => <Tooltip title={text}><span style={{ fontWeight: 500 }}>{text}</span></Tooltip>,
+      width: 150,
     },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-    },
-    {
-      title: 'Số điện thoại',
-      dataIndex: 'phone',
-      key: 'phone',
-    },
+    { title: 'Email', dataIndex: 'email', key: 'email', render: (text) => <Tooltip title={text}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: 140 }}>{text}</span></Tooltip>, width: 160 },
+    { title: 'Số điện thoại', dataIndex: 'phone', key: 'phone', align: 'center', width: 120 },
+    { title: 'Địa chỉ', dataIndex: 'address', key: 'address', render: (text) => <Tooltip title={text}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: 120 }}>{text}</span></Tooltip>, width: 130 },
+    { title: 'Giới tính', dataIndex: 'gender', key: 'gender', align: 'center', render: (gender) => gender === 'MALE' ? 'Nam' : gender === 'FEMALE' ? 'Nữ' : gender === 'OTHER' ? 'Khác' : '' },
+    { title: 'Ngày sinh', dataIndex: 'birthdate', key: 'birthdate', align: 'center', render: (date) => date ? new Date(date).toLocaleDateString('vi-VN') : '' },
+    { title: 'Chiều cao', dataIndex: 'height', key: 'height', align: 'center', width: 90 },
+    { title: 'Cân nặng', dataIndex: 'weight', key: 'weight', align: 'center', width: 90 },
+    { title: 'Lần hiến máu gần nhất', dataIndex: 'lastDonation', key: 'lastDonation', align: 'center', render: (date) => date ? new Date(date).toLocaleDateString('vi-VN') : '' },
+    { title: 'Tiền sử bệnh', dataIndex: 'medicalHistory', key: 'medicalHistory', render: (text) => <Tooltip title={text}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: 120 }}>{text}</span></Tooltip>, width: 130 },
+    { title: 'Người liên hệ khẩn cấp', dataIndex: 'emergencyName', key: 'emergencyName', render: (text) => <Tooltip title={text}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: 120 }}>{text}</span></Tooltip>, width: 130 },
+    { title: 'SĐT khẩn cấp', dataIndex: 'emergencyPhone', key: 'emergencyPhone', align: 'center', width: 120 },
+    { title: 'Nhóm máu', dataIndex: 'bloodType', key: 'bloodType', align: 'center', render: (type) => {
+      if (!type) return '';
+      const bloodMap = {
+        'A_POSITIVE': 'A+', 'A_NEGATIVE': 'A-',
+        'B_POSITIVE': 'B+', 'B_NEGATIVE': 'B-',
+        'O_POSITIVE': 'O+', 'O_NEGATIVE': 'O-',
+        'AB_POSITIVE': 'AB+', 'AB_NEGATIVE': 'AB-'
+      };
+      return <Tag color="geekblue" style={{ fontWeight: 500 }}>{bloodMap[type] || type}</Tag>;
+    } },
     {
       title: 'Vai trò',
       dataIndex: 'role',
@@ -192,62 +212,31 @@ function AdminUsersPage() {
       onFilter: (value, record) => record.role === value,
       render: (role) => {
         const colors = {
-          donor: 'blue',
-          staff: 'green',
-          doctor: 'purple',
-          admin: 'red',
+          donor: 'blue', staff: 'green', doctor: 'purple', admin: 'red',
         };
         const labels = {
-          donor: 'Người hiến máu',
-          staff: 'Nhân viên',
-          doctor: 'Bác sĩ',
-          admin: 'Quản trị viên',
+          donor: 'Người hiến máu', staff: 'Nhân viên', doctor: 'Bác sĩ', admin: 'Quản trị viên',
         };
-        return <Tag color={colors[role]}>{labels[role]}</Tag>;
+        return <Tag color={colors[role]} style={{ fontWeight: 500 }}>{labels[role]}</Tag>;
       },
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      filters: [
-        { text: 'Đang hoạt động', value: 'active' },
-        { text: 'Không hoạt động', value: 'inactive' },
-      ],
-      onFilter: (value, record) => record.status === value,
-      render: (status) => (
-        <Tag color={status === 'active' ? 'green' : 'orange'}>
-          {status === 'active' ? 'Đang hoạt động' : 'Không hoạt động'}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Ngày tham gia',
-      dataIndex: 'joinDate',
-      key: 'joinDate',
-      sorter: (a, b) => {
-        const dateA = a.joinDate.split('/').reverse().join('');
-        const dateB = b.joinDate.split('/').reverse().join('');
-        return dateA.localeCompare(dateB);
-      },
-    },
-    {
-      title: 'Đăng nhập gần nhất',
-      dataIndex: 'lastLogin',
-      key: 'lastLogin',
+      align: 'center',
     },
     {
       title: 'Hành động',
       key: 'action',
+      align: 'center',
       render: (_, record) => (
         <Space size="small">
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            size="small"
-            onClick={() => showModal('edit', record)}
-            style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
-          />
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              size="middle"
+              onClick={() => showModal('edit', record)}
+              style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
+              shape="circle"
+            />
+          </Tooltip>
           <Popconfirm
             title="Xác nhận xóa"
             description="Bạn có chắc chắn muốn xóa người dùng này?"
@@ -256,11 +245,14 @@ function AdminUsersPage() {
             cancelText="Hủy"
             okButtonProps={{ danger: true }}
           >
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              size="small"
-            />
+            <Tooltip title="Xóa">
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+                size="middle"
+                shape="circle"
+              />
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
@@ -270,120 +262,171 @@ function AdminUsersPage() {
   return (
     <div>
       <Card
-        title="Quản lý người dùng"
+        title={<span style={{ fontWeight: 700, fontSize: 22 }}>Quản lý người dùng</span>}
         extra={
           <Space>
             {/* Input Tìm kiếm */}
             <Input
               placeholder="Tìm kiếm theo tên, email, SĐT..."
-              prefix={<SearchOutlined />}
+              prefix={<SearchOutlined style={{ fontSize: 18 }} />}
               value={searchText}
               onChange={handleSearch}
-              style={{ width: 300 }}
+              style={{ width: 320, borderRadius: 24, boxShadow: '0 2px 8px #e0e0e0' }}
+              size="large"
             />
             {/* Nút Thêm người dùng */}
             <Button
               type="primary"
-              icon={<PlusOutlined />}
+              icon={<PlusOutlined style={{ fontSize: 20 }} />}
               onClick={() => showModal('add')}
-              style={{ background: '#d32f2f', borderColor: '#d32f2f' }}
+              style={{ background: '#d32f2f', borderColor: '#d32f2f', borderRadius: 24, fontWeight: 600 }}
+              size="large"
             >
               Thêm người dùng
             </Button>
           </Space>
         }
+        style={{ borderRadius: 18, boxShadow: '0 4px 24px #e0e0e0', marginBottom: 32 }}
+        bodyStyle={{ padding: 24 }}
       >
         <Table
           dataSource={filteredUsers} // Sử dụng dữ liệu đã lọc bởi searchText
           columns={columns} // Table sẽ tự áp dụng thêm lọc vai trò và trạng thái từ cấu hình cột
           rowKey="key"
           pagination={{ pageSize: 10 }}
+          bordered
+          scroll={{ x: 'max-content' }}
+          style={{ background: '#fff', borderRadius: 12 }}
+          size="middle"
         />
       </Card>
 
       <Modal
-        title={modalMode === 'add' ? 'Thêm người dùng mới' : 'Chỉnh sửa thông tin người dùng'}
+        title={<span style={{ fontWeight: 700, fontSize: 20 }}>{modalMode === 'add' ? 'Thêm người dùng mới' : 'Chỉnh sửa thông tin người dùng'}</span>}
         visible={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
         okText={modalMode === 'add' ? 'Thêm' : 'Cập nhật'}
         cancelText="Hủy"
+        width={700}
+        bodyStyle={{ padding: 24 }}
+        style={{ top: 40 }}
+        okButtonProps={{ style: { background: '#d32f2f', borderColor: '#d32f2f' } }}
       >
         <Form
           form={form}
           layout="vertical"
           name="userForm"
+          style={{ display: 'flex', flexWrap: 'wrap', gap: 24 }}
         >
-          <Form.Item
-            name="name"
-            label="Tên người dùng"
-            rules={[
-              { required: true, message: 'Vui lòng nhập tên người dùng!' },
-              { min: 3, message: 'Tên người dùng phải có ít nhất 3 ký tự!' },
-              { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' },
-              { pattern: /^[a-zA-Z\sÀÁẠẢÃĂẰẮẶẲẴÂẦẤẬẨẪÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐđ]+$/, message: 'Tên người dùng chỉ được chứa chữ cái và khoảng trắng!' }
-            ]}
-          >
-            <Input prefix={<UserOutlined />} placeholder="Nhập tên người dùng" />
-          </Form.Item>
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: 'Vui lòng nhập email!' },
-              { type: 'email', message: 'Email không hợp lệ!' },
-              { pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: 'Email phải có định dạng hợp lệ (ví dụ: example@domain.com)!' }
-            ]}
-          >
-            <Input prefix={<MailOutlined />} placeholder="Nhập email" />
-          </Form.Item>
-          <Form.Item
-            name="phone"
-            label="Số điện thoại"
-            rules={[
-              { required: true, message: 'Vui lòng nhập số điện thoại!' },
-              { pattern: /^[0-9]{10}$/, message: 'Số điện thoại phải có 10 chữ số!' }
-            ]}
-          >
-            <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" />
-          </Form.Item>
-          {modalMode === 'add' && (
+          <div style={{ flex: 1, minWidth: 280 }}>
             <Form.Item
-              name="password"
-              label="Mật khẩu"
+              name="name"
+              label={<b>Tên người dùng</b>}
               rules={[
-                { required: true, message: 'Vui lòng nhập mật khẩu!' },
-                { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
-                { max: 50, message: 'Mật khẩu không được vượt quá 50 ký tự!' }
+                { required: true, message: 'Vui lòng nhập tên người dùng!' },
+                { min: 3, message: 'Tên người dùng phải có ít nhất 3 ký tự!' },
+                { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' },
+                { pattern: /^[a-zA-Z\sÀÁẠẢÃĂẰẮẶẲẴÂẦẤẬẨẪÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐđ]+$/, message: 'Tên người dùng chỉ được chứa chữ cái và khoảng trắng!' }
               ]}
             >
-              <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" />
+              <Input prefix={<UserOutlined />} placeholder="Nhập tên người dùng" size="large" />
             </Form.Item>
-          )}
-          <Form.Item
-            name="role"
-            label="Vai trò"
-            rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
-          >
-            <Select placeholder="Chọn vai trò">
-              <Option value="donor">Người hiến máu</Option>
-              <Option value="staff">Nhân viên</Option>
-              <Option value="doctor">Bác sĩ</Option>
-              <Option value="admin">Quản trị viên</Option>
-            </Select>
-          </Form.Item>
-          {modalMode === 'edit' && (
             <Form.Item
-              name="status"
-              label="Trạng thái"
-              rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
+              name="email"
+              label={<b>Email</b>}
+              rules={[
+                { required: true, message: 'Vui lòng nhập email!' },
+                { type: 'email', message: 'Email không hợp lệ!' },
+                { pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: 'Email phải có định dạng hợp lệ (ví dụ: example@domain.com)!' }
+              ]}
             >
-              <Select placeholder="Chọn trạng thái">
-                <Option value="active">Đang hoạt động</Option>
-                <Option value="inactive">Không hoạt động</Option>
+              <Input prefix={<MailOutlined />} placeholder="Nhập email" size="large" />
+            </Form.Item>
+            <Form.Item
+              name="phone"
+              label={<b>Số điện thoại</b>}
+              rules={[
+                { required: true, message: 'Vui lòng nhập số điện thoại!' },
+                { pattern: /^[0-9+]{10,15}$/, message: 'Số điện thoại phải hợp lệ!' }
+              ]}
+            >
+              <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" size="large" />
+            </Form.Item>
+            <Form.Item name="address" label={<b>Địa chỉ</b>}>
+              <Input placeholder="Nhập địa chỉ" size="large" />
+            </Form.Item>
+            <Form.Item name="gender" label={<b>Giới tính</b>}>
+              <Select placeholder="Chọn giới tính" size="large">
+                {genderOptions.map(opt => <Option key={opt.value} value={opt.value}>{opt.label}</Option>)}
               </Select>
             </Form.Item>
-          )}
+            <Form.Item name="birthdate" label={<b>Ngày sinh</b>}>
+              <Input type="date" size="large" />
+            </Form.Item>
+          </div>
+          <div style={{ flex: 1, minWidth: 280 }}>
+            <Form.Item name="height" label={<b>Chiều cao (cm)</b>}>
+              <Input type="number" min={0} size="large" />
+            </Form.Item>
+            <Form.Item name="weight" label={<b>Cân nặng (kg)</b>}>
+              <Input type="number" min={0} size="large" />
+            </Form.Item>
+            <Form.Item name="lastDonation" label={<b>Lần hiến máu gần nhất</b>}>
+              <Input type="date" size="large" />
+            </Form.Item>
+            <Form.Item name="medicalHistory" label={<b>Tiền sử bệnh</b>}>
+              <Input placeholder="Nhập tiền sử bệnh" size="large" />
+            </Form.Item>
+            <Form.Item name="emergencyName" label={<b>Người liên hệ khẩn cấp</b>}>
+              <Input placeholder="Nhập tên người liên hệ khẩn cấp" size="large" />
+            </Form.Item>
+            <Form.Item name="emergencyPhone" label={<b>SĐT khẩn cấp</b>}>
+              <Input placeholder="Nhập số điện thoại khẩn cấp" size="large" />
+            </Form.Item>
+            <Form.Item name="bloodType" label={<b>Nhóm máu</b>}>
+              <Select placeholder="Chọn nhóm máu" size="large">
+                {bloodTypeOptions.map(type => <Option key={type} value={type}>{type.replace('_', ' ')}</Option>)}
+              </Select>
+            </Form.Item>
+            {modalMode === 'add' && (
+              <Form.Item
+                name="password"
+                label={<b>Mật khẩu</b>}
+                rules={[
+                  { required: true, message: 'Vui lòng nhập mật khẩu!' },
+                  { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
+                  { max: 50, message: 'Mật khẩu không được vượt quá 50 ký tự!' }
+                ]}
+              >
+                <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" size="large" />
+              </Form.Item>
+            )}
+            <Form.Item
+              name="role"
+              label={<b>Vai trò</b>}
+              rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
+            >
+              <Select placeholder="Chọn vai trò" size="large">
+                <Option value="donor">Người hiến máu</Option>
+                <Option value="staff">Nhân viên</Option>
+                <Option value="doctor">Bác sĩ</Option>
+                <Option value="admin">Quản trị viên</Option>
+              </Select>
+            </Form.Item>
+            {modalMode === 'edit' && (
+              <Form.Item
+                name="status"
+                label={<b>Trạng thái</b>}
+                rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
+              >
+                <Select placeholder="Chọn trạng thái" size="large">
+                  <Option value="active">Đang hoạt động</Option>
+                  <Option value="inactive">Không hoạt động</Option>
+                </Select>
+              </Form.Item>
+            )}
+          </div>
         </Form>
       </Modal>
     </div>

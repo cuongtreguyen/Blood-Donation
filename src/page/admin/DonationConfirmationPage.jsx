@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Input, Space, Card, Popconfirm, Tooltip, Spin } from 'antd';
+import { Table, Tag, Button, Input, Space, Card, Popconfirm, Tooltip, Spin, Select } from 'antd';
 import { SearchOutlined, CheckCircleOutlined, CloseCircleOutlined, UserOutlined, CalendarOutlined, HeartOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import api from '../../config/api';
-import dayjs from 'dayjs'; // Bạn cần cài đặt dayjs nếu chưa có: npm install dayjs
 
 const bloodTypeMap = {
   A_POSITIVE: "A+",
@@ -21,6 +20,7 @@ const DonationConfirmationPage = () => {
   const [donations, setDonations] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState('ALL');
 
   // Fetch blood register list
   const fetchBloodRegisterList = async () => {
@@ -46,17 +46,20 @@ const DonationConfirmationPage = () => {
         setDonations([]);
         toast.warning("Không có dữ liệu hiến máu nào!", {
           toastId: "no-data-warning",
-          position: "top-right"
+          position: "top-right",
         });
       } else {
-        setDonations(allResults);
+        setDonations(allResults.flat());
+        console.log('Donations chi tiết:', allResults.flat());
+        allResults.flat().forEach((item, idx) => console.log('Donation', idx, item));
       }
     } catch(err) {
       setDonations([]);
       toast.error("Không thể lấy dữ liệu từ máy chủ!", {
         toastId: "fetch-error",
-        position: "top-right"
+        position: "top-right",        
       });
+      console.error(err);
     }
     setLoading(false);
   };
@@ -85,6 +88,7 @@ const DonationConfirmationPage = () => {
       toast.success('Đã duyệt yêu cầu hiến máu thành công!', { toastId: 'approve-success' });
     } catch (err) {
       toast.error('Không thể duyệt yêu cầu hiến máu!', { toastId: 'approve-error' });
+      console.log(err);
     }
   };
 
@@ -104,6 +108,7 @@ const DonationConfirmationPage = () => {
       toast.success('Đã từ chối yêu cầu hiến máu thành công!', { toastId: 'reject-success' });
     } catch (err) {
       toast.error('Không thể từ chối yêu cầu hiến máu!', { toastId: 'reject-error' });
+      console.log(err);
     }
   };
 
@@ -113,11 +118,13 @@ const DonationConfirmationPage = () => {
 
   const filteredDonations = donations.filter(donation => {
     const searchLower = searchText.toLowerCase();
-    return (
+    const matchSearch =
       (donation.id ? donation.id.toString().includes(searchLower) : false) ||
       (donation.status ? donation.status.toLowerCase().includes(searchLower) : false) ||
-      (donation.blood && donation.blood.bloodType ? (bloodTypeMap[donation.blood.bloodType] || '').toLowerCase().includes(searchLower) : false)
-    );
+      (donation.blood && donation.blood.bloodType ? (bloodTypeMap[donation.blood.bloodType] || '').toLowerCase().includes(searchLower) : false);
+    const matchStatus =
+      statusFilter === 'ALL' ? true : donation.status === statusFilter;
+    return matchSearch && matchStatus;
   });
 
   // Format wantedHour
@@ -177,7 +184,7 @@ const DonationConfirmationPage = () => {
       }
     },
     { 
-      title: 'Ngày đăng ký', 
+      title: 'Ngày hẹn', 
       dataIndex: 'wantedDate', 
       key: 'wantedDate',
       sorter: (a, b) => new Date(a.wantedDate) - new Date(b.wantedDate),
@@ -185,10 +192,18 @@ const DonationConfirmationPage = () => {
       render: value => value ? new Date(value).toLocaleDateString('vi-VN') : ''
     },
     { 
-      title: 'Giờ đăng ký', 
+      title: 'Giờ hẹn', 
       dataIndex: 'wantedHour', 
       key: 'wantedHour',
       render: value => formatWantedHour(value)
+    },
+    {
+      title: 'Nhóm máu',
+      key: 'bloodType',
+      render: (_, record) => {
+        const bloodType = record.bloodType || '';
+        return bloodTypeMap[bloodType] || bloodType || '-';
+      }
     },
     {
       title: 'Hành động',
@@ -243,8 +258,18 @@ const DonationConfirmationPage = () => {
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={handleSearch}
-              style={{ width: 300 }}
+              style={{ width: 220 }}
             />
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              style={{ width: 150 }}
+            >
+              <Select.Option value="ALL">Tất cả</Select.Option>
+              <Select.Option value="APPROVED">Đã duyệt</Select.Option>
+              <Select.Option value="PENDING">Chờ duyệt</Select.Option>
+              <Select.Option value="REJECTED">Đã từ chối</Select.Option>
+            </Select>
           </Space>
         }
       >

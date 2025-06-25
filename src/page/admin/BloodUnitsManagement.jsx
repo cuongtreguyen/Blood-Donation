@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Card, Input, Spin, Row, Col, Statistic, Button, Modal, Form, Select, Popconfirm, Tooltip, Space, InputNumber } from 'antd';
+import { Table, Tag, Card, Input, Spin, Row, Col, Statistic, Button, Modal, Form, Select, Popconfirm, Tooltip, Space, InputNumber, DatePicker } from 'antd';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { SearchOutlined, BarChartOutlined, WarningOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -27,6 +27,9 @@ const BloodUnitsManagement = () => {
   const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
   const [selectedUnitId, setSelectedUnitId] = useState(null);
   const [form] = Form.useForm();
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [bloodUnitDetail, setBloodUnitDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const fetchBloodInventory = async () => {
     setLoading(true);
@@ -38,15 +41,18 @@ const BloodUnitsManagement = () => {
         return;
       }
 
-      const res = await api.get('/blood-inventory', {
+      const res = await api.get('/blood-inventory/get-all', {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      console.log(res.data);
       
       setBloodUnits(res.data && Array.isArray(res.data) ? res.data : []);
 
     } catch (err) {
       setBloodUnits([]);
       toast.error("Không thể tải dữ liệu kho máu từ máy chủ.");
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -62,7 +68,8 @@ const BloodUnitsManagement = () => {
       setSelectedUnitId(record.id);
       form.setFieldsValue({
         bloodType: record.bloodType,
-        unitsAvailable: record.totalUnitsAvailable,
+        unitsAvailable: record.unitsAvailable,
+        expirationDate: record.expirationDate ? new Date(record.expirationDate) : null,
       });
     } else {
       form.resetFields();
@@ -81,28 +88,22 @@ const BloodUnitsManagement = () => {
       const values = await form.validateFields();
       const token = localStorage.getItem("token");
       const headers = { Authorization: `Bearer ${token}` };
-      
+      const payload = {
+        bloodType: values.bloodType,
+        unitsAvailable: values.unitsAvailable,
+        expirationDate: values.expirationDate ? values.expirationDate.toISOString() : undefined,
+      };
       if (modalMode === 'add') {
-        await api.post('/blood-inventory', values, { headers });
+        await api.post('/blood-inventory', payload, { headers });
         toast.success('Thêm đơn vị máu thành công!');
       } else {
         if (!selectedUnitId || selectedUnitId <= 0) {
           toast.error('ID của đơn vị máu không hợp lệ. Không thể cập nhật.');
           return;
         }
-        const originalUnit = bloodUnits.find(unit => unit.id === selectedUnitId);
-        if (originalUnit) {
-          const payload = {
-            bloodType: originalUnit.bloodType,
-            unitsAvailable: values.unitsAvailable,
-          };
-          await api.put(`/blood-inventory/${selectedUnitId}`, payload, { headers });
-          toast.success('Cập nhật đơn vị máu thành công!');
-        } else {
-          toast.error('Không thể tìm thấy đơn vị máu để cập nhật.');
-        }
+        await api.put(`/blood-inventory/update/${selectedUnitId}`, payload, { headers });
+        toast.success('Cập nhật đơn vị máu thành công!');
       }
-      
       setIsModalVisible(false);
       fetchBloodInventory(); // Refresh data
     } catch (error) {
@@ -113,7 +114,7 @@ const BloodUnitsManagement = () => {
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await api.delete(`/blood-inventory/${id}`, {
+      await api.delete(`/blood-inventory/delete/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Xóa đơn vị máu thành công!');
@@ -123,6 +124,22 @@ const BloodUnitsManagement = () => {
     }
   };
 
+  const fetchBloodUnitById = async (id) => {
+    setDetailLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await api.get(`/blood-inventory/get/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setBloodUnitDetail(res.data);
+      setDetailModalVisible(true);
+    } catch (error) {
+      toast.error("Không thể lấy chi tiết đơn vị máu.");
+      console.error(error);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
 
   const handleSearch = (e) => {
     setSearchText(e.target.value.toLowerCase());
@@ -136,20 +153,20 @@ const BloodUnitsManagement = () => {
     );
   });
 
-  const totalUnits = filteredBloodUnits.reduce((acc, unit) => acc + (unit.totalUnitsAvailable || 0), 0);
+  const totalUnits = filteredBloodUnits.reduce((acc, unit) => acc + (unit.unitsAvailable || 0), 0);
   const lowStockThreshold = 10;
   const bloodTypeCounts = filteredBloodUnits.reduce((acc, unit) => {
-    acc[unit.bloodType] = (acc[unit.bloodType] || 0) + (unit.totalUnitsAvailable || 0);
+    acc[unit.bloodType] = (acc[unit.bloodType] || 0) + (unit.unitsAvailable || 0);
     return acc;
   }, {});
 
   const columns = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      sorter: (a, b) => a.id - b.id,
-    },
+    // {
+    //   title: 'ID',
+    //   dataIndex: 'id',
+    //   key: 'id',
+    //   sorter: (a, b) => a.id - b.id,
+    // },
     {
       title: 'Nhóm Máu',
       dataIndex: 'bloodType',
@@ -165,9 +182,9 @@ const BloodUnitsManagement = () => {
     },
     {
       title: 'Số Lượng Hiện Có (ml)',
-      dataIndex: 'totalUnitsAvailable',
-      key: 'totalUnitsAvailable',
-      sorter: (a, b) => (a.totalUnitsAvailable || 0) - (b.totalUnitsAvailable || 0),
+      dataIndex: 'unitsAvailable',
+      key: 'unitsAvailable',
+      sorter: (a, b) => (a.unitsAvailable || 0) - (b.unitsAvailable || 0),
       render: (units) => (units || 0).toLocaleString(),
     },
     {
@@ -175,6 +192,12 @@ const BloodUnitsManagement = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
+          <Tooltip title="Xem chi tiết">
+            <Button
+              icon={<SearchOutlined />}
+              onClick={() => fetchBloodUnitById(record.id)}
+            />
+          </Tooltip>
           <Tooltip title="Sửa">
             <Button icon={<EditOutlined />} onClick={() => showModal('edit', record)} />
           </Tooltip>
@@ -246,8 +269,8 @@ const BloodUnitsManagement = () => {
             bordered
             summary={pageData => {
               let totalPageUnits = 0;
-              pageData.forEach(({ totalUnitsAvailable }) => {
-                totalPageUnits += (totalUnitsAvailable || 0);
+              pageData.forEach(({ unitsAvailable }) => {
+                totalPageUnits += (unitsAvailable || 0);
               });
 
               return (
@@ -290,7 +313,33 @@ const BloodUnitsManagement = () => {
           >
             <InputNumber min={0} style={{ width: '100%' }} placeholder="Nhập số lượng ml" />
           </Form.Item>
+          <Form.Item
+            name="expirationDate"
+            label="Ngày hết hạn"
+            rules={[{ required: true, message: 'Vui lòng chọn ngày hết hạn!' }]}
+          >
+            <DatePicker style={{ width: '100%' }} showTime />
+          </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title="Chi tiết đơn vị máu"
+        visible={detailModalVisible}
+        onCancel={() => setDetailModalVisible(false)}
+        footer={null}
+      >
+        {detailLoading ? (
+          <Spin />
+        ) : bloodUnitDetail ? (
+          <div>
+            {/* <p><b>ID:</b> {bloodUnitDetail.id}</p> */}
+            <p><b>Nhóm máu:</b> {bloodTypeMap[bloodUnitDetail.bloodType] || bloodUnitDetail.bloodType}</p>
+            <p><b>Số lượng (ml):</b> {bloodUnitDetail.unitsAvailable}</p>
+            {/* Nếu có thêm trường khác, hiển thị ở đây */}
+          </div>
+        ) : (
+          <p>Không có dữ liệu.</p>
+        )}
       </Modal>
     </div>
   );
