@@ -64,7 +64,7 @@ const RegisterPage = () => {
       console.error("Registration error:", error);
       if (error.response?.status === 400) {
         toast.error("Thông tin đăng ký không hợp lệ!");
-      } else if (error.response?.status === 409) {
+      } else if (error.response?.status === 401) {
         toast.error("Email đã được sử dụng!");
       } else if (error.message) {
         toast.error(error.message);

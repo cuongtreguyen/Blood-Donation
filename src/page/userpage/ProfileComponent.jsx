@@ -531,7 +531,7 @@ const ProfileComponent = () => {
               <img
                 src={
                   userData.profileImage ||
-                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSe686s_Cv_FIhQ7Vn1EQaqd2ynJS91CFcptA&s"
+                  "https://media.vov.vn/sites/default/files/styles/large/public/2020-12/Trump3_0.jpg"
                 }
                 alt="Hồ sơ"
                 className="w-24 h-24 rounded-full object-cover ring-4 ring-red-200 shadow-lg border-4 border-white"
