@@ -168,7 +168,7 @@ function HeroSection({ onLearnMoreClick }) {
   // API call function
   const submitDonationRequest = async (apiData) => {
     try {
-      const response = await api.post("blood-register", apiData);
+      const response = await api.post("blood-register/create", apiData);
       console.log(response.data);
       setShowDonationForm(false);
 

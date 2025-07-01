@@ -46,7 +46,33 @@ function DoctorDashboardLayout() {
     <div className="flex h-screen">
       {/* Sidebar */}
       <div className="w-64 bg-red-600 text-white p-6">
-        <h1 className="text-2xl font-bold mb-8">{user?.role === "DOCTOR" ? "Bác Sĩ" : "Nhân Viên"} Dashboard</h1>
+        {/* <h1 className="text-2xl font-bold mb-8">{user?.role === "DOCTOR" ? "Bác Sĩ" : "Nhân Viên"} Dashboard</h1> */}
+        <Link
+          to="/"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            textDecoration: "none",
+            marginBottom: "2rem", // tương đương mb-8
+          }}
+        >
+          <img
+            src="https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain"
+            alt="Logo"
+            style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+          />
+          <span
+            style={{
+              marginLeft: "8px",
+              fontSize: "18px",
+              fontWeight: "bold",
+              color: "white",
+            }}
+          >
+            Dòng Máu Việt
+          </span>
+        </Link>
+
         <nav className="space-y-2">
           {menuItems.map((item) => (
             <Link
@@ -68,10 +94,11 @@ function DoctorDashboardLayout() {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <header className="bg-white shadow p-4">
-          <div className="flex justify-between items-center">
+<div className="flex justify-between items-center">
             <div>
               <h2 className="text-xl font-semibold mb-1">
-                Xin chào, {user?.role === "DOCTOR" ? "BS." : ""} {user?.fullName}
+                Xin chào, {user?.role === "DOCTOR" ? "BS." : ""}{" "}
+                {user?.fullName}
               </h2>
               <p className="text-gray-600">
                 {user?.location && `Phòng khám: ${user.location}`}

@@ -29,10 +29,28 @@ const Header = () => {
 
   const userMenu = (
     <Menu>
-      <Menu.Item key="1">
+      {/* <Menu.Item key="1">
         <Link to="/user">Profile</Link>
-      </Menu.Item>
-      <Menu.Item key="2" onClick={handleLogout}>
+      </Menu.Item> */}
+      {/* hien thị user profile */}
+        {user?.role === "MEMBER" && (
+        <Menu.Item key="member">
+          <Link to="/user">Trang Cá Nhân</Link>
+        </Menu.Item>
+      )}
+      {/* Hiển thị tùy theo vai trò */}
+      {user?.role === "STAFF" && (
+        <Menu.Item key="staff">
+          <Link to="/doctor">Trang Bác Sĩ</Link>
+        </Menu.Item>
+      )}
+      {user?.role === "ADMIN" && (
+        <Menu.Item key="admin">
+          <Link to="/admin">Trang Admin</Link>
+        </Menu.Item>
+      )}
+
+      <Menu.Item key="logout" onClick={handleLogout}>
         Đăng xuất
       </Menu.Item>
     </Menu>
