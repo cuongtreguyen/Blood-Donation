@@ -104,7 +104,7 @@ function BloodRequestForm() {
         isEmergency: values.requestType === 'emergency',
       };
       
-      await api.post("/blood-receive", payload, {
+      await api.post("/blood-receive/create", payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
