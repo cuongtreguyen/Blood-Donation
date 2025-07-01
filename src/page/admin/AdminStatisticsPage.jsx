@@ -1,18 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Row, Col, Typography, Space, Tag } from 'antd';
 import { UserOutlined, TeamOutlined, HeartOutlined, BarChartOutlined } from '@ant-design/icons';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import api from '../../config/api';
 
 const { Title, Text } = Typography;
 
 const AdminStatisticsPage = () => {
-  // Mock data for statistics
-  const stats = {
-    totalUsers: 1500,
-    totalDonors: 1200,
-    totalBloodBanks: 50,
-    totalDonations: 3500,
-  };
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalDonors: 0,
+    totalBloodBanks: 0,
+    totalDonations: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get('/user/get-user-by-role');
+        let allUsers = [];
+        if (Array.isArray(res.data)) {
+          allUsers = res.data;
+        } else if (typeof res.data === 'object') {
+          allUsers = Object.values(res.data).flat();
+        }
+        setStats({
+          totalUsers: allUsers.length,
+          totalDonors: allUsers.filter(u => u.role === 'donor' || u.role === 'MEMBER').length,
+          totalBloodBanks: allUsers.filter(u => u.role === 'bloodbank').length, // nếu có role này
+          totalDonations: allUsers.reduce((sum, u) => sum + (u.donationsCount || 0), 0), // nếu có trường này
+        });
+      } catch {
+        setStats({ totalUsers: 0, totalDonors: 0, totalBloodBanks: 0, totalDonations: 0 });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   // Mock data for charts (example: monthly donations)
   const monthlyDonations = [
@@ -45,7 +72,7 @@ const AdminStatisticsPage = () => {
               <UserOutlined style={{ fontSize: '30px', color: '#1890ff' }} />
               <div>
                 <Text type="secondary">Tổng số người dùng</Text>
-                <Title level={4} style={{ margin: 0 }}>{stats.totalUsers}</Title>
+                <Title level={4} style={{ margin: 0 }}>{loading ? '...' : stats.totalUsers}</Title>
               </div>
             </Space>
           </Card>
@@ -56,7 +83,7 @@ const AdminStatisticsPage = () => {
               <HeartOutlined style={{ fontSize: '30px', color: '#f5222d' }} />
               <div>
                 <Text type="secondary">Tổng số người hiến máu</Text>
-                <Title level={4} style={{ margin: 0 }}>{stats.totalDonors}</Title>
+                <Title level={4} style={{ margin: 0 }}>{loading ? '...' : stats.totalDonors}</Title>
               </div>
             </Space>
           </Card>
@@ -67,7 +94,7 @@ const AdminStatisticsPage = () => {
               <TeamOutlined style={{ fontSize: '30px', color: '#52c41a' }} />
               <div>
                 <Text type="secondary">Tổng số ngân hàng máu</Text>
-                <Title level={4} style={{ margin: 0 }}>{stats.totalBloodBanks}</Title>
+                <Title level={4} style={{ margin: 0 }}>{loading ? '...' : stats.totalBloodBanks}</Title>
               </div>
             </Space>
           </Card>
@@ -78,7 +105,7 @@ const AdminStatisticsPage = () => {
               <BarChartOutlined style={{ fontSize: '30px', color: '#fa8c16' }} />
               <div>
                 <Text type="secondary">Tổng số lượt hiến máu</Text>
-                <Title level={4} style={{ margin: 0 }}>{stats.totalDonations}</Title>
+                <Title level={4} style={{ margin: 0 }}>{loading ? '...' : stats.totalDonations}</Title>
               </div>
             </Space>
           </Card>

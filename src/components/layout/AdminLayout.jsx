@@ -24,6 +24,7 @@ import {
   RedEnvelopeOutlined
 } from '@ant-design/icons';
 import { toast } from 'react-toastify';
+import { FaTachometerAlt, FaUser, FaNotesMedical, FaTint, FaFileAlt, FaUserCircle, FaUsers, FaCog, FaBell, FaHeart, FaExclamationCircle, FaChartBar, FaBlog, FaEnvelopeOpenText, FaHospital } from 'react-icons/fa';
 
 const { Header, Sider, Content } = Layout;
 
@@ -130,6 +131,20 @@ function AdminLayout() {
     },
   ];
 
+  // Map icon cho từng menu item
+  const iconMap = {
+    '/admin': <FaTachometerAlt />,
+    '/admin/users': <FaUsers />,
+    '/admin/blood-units': <FaHospital />,
+    '/admin/statistics': <FaChartBar />,
+    '/admin/blood-requests': <FaEnvelopeOpenText />,
+    '/admin/blood-donation-approval': <FaExclamationCircle />,
+    '/admin/donation-confirmation': <FaHeart />,
+    '/admin/blogs': <FaBlog />,
+    '/admin/notifications': <FaBell />,
+    '/admin/settings': <FaCog />,
+  };
+
   // User menu
   const userMenu = (
     <Menu>
@@ -210,95 +225,73 @@ function AdminLayout() {
   );
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed} theme="light" style={{ background: '#d32f2f' }}>
-        <div className="logo" style={{ height: '64px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <img
-              src="https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain"
-              alt="Logo"
-              style={{ width: '40px', height: '40px', borderRadius: '50%' }}
-            />
-            {!collapsed && <span style={{ marginLeft: '8px', fontSize: '18px', fontWeight: 'bold', color: 'white' }}>Dòng Máu Việt</span>}
-          </Link>
-        </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          openKeys={openKeys}
-          items={menuItems}
-          onClick={({ key }) => {
-            console.log('onClick called with key:', key);
-            // Chỉ điều hướng nếu key là một đường dẫn (bắt đầu bằng '/')
-            // Việc mở/đóng submenu sẽ do onOpenChange quản lý
-            if (key.startsWith('/')) {
-              navigate(key);
-            }
-          }}
-          onOpenChange={onOpenChange}
-          className="blood-donation-admin-menu"
-          style={{ background: '#d32f2f' }}
-        />
-      </Sider>
-      <Layout className="site-layout">
-        <Header style={{ padding: 0, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Inter, Roboto, Arial, sans-serif' }}>
+      {/* Sidebar giống doctor */}
+      <div style={{ width: 260, background: '#d32f2f', color: '#fff', padding: '0 0', display: 'flex', flexDirection: 'column' }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 64, textDecoration: 'none', marginBottom: 24 }}>
+          <img src="https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain" alt="Logo" style={{ width: 40, height: 40, borderRadius: '50%' }} />
+          <span style={{ marginLeft: 10, fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>Dòng Máu Việt</span>
+        </Link>
+        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {menuItems.map(item => {
+            const isActive = location.pathname === item.key;
+            return (
+              <Link
+                key={item.key}
+                to={item.key}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '8px 20px',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  color: '#fff',
+                  background: isActive ? '#b71c1c' : 'transparent',
+                  textDecoration: 'underline',
+                  margin: '2px 8px',
+                  transition: 'background 0.2s',
+                  whiteSpace: 'nowrap',
+                  overflow: 'visible',
+                }}
+              >
+                <span style={{ fontSize: 18 }}>{iconMap[item.key]}</span>
+                <span style={{ flex: 1 }}>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+      {/* Main content */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: 0, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
             style={{ fontSize: '16px', width: 64, height: 64 }}
           />
-          <div style={{ display: 'flex', alignItems: 'center', marginRight: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginRight: 24 }}>
             <Dropdown overlay={notificationMenu} placement="bottomRight" trigger={['click']}>
-              <Badge count={notifications.filter(n => !n.read).length} style={{ marginRight: '24px' }}>
-                <BellOutlined style={{ fontSize: '20px', cursor: 'pointer' }} />
+              <Badge count={notifications.filter(n => !n.read).length} style={{ marginRight: 24 }}>
+                <BellOutlined style={{ fontSize: 20, cursor: 'pointer' }} />
               </Badge>
             </Dropdown>
             <Dropdown overlay={userMenu} placement="bottomRight">
               <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                 <Avatar icon={<UserOutlined />} />
-                <span style={{ marginLeft: '8px' }}>Admin</span>
+                <span style={{ marginLeft: 8 }}>Admin</span>
               </div>
             </Dropdown>
           </div>
-        </Header>
-        <Content
-          style={{
-            margin: '24px 16px',
-            padding: 24,
-            minHeight: 280,
-            background: '#fff',
-            borderRadius: '4px',
-          }}
-        >
+        </div>
+        <div style={{ flex: 1, background: '#f5f5f5', padding: 24 }}>
           <Outlet />
-        </Content>
-      </Layout>
-    </Layout>
+        </div>
+      </div>
+    </div>
   );
 }
-
-// Add custom styles for menu items
-const customStyles = `
-  .custom-menu .ant-menu-item {
-    color: white !important;
-  }
-  .custom-menu .ant-menu-item-selected {
-    background-color: #ff4d4f !important;
-  }
-  .custom-menu .ant-menu-item:hover {
-    background-color: #ff7875 !important;
-  }
-  .custom-menu .ant-menu-item .anticon {
-    color: white !important;
-  }
-`;
-
-// Add styles to document
-const styleSheet = document.createElement("style");
-styleSheet.type = "text/css";
-styleSheet.innerText = customStyles;
-document.head.appendChild(styleSheet);
 
 export default AdminLayout; 

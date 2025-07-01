@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, Statistic, Table, Button, Tag, Progress, List, Avatar } from 'antd';
 import UserOutlined from '@ant-design/icons/lib/icons/UserOutlined';
 import HeartOutlined from '@ant-design/icons/lib/icons/HeartOutlined';
@@ -11,183 +11,132 @@ import {
   ArrowUpOutlined,
   ArrowDownOutlined,
 } from '@ant-design/icons';
+import api from '../../config/api';
+
+const roles = ['donor', 'staff', 'doctor', 'admin'];
 
 function AdminDashboard() {
-  // Mock data for dashboard
-  const [stats, setStats] = useState({
-    totalUsers: 1245,
-    totalBloodBanks: 45,
-    totalDonations: 856,
-    bloodInventory: {
-      'A+': 85,
-      'A-': 45,
-      'B+': 76,
-      'B-': 30,
-      'AB+': 25,
-      'AB-': 15,
-      'O+': 92,
-      'O-': 38,
-    },
-    donationTrend: +12.5,
-    userTrend: +8.3,
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [bloodInventory, setBloodInventory] = useState([]);
+
+  useEffect(() => {
+    // Gọi API lấy toàn bộ user giống trang AdminUsersPage
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await api.get('/user/get-user-by-role', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        let allUsers = [];
+        if (Array.isArray(res.data)) {
+          allUsers = res.data;
+        } else if (typeof res.data === 'object') {
+          allUsers = Object.values(res.data).flat();
+        }
+        // Map lại dữ liệu giống AdminUsersPage
+        const usersFromApi = allUsers.map((user, idx) => ({
+          key: user.id || idx + 1,
+          id: user.id,
+          name: user.fullName,
+          email: user.email,
+          phone: user.phone,
+          role: user.role === "MEMBER" ? "donor" : user.role?.toLowerCase(),
+          status: user.status || "active",
+          joinDate: user.joinDate || (user.birthdate ? new Date(user.birthdate).toLocaleDateString('vi-VN') : "-"),
+          address: user.address || '',
+          gender: user.gender || '',
+          birthdate: user.birthdate || '',
+          height: user.height || '',
+          weight: user.weight || '',
+          lastDonation: user.lastDonation || '',
+          medicalHistory: user.medicalHistory || '',
+          emergencyName: user.emergencyName || '',
+          emergencyPhone: user.emergencyPhone || '',
+          bloodType: user.bloodType || '',
+        }));
+        setUsers(usersFromApi);
+      } catch (e) {
+        setUsers([]);
+      }
+      setLoading(false);
+    };
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    // Gọi API lấy tồn kho máu
+    const fetchBloodInventory = async () => {
+      try {
+        const res = await api.get('/blood-inventory/get-all');
+        console.log('Blood inventory API response:', res.data);
+        setBloodInventory(Array.isArray(res.data) ? res.data : []);
+      } catch (e) {
+        setBloodInventory([]);
+      }
+    };
+    fetchBloodInventory();
+  }, []);
+
+  // Thống kê
+  const totalUsers = users.length;
+  const usersByRole = roles.reduce((acc, role) => {
+    acc[role] = users.filter(u => (u.role === role || u.role?.toLowerCase() === role)).length;
+    return acc;
+  }, {});
+
+  // Top 5 người dùng mới nhất (ưu tiên sort theo joinDate, nếu không có thì lấy đầu mảng)
+  const sortedUsers = users.slice().sort((a, b) => {
+    if (a.joinDate && b.joinDate) {
+      return new Date(b.joinDate) - new Date(a.joinDate);
+    }
+    return 0;
   });
+  const top5Users = sortedUsers.slice(0, 5);
 
-  // Mock data for recent users
-  const recentUsers = [
-    {
-      key: '1',
-      name: 'Nguyễn Văn A',
-      email: 'nguyenvana@example.com',
-      role: 'donor',
-      status: 'active',
-      joinDate: '15/10/2023',
-    },
-    {
-      key: '2',
-      name: 'Trần Thị B',
-      email: 'tranthib@example.com',
-      role: 'staff',
-      status: 'active',
-      joinDate: '14/10/2023',
-    },
-    {
-      key: '3',
-      name: 'Lê Văn C',
-      email: 'levanc@example.com',
-      role: 'doctor',
-      status: 'inactive',
-      joinDate: '13/10/2023',
-    },
-  ];
-
-  // Mock data for recent blood banks
-  const recentBloodBanks = [
-    {
-      key: '1',
-      name: 'Bệnh viện Đa khoa Trung ương',
-      location: 'Quận 1, TP.HCM',
-      status: 'active',
-      lastUpdate: '15/10/2023',
-    },
-    {
-      key: '2',
-      name: 'Trung tâm Huyết học Quốc gia',
-      location: 'Quận 1, TP.HCM',
-      status: 'active',
-      lastUpdate: '14/10/2023',
-    },
-    {
-      key: '3',
-      name: 'Bệnh viện Chợ Rẫy',
-      location: 'Quận 5, TP.HCM',
-      status: 'inactive',
-      lastUpdate: '13/10/2023',
-    },
-  ];
-
-  // Mock data for recent activities
-  const recentActivities = [
-    {
-      id: 1,
-      user: 'Nguyễn Văn A',
-      action: 'đã đăng ký tài khoản',
-      time: '2 giờ trước',
-    },
-    {
-      id: 2,
-      user: 'Trần Thị B',
-      action: 'đã cập nhật thông tin ngân hàng máu',
-      time: '3 giờ trước',
-    },
-    {
-      id: 3,
-      user: 'Lê Văn C',
-      action: 'đã thêm người dùng mới',
-      time: '5 giờ trước',
-    },
-    {
-      id: 4,
-      user: 'Phạm Thị D',
-      action: 'đã xóa ngân hàng máu',
-      time: '1 ngày trước',
-    },
-  ];
-
-  // Columns for users table
-  const userColumns = [
+  // Columns for top 5 users table (chỉ các trường: Tên, Email, Nhóm máu, Vai trò)
+  const topUserColumns = [
     {
       title: 'Tên',
       dataIndex: 'name',
       key: 'name',
+      render: (text) => text || '-',
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
+      render: (text) => text || '-',
+    },
+    {
+      title: 'Nhóm máu',
+      dataIndex: 'bloodType',
+      key: 'bloodType',
+      render: (type) => {
+        if (!type) return '-';
+        const bloodMap = {
+          'A_POSITIVE': 'A+', 'A_NEGATIVE': 'A-',
+          'B_POSITIVE': 'B+', 'B_NEGATIVE': 'B-',
+          'O_POSITIVE': 'O+', 'O_NEGATIVE': 'O-',
+          'AB_POSITIVE': 'AB+', 'AB_NEGATIVE': 'AB-'
+        };
+        return bloodMap[type] || type;
+      }
     },
     {
       title: 'Vai trò',
       dataIndex: 'role',
       key: 'role',
       render: (role) => {
-        const colors = {
-          donor: 'blue',
-          staff: 'green',
-          doctor: 'purple',
-          admin: 'red',
-        };
         const labels = {
           donor: 'Người hiến máu',
           staff: 'Nhân viên',
           doctor: 'Bác sĩ',
           admin: 'Quản trị viên',
         };
-        return <Tag color={colors[role]}>{labels[role]}</Tag>;
+        return labels[role] || '-';
       },
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => (
-        <Tag color={status === 'active' ? 'green' : 'orange'}>
-          {status === 'active' ? 'Đang hoạt động' : 'Không hoạt động'}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Ngày tham gia',
-      dataIndex: 'joinDate',
-      key: 'joinDate',
-    },
-  ];
-
-  // Columns for blood banks table
-  const bloodBankColumns = [
-    {
-      title: 'Tên',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Địa điểm',
-      dataIndex: 'location',
-      key: 'location',
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => (
-        <Tag color={status === 'active' ? 'green' : 'orange'}>
-          {status === 'active' ? 'Đang hoạt động' : 'Không hoạt động'}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Cập nhật gần nhất',
-      dataIndex: 'lastUpdate',
-      key: 'lastUpdate',
     },
   ];
 
@@ -201,104 +150,61 @@ function AdminDashboard() {
           <Card>
             <Statistic
               title="Tổng người dùng"
-              value={stats.totalUsers}
+              value={totalUsers}
               prefix={<UserOutlined />}
               valueStyle={{ color: '#3f8600' }}
-              suffix={
-                <span style={{ fontSize: '0.5em', marginLeft: 8 }}>
-                  <ArrowUpOutlined style={{ color: '#3f8600' }} /> {stats.userTrend}%
-                </span>
-              }
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Tổng ngân hàng máu"
-              value={stats.totalBloodBanks}
-              prefix={<BankOutlined />}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Tổng lượt hiến máu"
-              value={stats.totalDonations}
-              prefix={<HeartOutlined />}
-              valueStyle={{ color: '#d32f2f' }}
-              suffix={
-                <span style={{ fontSize: '0.5em', marginLeft: 8 }}>
-                  <ArrowUpOutlined style={{ color: '#3f8600' }} /> {stats.donationTrend}%
-                </span>
-              }
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Người dùng mới hôm nay"
-              value={12}
-              prefix={<UserOutlined />}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
+        {roles.filter(role => role !== 'admin').map(role => (
+          <Col xs={24} sm={12} lg={6} key={role}>
+            <Card>
+              <Statistic
+                title={`Số ${role === 'donor' ? 'người hiến máu' : role === 'staff' ? 'nhân viên' : 'bác sĩ'}`}
+                value={usersByRole[role] || 0}
+                valueStyle={{ color: role === 'doctor' ? '#722ed1' : role === 'staff' ? '#389e0d' : '#1890ff' }}
+              />
+            </Card>
+          </Col>
+        ))}
       </Row>
 
       {/* Main content */}
       <Row gutter={16}>
         <Col xs={24} lg={16}>
-          <Card title="Người dùng gần đây" extra={<Button type="link">Xem tất cả</Button>} style={{ marginBottom: 24 }}>
-            <Table 
-              dataSource={recentUsers} 
-              columns={userColumns} 
+          <Card title="Top 5 người dùng mới nhất" style={{ marginBottom: 24 }}>
+            <Table
+              dataSource={top5Users}
+              columns={topUserColumns}
               pagination={false}
-              size="small"
-            />
-          </Card>
-          <Card title="Ngân hàng máu gần đây" extra={<Button type="link">Xem tất cả</Button>}>
-            <Table 
-              dataSource={recentBloodBanks} 
-              columns={bloodBankColumns} 
-              pagination={false}
+              rowKey={record => record.id || record.email}
+              loading={loading}
               size="small"
             />
           </Card>
         </Col>
         <Col xs={24} lg={8}>
-          <Card title="Hoạt động gần đây" style={{ marginBottom: 24 }}>
-            <List
-              itemLayout="horizontal"
-              dataSource={recentActivities}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    avatar={<Avatar icon={<UserOutlined />} />}
-                    title={item.user}
-                    description={`${item.action} - ${item.time}`}
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
           <Card title="Tình trạng nhóm máu">
-            {Object.entries(stats.bloodInventory).map(([type, amount]) => (
-              <div key={type} style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Nhóm máu {type}</span>
-                  <span>{amount} đơn vị</span>
+            {!Array.isArray(bloodInventory) || bloodInventory.length === 0 ? (
+              <div>Không có dữ liệu tồn kho máu.</div>
+            ) : (
+              bloodInventory.map(item => (
+                <div key={item.bloodType} style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Nhóm máu {item.bloodType.replace('_', ' +')}</span>
+                    <span>{item.unitsAvailable} đơn vị</span>
+                  </div>
+                  <Progress
+                    percent={Math.min(item.unitsAvailable * 10, 100)}
+                    showInfo={false}
+                    status={
+                      item.unitsAvailable < 4 ? "exception" :
+                      item.unitsAvailable > 8 ? "success" : "active"
+                    }
+                  />
                 </div>
-                <Progress 
-                  percent={amount} 
-                  showInfo={false}
-                  status={amount < 40 ? "exception" : amount > 80 ? "success" : "active"}
-                />
-              </div>
-            ))}
+              ))
+            )}
           </Card>
         </Col>
       </Row>
