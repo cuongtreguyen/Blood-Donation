@@ -12,6 +12,10 @@ import {
   Typography,
   Space,
   Button,
+  Modal,
+  Form,
+  Input,
+  DatePicker,
 } from "antd";
 import {
   WarningOutlined,
@@ -24,8 +28,9 @@ import {
   updateBloodRegisterStatus,
   completeBloodRegister,
 } from "../../../services/bloodRegisterService";
-import { createBloodInventory } from "../../../services/bloodInventoryService";
+// import { createBloodInventory } from "../../../services/bloodInventoryService";
 import api from "../../../config/api";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 
@@ -57,6 +62,10 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("PENDING");
   const [searchText, setSearchText] = useState("");
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
+  const [completeLoading, setCompleteLoading] = useState(false);
+  const [completeRecord, setCompleteRecord] = useState(null);
+  const [completeForm] = Form.useForm();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -107,7 +116,11 @@ const DashboardPage = () => {
                 item.quantity ||
                 item.amount ||
                 1,
-              wantedHour: item.wantedHour || (item.blood && item.blood.wantedHour) || item.hour || "",
+              wantedHour:
+                item.wantedHour ||
+                (item.blood && item.blood.wantedHour) ||
+                item.hour ||
+                "",
               wantedDate:
                 item.wantedDate ||
                 (item.blood && item.blood.donationDate) ||
@@ -139,15 +152,7 @@ const DashboardPage = () => {
         implementationDate: new Date().toISOString().split("T")[0],
         unit: record.quantity,
       });
-      // Sau khi complete, thêm vào kho máu
-      const expiration = new Date();
-      expiration.setDate(expiration.getDate() + 35); // máu toàn phần thường bảo quản 35 ngày
-      await createBloodInventory({
-        bloodType: record.bloodType,
-        unitsAvailable: record.quantity,
-        expirationDate: expiration.toISOString(),
-      });
-      message.success("Đã đánh dấu hoàn thành và thêm vào kho máu!");
+      message.success("Đã đánh dấu hoàn thành!");
       const updatedData = data.map((item) =>
         item.id === record.id ? { ...item, status: "COMPLETED" } : item
       );
@@ -155,7 +160,7 @@ const DashboardPage = () => {
     } catch (err) {
       console.error("Complete error:", err);
       message.error(
-        "Lỗi khi hoàn thành đăng ký hoặc thêm vào kho máu: " +
+        "Lỗi khi hoàn thành đăng ký: " +
           (err?.response?.data?.message || "Unknown error")
       );
     }
@@ -171,9 +176,41 @@ const DashboardPage = () => {
         )
       );
       setStatus("ALL");
-    } catch (err) {
+    } catch {
       message.error("Cập nhật trạng thái thất bại!");
-      console.error("Incomplete error:", err?.response?.data || err);
+    }
+  };
+
+  const handleOpenCompleteModal = (record) => {
+    setCompleteRecord(record);
+    setCompleteModalOpen(true);
+    completeForm.setFieldsValue({
+      implementationDate: dayjs(),
+      unit: record.quantity,
+    });
+  };
+
+  const handleCompleteSubmit = async (values) => {
+    setCompleteLoading(true);
+    try {
+      await completeBloodRegister({
+        bloodId: completeRecord.id,
+        implementationDate: values.implementationDate.format("YYYY-MM-DD"),
+        unit: values.unit,
+      });
+      message.success("Đã đánh dấu hoàn thành!");
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === completeRecord.id ? { ...item, status: "COMPLETED" } : item
+        )
+      );
+      setCompleteModalOpen(false);
+      setCompleteRecord(null);
+      completeForm.resetFields();
+    } catch (err) {
+      message.error("Lỗi khi hoàn thành đăng ký!");
+    } finally {
+      setCompleteLoading(false);
     }
   };
 
@@ -240,7 +277,7 @@ const DashboardPage = () => {
         if (record.status === "APPROVED") {
           return (
             <Space>
-              <Button type="primary" onClick={() => handleComplete(record)}>
+              <Button type="primary" onClick={() => handleOpenCompleteModal(record)}>
                 Hoàn thành
               </Button>
               <Button danger onClick={() => handleIncomplete(record)}>
@@ -371,6 +408,39 @@ const DashboardPage = () => {
           />
         )}
       </Card>
+      <Modal
+        open={completeModalOpen}
+        title="Xác nhận hoàn thành đăng ký hiến máu"
+        onCancel={() => { setCompleteModalOpen(false); setCompleteRecord(null); completeForm.resetFields(); }}
+        footer={null}
+        destroyOnClose
+      >
+        <Form
+          form={completeForm}
+          layout="vertical"
+          onFinish={handleCompleteSubmit}
+        >
+          <Form.Item
+            label="Ngày thực hiện"
+            name="implementationDate"
+            rules={[{ required: true, message: "Chọn ngày thực hiện" }]}
+          >
+            <DatePicker style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item
+            label="Số lượng (đơn vị)"
+            name="unit"
+            rules={[{ required: true, message: "Nhập số lượng" }]}
+          >
+            <Input type="number" min={1} />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={completeLoading} style={{ width: "100%" }}>
+              Xác nhận hoàn thành
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

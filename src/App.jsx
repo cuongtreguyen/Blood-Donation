@@ -46,6 +46,7 @@ import DonateUser from "./page/userpage/DonateUser";
 import DoctorBloodInventoryPage from "./page/doctorpage/dashboard/BloodInventoryPage";
 import DoctorProfilePage from "./page/doctorpage/dashboard/ProfilePage";
 import DoctorSettingsPage from "./page/doctorpage/dashboard/SettingsPage";
+import BloodReceivePage from "./page/doctorpage/doctor/BloodReceivePage";
 
 const router = createBrowserRouter([
   {
@@ -93,6 +94,7 @@ const router = createBrowserRouter([
       { path: "blood-inventory", element: <DoctorBloodInventoryPage /> },
       { path: "profile", element: <DoctorProfilePage /> },
       { path: "settings", element: <DoctorSettingsPage /> },
+      { path: "blood-receive", element: <BloodReceivePage /> },
     ],
   },
 ]);
