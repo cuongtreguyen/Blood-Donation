@@ -100,11 +100,6 @@ function AdminLayout() {
       label: 'Thống kê tổng quan',
     },
     {
-      key: '/admin/blood-requests',
-      icon: <RedEnvelopeOutlined />,
-      label: 'Quản lý yêu cầu máu khẩn cấp',
-    },
-    {
       key: '/admin/blood-donation-approval',
       icon: <ExclamationCircleOutlined />,
       label: 'Xác nhận yêu cầu nhận máu',
@@ -137,7 +132,6 @@ function AdminLayout() {
     '/admin/users': <FaUsers />,
     '/admin/blood-units': <FaHospital />,
     '/admin/statistics': <FaChartBar />,
-    '/admin/blood-requests': <FaEnvelopeOpenText />,
     '/admin/blood-donation-approval': <FaExclamationCircle />,
     '/admin/donation-confirmation': <FaHeart />,
     '/admin/blogs': <FaBlog />,

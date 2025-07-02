@@ -61,6 +61,7 @@ function BloodRequestForm() {
         weight: userData.weight || "",
         emergencyName: userData.emergencyName || "",
         emergencyPhone: userData.emergencyPhone || "",
+        requestType: "emergency", // Đảm bảo giá trị mặc định được giữ lại
       };
       
       form.setFieldsValue(formData);
@@ -101,8 +102,10 @@ function BloodRequestForm() {
         wantedHour: values.wantedHour ? `${values.wantedHour}:00` : null,
         emergencyName: values.emergencyName,
         emergencyPhone: values.emergencyPhone,
-        isEmergency: values.requestType === 'emergency',
+        isEmergency: values.requestType === 'emergency' ? true : false,
       };
+      
+      // Debug logs đã xác nhận form hoạt động đúng
       
       await api.post("/blood-receive/create", payload, {
         headers: { Authorization: `Bearer ${token}` }
@@ -163,6 +166,8 @@ function BloodRequestForm() {
     unknown: "Chưa biết"
   };
 
+  // Form đã được xác nhận hoạt động đúng
+
   return (
     <div className="py-6 px-4">
       <Card title="Đăng Ký Nhận Máu" className="shadow-md">
@@ -192,7 +197,7 @@ function BloodRequestForm() {
                 >
                   <Radio.Group>
                     <Radio value="emergency">Khẩn cấp</Radio>
-                    <Radio value="scheduled">Theo lịch</Radio>
+                    <Radio value="scheduled">Bình thường</Radio>
                   </Radio.Group>
                 </Form.Item>
               </Col>

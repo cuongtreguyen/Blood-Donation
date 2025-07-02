@@ -35,6 +35,7 @@ const BloodDonationApprovalPage = () => {
         setRequests([]);
         toast.warning("Không có dữ liệu yêu cầu nhận máu nào!", { toastId: "no-data-warning" });
       } else {
+        console.log("Blood receive data:", allResults);
         setRequests(allResults);
       }
     } catch (err) {
@@ -97,6 +98,49 @@ const BloodDonationApprovalPage = () => {
     return JSON.stringify(wantedHour);
   };
 
+  // Function để xác định mức độ khẩn cấp từ dữ liệu record
+  const getEmergencyStatus = (record) => {
+    // Kiểm tra các trường có thể chứa thông tin khẩn cấp
+    const possibleEmergencyFields = [
+      'isEmergency', 
+      'emergency', 
+      'is_emergency', 
+      'requestType', 
+      'request_type',
+      'emergencyRequest',
+      'isEmergencyRequest',
+      'type',
+      'requestType',
+      'priority'
+    ];
+    
+    for (const field of possibleEmergencyFields) {
+      if (record[field] !== undefined && record[field] !== null) {
+        console.log(`Field ${field}:`, record[field], typeof record[field]);
+        
+        // Xử lý các trường hợp khác nhau
+        if (field === 'requestType' || field === 'request_type' || field === 'type') {
+          return record[field] === 'emergency';
+        } else if (field === 'priority') {
+          return record[field] === 'high' || record[field] === 'urgent' || record[field] === 'emergency';
+        } else if (typeof record[field] === 'boolean') {
+          return record[field];
+        } else if (typeof record[field] === 'string') {
+          return record[field].toLowerCase() === 'true' || 
+                 record[field].toLowerCase() === 'emergency' ||
+                 record[field].toLowerCase() === 'yes' ||
+                 record[field].toLowerCase() === 'high' ||
+                 record[field].toLowerCase() === 'urgent';
+        } else if (typeof record[field] === 'number') {
+          return record[field] === 1;
+        }
+      }
+    }
+    
+    // Mặc định là false nếu không tìm thấy trường nào
+    return false;
+  };
+
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', sorter: (a, b) => a.id - b.id },
     {
@@ -148,7 +192,13 @@ const BloodDonationApprovalPage = () => {
         return <Tag color="geekblue" style={{ fontWeight: 500 }}>{bloodMap[type] || type}</Tag>;
       }
     },
-    { title: 'Khẩn cấp', dataIndex: 'isEmergency', key: 'isEmergency', render: (isEmergency) => (isEmergency ? <Tag color="red">Có</Tag> : <Tag color="blue">Không</Tag>) },
+    { 
+      title: 'Khẩn cấp',
+      dataIndex: 'isEmergency',
+      key: 'isEmergency',
+      render: (isEmergency) =>
+        isEmergency ? <Tag color="red">Có</Tag> : <Tag color="blue">Không</Tag>,
+    },
     {
       title: 'Hành động',
       key: 'action',
