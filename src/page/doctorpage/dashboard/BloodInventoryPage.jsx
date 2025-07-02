@@ -112,6 +112,7 @@ const BloodInventoryPage = () => {
   const handleEdit = async (record) => {
     if (!record.id || record.id === 0) {
       message.warning("Không thể sửa nhóm máu này do thiếu id từ backend.");
+      console.log("Record không hợp lệ:", record);
       return;
     }
     try {
@@ -140,6 +141,7 @@ const BloodInventoryPage = () => {
       const commonData = {
         bloodType: values.type,
         unitsAvailable: values.unitsAvailable,
+        expirationDate: values.expirationDate.toISOString(),
       };
       if (editingRecord && editingRecord.id && editingRecord.id !== 0) {
         await updateBloodInventory(editingRecord.id, commonData);
@@ -159,7 +161,8 @@ const BloodInventoryPage = () => {
 
   const handleDelete = (record) => {
     if (!record.id || record.id === 0) {
-      message.warning("Không thể xóa nhóm máu này do thiếu id từ backend.");
+      message.error("Không thể xóa nhóm máu này do thiếu id từ backend.");
+      console.log("Record không hợp lệ:", record);
       return;
     }
     confirm({
@@ -229,19 +232,31 @@ const BloodInventoryPage = () => {
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-            Cập nhật
+          <Button icon={<EditOutlined />} onClick={() => {
+            if (!record.id || record.id === 0) {
+              message.error("Không thể sửa nhóm máu này do thiếu id từ backend.");
+              console.log("Record không hợp lệ:", record);
+              return;
+            }
+            handleEdit(record);
+          }}>
+            Sửa
           </Button>
           <Popconfirm
             title="Bạn có chắc chắn muốn xóa nhóm máu này không?"
-            onConfirm={() => handleDelete(record)}
+            onConfirm={() => {
+              if (!record.id || record.id === 0) {
+                message.error("Không thể xóa nhóm máu này do thiếu id từ backend.");
+                console.log("Record không hợp lệ:", record);
+                return;
+              }
+              handleDelete(record);
+            }}
             okText="Xóa"
             cancelText="Hủy"
             okButtonProps={{ danger: true }}
           >
-            <Button danger icon={<DeleteOutlined />}>
-              Xóa
-            </Button>
+            <Button danger icon={<DeleteOutlined />}>Xóa</Button>
           </Popconfirm>
         </Space>
       ),
@@ -390,6 +405,13 @@ const BloodInventoryPage = () => {
             rules={[{ required: true, message: "Vui lòng nhập số lượng" }]}
           >
             <InputNumber min={0} step={1} style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item
+            name="expirationDate"
+            label="Ngày hết hạn"
+            rules={[{ required: true, message: "Vui lòng chọn ngày hết hạn" }]}
+          >
+            <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
           </Form.Item>
         </Form>
       </Modal>

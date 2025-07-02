@@ -26,6 +26,7 @@ function DoctorDashboardLayout() {
       icon: <FaNotesMedical />,
     },
     { to: "/doctor/blood-inventory", label: "Kho Máu", icon: <FaTint /> },
+    { to: "/doctor/blood-receive", label: "Danh Sách Nhận Máu", icon: <FaTint /> },
     { to: "/doctor/reports", label: "Báo Cáo", icon: <FaFileAlt /> },
     { to: "/doctor/profile", label: "Hồ Sơ Cá Nhân", icon: <FaUserCircle /> },
   ];
