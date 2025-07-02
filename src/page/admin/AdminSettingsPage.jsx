@@ -33,22 +33,22 @@ const AdminSettingsPage = () => {
   const handlePasswordSubmit = async (values) => {
     try {
       setLoading(true);
+      // Lấy email từ localStorage (hoặc context nếu có)
+      const user = JSON.parse(localStorage.getItem('user'));
+      const email = user?.email;
+      if (!email) throw new Error('Không tìm thấy email người dùng!');
       // Gọi API đổi mật khẩu
-      await api.put('/settings/password', {
-        currentPassword: values.currentPassword,
-        newPassword: values.newPassword
+      await api.put('/user/update/email-password', {
+        email,
+        password: values.newPassword
       });
       toast.success('Đổi mật khẩu thành công!');
       passwordForm.resetFields(); // Reset form sau khi đổi mật khẩu thành công
     } catch (error) {
       console.error('Lỗi khi đổi mật khẩu:', error);
-       // Thử hiển thị thông báo lỗi chi tiết từ server nếu có
+      // Thử hiển thị thông báo lỗi chi tiết từ server nếu có
       const errorMessage = error.response?.data?.message || 'Đổi mật khẩu thất bại. Vui lòng thử lại!';
-      if (error.response?.status === 401) {
-         toast.error('Mật khẩu hiện tại không đúng!');
-      } else {
-         toast.error(errorMessage);
-      }
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -220,13 +220,6 @@ const AdminSettingsPage = () => {
           layout="vertical"
           onFinish={handlePasswordSubmit}
         >
-          <Form.Item
-            name="currentPassword"
-            label="Mật khẩu hiện tại"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại!' }]}
-          >
-            <Input.Password prefix={<LockOutlined />} />
-          </Form.Item>
           <Form.Item
             name="newPassword"
             label="Mật khẩu mới"
