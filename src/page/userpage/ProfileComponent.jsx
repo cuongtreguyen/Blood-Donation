@@ -374,7 +374,9 @@ const ProfileComponent = () => {
   useEffect(() => {
     setFormData(userData);
   }, [userData]);
+  
 
+  
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -436,6 +438,7 @@ const ProfileComponent = () => {
         ...userData,
         ...response.data,
         email: response.data.email || userData.email, // Ưu tiên email từ response, nếu không thì giữ email cũ
+        role: response.data.role || userData.role, // Giữ role cũ nếu không có trong phản hồi
       };
       dispatch(login(updatedUser));
       localStorage.setItem("user", JSON.stringify(updatedUser));
@@ -493,8 +496,10 @@ const ProfileComponent = () => {
 
       const updatedUser = {
         ...userData,
+        role: response.data.role || userData.role,
         profileImage: response.data.profileImage,
       };
+      
       dispatch(login(updatedUser));
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setFormData(updatedUser);
