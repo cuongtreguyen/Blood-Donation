@@ -10,7 +10,7 @@ import { logout } from "../../redux/features/userSlice";
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(10); // Số thông báo
+  const [notificationCount, setNotificationCount] = useState(3); // Số thông báo
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
