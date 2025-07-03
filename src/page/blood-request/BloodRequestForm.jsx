@@ -102,7 +102,7 @@ function BloodRequestForm() {
         wantedHour: values.wantedHour ? `${values.wantedHour}:00` : null,
         emergencyName: values.emergencyName,
         emergencyPhone: values.emergencyPhone,
-        isEmergency: values.requestType === 'emergency' ? true : false,
+        emergency: values.requestType === 'emergency' ? true : false,
       };
       
       // Debug logs đã xác nhận form hoạt động đúng
