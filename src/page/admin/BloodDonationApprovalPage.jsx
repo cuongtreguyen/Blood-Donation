@@ -10,6 +10,7 @@ const BloodDonationApprovalPage = () => {
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [emergencyFilter, setEmergencyFilter] = useState('ALL');
 
   const fetchBloodReceiveList = async () => {
     setLoading(true);
@@ -36,6 +37,16 @@ const BloodDonationApprovalPage = () => {
         toast.warning("Không có dữ liệu yêu cầu nhận máu nào!", { toastId: "no-data-warning" });
       } else {
         console.log("Blood receive data:", allResults);
+        // Debug: Log chi tiết từng record để kiểm tra trường isEmergency
+        allResults.forEach((record, index) => {
+          console.log(`Record ${index + 1}:`, {
+            id: record.id,
+            isEmergency: record.isEmergency,
+            emergency: record.emergency,
+            requestType: record.requestType,
+            type: record.type,
+          });
+        });
         setRequests(allResults);
       }
     } catch (err) {
@@ -78,7 +89,11 @@ const BloodDonationApprovalPage = () => {
       (request.status ? request.status.toLowerCase().includes(searchLower) : false);
     const matchStatus =
       statusFilter === 'ALL' ? true : request.status === statusFilter;
-    return matchSearch && matchStatus;
+    const matchEmergency =
+      emergencyFilter === 'ALL' ? true : 
+      emergencyFilter === 'EMERGENCY' ? getEmergencyStatus(request) :
+      emergencyFilter === 'NORMAL' ? !getEmergencyStatus(request) : true;
+    return matchSearch && matchStatus && matchEmergency;
   });
   
   const formatWantedHour = (wantedHour) => {
@@ -100,44 +115,16 @@ const BloodDonationApprovalPage = () => {
 
   // Function để xác định mức độ khẩn cấp từ dữ liệu record
   const getEmergencyStatus = (record) => {
-    // Kiểm tra các trường có thể chứa thông tin khẩn cấp
-    const possibleEmergencyFields = [
-      'isEmergency', 
-      'emergency', 
-      'is_emergency', 
-      'requestType', 
-      'request_type',
-      'emergencyRequest',
-      'isEmergencyRequest',
-      'type',
-      'requestType',
-      'priority'
-    ];
-    
-    for (const field of possibleEmergencyFields) {
-      if (record[field] !== undefined && record[field] !== null) {
-        console.log(`Field ${field}:`, record[field], typeof record[field]);
-        
-        // Xử lý các trường hợp khác nhau
-        if (field === 'requestType' || field === 'request_type' || field === 'type') {
-          return record[field] === 'emergency';
-        } else if (field === 'priority') {
-          return record[field] === 'high' || record[field] === 'urgent' || record[field] === 'emergency';
-        } else if (typeof record[field] === 'boolean') {
-          return record[field];
-        } else if (typeof record[field] === 'string') {
-          return record[field].toLowerCase() === 'true' || 
-                 record[field].toLowerCase() === 'emergency' ||
-                 record[field].toLowerCase() === 'yes' ||
-                 record[field].toLowerCase() === 'high' ||
-                 record[field].toLowerCase() === 'urgent';
-        } else if (typeof record[field] === 'number') {
-          return record[field] === 1;
-        }
-      }
+    // Ưu tiên trường emergency (kiểu boolean)
+    if (record.emergency !== undefined && record.emergency !== null) {
+      return record.emergency === true || record.emergency === 1 || record.emergency === '1';
     }
-    
-    // Mặc định là false nếu không tìm thấy trường nào
+    // Nếu backend trả về is_emergency hoặc isEmergency thì kiểm tra thêm
+    if (record.isEmergency !== undefined && record.isEmergency !== null) {
+      if (typeof record.isEmergency === 'boolean') return record.isEmergency;
+      if (typeof record.isEmergency === 'number') return record.isEmergency === 1;
+      if (typeof record.isEmergency === 'string') return record.isEmergency === '1' || record.isEmergency.toLowerCase() === 'true';
+    }
     return false;
   };
 
@@ -194,10 +181,16 @@ const BloodDonationApprovalPage = () => {
     },
     { 
       title: 'Khẩn cấp',
-      dataIndex: 'isEmergency',
       key: 'isEmergency',
-      render: (isEmergency) =>
-        isEmergency ? <Tag color="red">Có</Tag> : <Tag color="blue">Không</Tag>,
+      sorter: (a, b) => {
+        const aEmergency = getEmergencyStatus(a);
+        const bEmergency = getEmergencyStatus(b);
+        return aEmergency === bEmergency ? 0 : aEmergency ? 1 : -1;
+      },
+      render: (_, record) => {
+        const isEmergency = getEmergencyStatus(record);
+        return isEmergency ? <Tag color="red">Có</Tag> : <Tag color="blue">Không</Tag>;
+      },
     },
     {
       title: 'Hành động',
@@ -261,12 +254,14 @@ const BloodDonationApprovalPage = () => {
               value={statusFilter}
               onChange={setStatusFilter}
               style={{ width: 150 }}
+              placeholder="Lọc theo trạng thái"
             >
-              <Select.Option value="ALL">Tất cả</Select.Option>
+              <Select.Option value="ALL">Tất cả trạng thái</Select.Option>
               <Select.Option value="APPROVED">Đã duyệt</Select.Option>
               <Select.Option value="PENDING">Chờ duyệt</Select.Option>
               <Select.Option value="REJECTED">Đã từ chối</Select.Option>
             </Select>
+            
           </Space>
         }
       >

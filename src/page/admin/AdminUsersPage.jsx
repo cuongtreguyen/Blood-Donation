@@ -169,6 +169,7 @@ function AdminUsersPage() {
       sorter: (a, b) => String(a.id).localeCompare(String(b.id)),
       align: 'center',
       width: 80,
+      fixed: 'left',
     },
     {
       title: 'Tên',
@@ -177,6 +178,7 @@ function AdminUsersPage() {
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (text) => <Tooltip title={text}><span style={{ fontWeight: 500 }}>{text}</span></Tooltip>,
       width: 150,
+      fixed: 'left',
     },
     { title: 'Email', dataIndex: 'email', key: 'email', render: (text) => <Tooltip title={text}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: 140 }}>{text}</span></Tooltip>, width: 160 },
     { title: 'Số điện thoại', dataIndex: 'phone', key: 'phone', align: 'center', width: 120 },
@@ -203,6 +205,7 @@ function AdminUsersPage() {
       title: 'Vai trò',
       dataIndex: 'role',
       key: 'role',
+      width: 140,
       filters: [
         { text: 'Người hiến máu', value: 'donor' },
         { text: 'Nhân viên', value: 'staff' },
@@ -217,7 +220,22 @@ function AdminUsersPage() {
         const labels = {
           donor: 'Người hiến máu', staff: 'Nhân viên', doctor: 'Bác sĩ', admin: 'Quản trị viên',
         };
-        return <Tag color={colors[role]} style={{ fontWeight: 500 }}>{labels[role]}</Tag>;
+        return (
+          <Tag
+            color={colors[role]}
+            style={{
+              fontWeight: 500,
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              textAlign: 'center',
+              width: '100%',
+              display: 'block',
+              margin: 0
+            }}
+          >
+            {labels[role]}
+          </Tag>
+        );
       },
       align: 'center',
     },
@@ -289,16 +307,18 @@ function AdminUsersPage() {
         style={{ borderRadius: 18, boxShadow: '0 4px 24px #e0e0e0', marginBottom: 32 }}
         bodyStyle={{ padding: 24 }}
       >
-        <Table
-          dataSource={filteredUsers} // Sử dụng dữ liệu đã lọc bởi searchText
-          columns={columns} // Table sẽ tự áp dụng thêm lọc vai trò và trạng thái từ cấu hình cột
-          rowKey="key"
-          pagination={{ pageSize: 10 }}
-          bordered
-          scroll={{ x: 'max-content' }}
-          style={{ background: '#fff', borderRadius: 12 }}
-          size="middle"
-        />
+        <div className="table-wrapper" style={{ overflowX: 'auto', background: '#fff', borderRadius: 12 }}>
+          <Table
+            dataSource={filteredUsers} // Sử dụng dữ liệu đã lọc bởi searchText
+            columns={columns} // Table sẽ tự áp dụng thêm lọc vai trò và trạng thái từ cấu hình cột
+            rowKey="key"
+            pagination={{ pageSize: 10 }}
+            bordered
+            scroll={{ x: 1800 }}
+            style={{ minWidth: 1000 }}
+            size="middle"
+          />
+        </div>
       </Card>
 
       <Modal

@@ -20,14 +20,6 @@ function AdminNotificationsPage() {
     },
     {
       id: 2,
-      title: 'Ngân hàng máu mới',
-      message: 'Bệnh viện Chợ Rẫy đã được thêm vào hệ thống',
-      type: 'bloodBank',
-      read: false,
-      timestamp: '2024-03-20 09:15:00',
-    },
-    {
-      id: 3,
       title: 'Báo cáo mới',
       message: 'Báo cáo thống kê tháng 3 đã được tạo',
       type: 'report',
@@ -35,7 +27,7 @@ function AdminNotificationsPage() {
       timestamp: '2024-03-19 15:45:00',
     },
     {
-      id: 4,
+      id: 3,
       title: 'Cập nhật hệ thống',
       message: 'Hệ thống đã được cập nhật lên phiên bản mới',
       type: 'system',
