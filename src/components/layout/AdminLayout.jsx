@@ -168,44 +168,44 @@ function AdminLayout() {
         </div>
       </Menu.Item>
       <Menu.Divider />
-      {notifications.length > 0 ? (
-        notifications.slice(0, 5).map(notification => (
-          <Menu.Item 
-            key={notification.id} 
-            style={{ 
-              backgroundColor: notification.read ? 'white' : '#f0f0f0',
-              padding: '12px 16px'
-            }}
-            onClick={() => {
-              setNotifications(notifications.map(n => 
-                n.id === notification.id ? { ...n, read: true } : n
-              ));
-              // Navigate based on notification type
-              switch(notification.type) {
-                case 'user':
-                  navigate('/admin/users');
-                  break;
-                case 'bloodBank':
-                  navigate('/admin/blood-banks');
-                  break;
-                case 'report':
-                  navigate('/admin/statistics');
-                  break;
-                default:
-                  break;
-              }
-            }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 'bold' }}>{notification.title}</span>
-                {!notification.read && <Badge status="processing" />}
+      {notifications.filter(n => n.type !== 'bloodBank').length > 0 ? (
+        notifications
+          .filter(n => n.type !== 'bloodBank')
+          .slice(0, 5)
+          .map(notification => (
+            <Menu.Item 
+              key={notification.id} 
+              style={{ 
+                backgroundColor: notification.read ? 'white' : '#f0f0f0',
+                padding: '12px 16px'
+              }}
+              onClick={() => {
+                setNotifications(notifications.map(n => 
+                  n.id === notification.id ? { ...n, read: true } : n
+                ));
+                // Navigate based on notification type
+                switch(notification.type) {
+                  case 'user':
+                    navigate('/admin/users');
+                    break;
+                  case 'report':
+                    navigate('/admin/statistics');
+                    break;
+                  default:
+                    break;
+                }
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 'bold' }}>{notification.title}</span>
+                  {!notification.read && <Badge status="processing" />}
+                </div>
+                <span style={{ fontSize: '12px', color: '#666' }}>{notification.message}</span>
+                <span style={{ fontSize: '11px', color: '#999' }}>{notification.timestamp}</span>
               </div>
-              <span style={{ fontSize: '12px', color: '#666' }}>{notification.message}</span>
-              <span style={{ fontSize: '11px', color: '#999' }}>{notification.timestamp}</span>
-            </div>
-          </Menu.Item>
-        ))
+            </Menu.Item>
+          ))
       ) : (
         <Menu.Item disabled>Không có thông báo mới</Menu.Item>
       )}
@@ -220,8 +220,8 @@ function AdminLayout() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Inter, Roboto, Arial, sans-serif' }}>
-      {/* Sidebar giống doctor */}
-      <div style={{ width: 260, background: '#d32f2f', color: '#fff', padding: '0 0', display: 'flex', flexDirection: 'column' }}>
+      {/* Sidebar cố định */}
+      <div style={{ width: 260, background: '#d32f2f', color: '#fff', padding: '0 0', display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0, height: '100vh', zIndex: 100 }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 64, textDecoration: 'none', marginBottom: 24 }}>
           <img src="https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain" alt="Logo" style={{ width: 40, height: 40, borderRadius: '50%' }} />
           <span style={{ marginLeft: 10, fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>Dòng Máu Việt</span>
@@ -258,15 +258,29 @@ function AdminLayout() {
         </nav>
       </div>
       {/* Main content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: 0, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', marginLeft: 260, minHeight: '100vh' }}>
+        {/* Header cố định trên cùng, luôn ở trên cùng bên phải */}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 260,
+          right: 0,
+          height: 64,
+          background: '#fff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          zIndex: 101,
+          boxShadow: '0 2px 8px #e0e0e0',
+          paddingRight: 32
+        }}>
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
             style={{ fontSize: '16px', width: 64, height: 64 }}
           />
-          <div style={{ display: 'flex', alignItems: 'center', marginRight: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <Dropdown overlay={notificationMenu} placement="bottomRight" trigger={['click']}>
               <Badge count={notifications.filter(n => !n.read).length} style={{ marginRight: 24 }}>
                 <BellOutlined style={{ fontSize: 20, cursor: 'pointer' }} />
@@ -280,7 +294,8 @@ function AdminLayout() {
             </Dropdown>
           </div>
         </div>
-        <div style={{ flex: 1, background: '#f5f5f5', padding: 24 }}>
+        {/* Content, thêm paddingTop để không bị header che */}
+        <div style={{ flex: 1, background: '#f5f5f5', padding: 24, minHeight: 'calc(100vh - 64px)', paddingTop: 64 }}>
           <Outlet />
         </div>
       </div>
