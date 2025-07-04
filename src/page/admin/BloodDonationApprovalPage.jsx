@@ -192,49 +192,6 @@ const BloodDonationApprovalPage = () => {
         return isEmergency ? <Tag color="red">Có</Tag> : <Tag color="blue">Không</Tag>;
       },
     },
-    {
-      title: 'Hành động',
-      key: 'action',
-      render: (_, record) => {
-        if (record.status === 'PENDING') {
-          return (
-            <Space>
-              <Tooltip title="Duyệt yêu cầu">
-                <Popconfirm
-                  title="Bạn có chắc chắn muốn duyệt yêu cầu này?"
-                  onConfirm={() => handleUpdateStatus(record.id, 'APPROVED')}
-                  okText="Duyệt"
-                  cancelText="Hủy"
-                >
-                  <Button
-                    type="primary"
-                    shape="circle"
-                    icon={<CheckCircleOutlined />}
-                    style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}
-                  />
-                </Popconfirm>
-              </Tooltip>
-              <Tooltip title="Từ chối yêu cầu">
-                <Popconfirm
-                  title="Bạn có chắc chắn muốn từ chối yêu cầu này?"
-                  onConfirm={() => handleUpdateStatus(record.id, 'REJECTED')}
-                  okText="Từ chối"
-                  cancelText="Hủy"
-                  okButtonProps={{ danger: true }}
-                >
-                  <Button
-                    shape="circle"
-                    icon={<CloseCircleOutlined />}
-                    style={{ color: '#f44336', borderColor: '#f44336' }}
-                  />
-                </Popconfirm>
-              </Tooltip>
-            </Space>
-          );
-        }
-        return null;
-      },
-    },
   ];
 
   return (
