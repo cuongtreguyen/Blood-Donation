@@ -205,6 +205,46 @@ const DonationConfirmationPage = () => {
         return bloodTypeMap[bloodType] || bloodType || '-';
       }
     },
+    {
+      title: 'Hành động',
+      key: 'action',
+      render: (_, record) => {
+        if (record.status === 'PENDING') {
+          return (
+            <Space>
+              <Popconfirm
+                title="Bạn có chắc chắn muốn duyệt yêu cầu này?"
+                onConfirm={() => handleApprove(record.id)}
+                okText="Duyệt"
+                cancelText="Hủy"
+                okButtonProps={{ type: 'primary', style: { background: '#4CAF50', borderColor: '#4CAF50' } }}
+              >
+                <Button
+                  type="primary"
+                  shape="circle"
+                  icon={<CheckCircleOutlined style={{ fontSize: 24 }} />}
+                  style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', boxShadow: '0 2px 8px #b2f2bb' }}
+                />
+              </Popconfirm>
+              <Popconfirm
+                title="Bạn có chắc chắn muốn từ chối yêu cầu này?"
+                onConfirm={() => handleReject(record.id)}
+                okText="Từ chối"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+              >
+                <Button
+                  shape="circle"
+                  icon={<CloseCircleOutlined style={{ fontSize: 24, color: '#f44336' }} />}
+                  style={{ borderColor: '#f44336', backgroundColor: 'white', boxShadow: '0 2px 8px #ffc9c9' }}
+                />
+              </Popconfirm>
+            </Space>
+          );
+        }
+        return null; // Không hiển thị gì nếu trạng thái không phải PENDING
+      },
+    },
   ];
 
   return (

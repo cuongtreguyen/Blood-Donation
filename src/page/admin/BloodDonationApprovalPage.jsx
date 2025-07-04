@@ -10,7 +10,6 @@ const BloodDonationApprovalPage = () => {
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [emergencyFilter, setEmergencyFilter] = useState('ALL');
 
   const fetchBloodReceiveList = async () => {
     setLoading(true);
@@ -36,17 +35,6 @@ const BloodDonationApprovalPage = () => {
         setRequests([]);
         toast.warning("Không có dữ liệu yêu cầu nhận máu nào!", { toastId: "no-data-warning" });
       } else {
-        console.log("Blood receive data:", allResults);
-        // Debug: Log chi tiết từng record để kiểm tra trường isEmergency
-        allResults.forEach((record, index) => {
-          console.log(`Record ${index + 1}:`, {
-            id: record.id,
-            isEmergency: record.isEmergency,
-            emergency: record.emergency,
-            requestType: record.requestType,
-            type: record.type,
-          });
-        });
         setRequests(allResults);
       }
     } catch (err) {
@@ -89,11 +77,7 @@ const BloodDonationApprovalPage = () => {
       (request.status ? request.status.toLowerCase().includes(searchLower) : false);
     const matchStatus =
       statusFilter === 'ALL' ? true : request.status === statusFilter;
-    const matchEmergency =
-      emergencyFilter === 'ALL' ? true : 
-      emergencyFilter === 'EMERGENCY' ? getEmergencyStatus(request) :
-      emergencyFilter === 'NORMAL' ? !getEmergencyStatus(request) : true;
-    return matchSearch && matchStatus && matchEmergency;
+    return matchSearch && matchStatus;
   });
   
   const formatWantedHour = (wantedHour) => {
@@ -111,21 +95,6 @@ const BloodDonationApprovalPage = () => {
       return `${pad(hour)}:${pad(minute)}:${pad(second)}`;
     }
     return JSON.stringify(wantedHour);
-  };
-
-  // Function để xác định mức độ khẩn cấp từ dữ liệu record
-  const getEmergencyStatus = (record) => {
-    // Ưu tiên trường emergency (kiểu boolean)
-    if (record.emergency !== undefined && record.emergency !== null) {
-      return record.emergency === true || record.emergency === 1 || record.emergency === '1';
-    }
-    // Nếu backend trả về is_emergency hoặc isEmergency thì kiểm tra thêm
-    if (record.isEmergency !== undefined && record.isEmergency !== null) {
-      if (typeof record.isEmergency === 'boolean') return record.isEmergency;
-      if (typeof record.isEmergency === 'number') return record.isEmergency === 1;
-      if (typeof record.isEmergency === 'string') return record.isEmergency === '1' || record.isEmergency.toLowerCase() === 'true';
-    }
-    return false;
   };
 
   const columns = [
@@ -179,17 +148,48 @@ const BloodDonationApprovalPage = () => {
         return <Tag color="geekblue" style={{ fontWeight: 500 }}>{bloodMap[type] || type}</Tag>;
       }
     },
-    { 
-      title: 'Khẩn cấp',
-      key: 'isEmergency',
-      sorter: (a, b) => {
-        const aEmergency = getEmergencyStatus(a);
-        const bEmergency = getEmergencyStatus(b);
-        return aEmergency === bEmergency ? 0 : aEmergency ? 1 : -1;
-      },
+    { title: 'Khẩn cấp', dataIndex: 'isEmergency', key: 'isEmergency', render: (isEmergency) => (isEmergency ? <Tag color="red">Có</Tag> : <Tag color="blue">Không</Tag>) },
+    {
+      title: 'Hành động',
+      key: 'action',
       render: (_, record) => {
-        const isEmergency = getEmergencyStatus(record);
-        return isEmergency ? <Tag color="red">Có</Tag> : <Tag color="blue">Không</Tag>;
+        if (record.status === 'PENDING') {
+          return (
+            <Space>
+              <Tooltip title="Duyệt yêu cầu">
+                <Popconfirm
+                  title="Bạn có chắc chắn muốn duyệt yêu cầu này?"
+                  onConfirm={() => handleUpdateStatus(record.id, 'APPROVED')}
+                  okText="Duyệt"
+                  cancelText="Hủy"
+                >
+                  <Button
+                    type="primary"
+                    shape="circle"
+                    icon={<CheckCircleOutlined />}
+                    style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}
+                  />
+                </Popconfirm>
+              </Tooltip>
+              <Tooltip title="Từ chối yêu cầu">
+                <Popconfirm
+                  title="Bạn có chắc chắn muốn từ chối yêu cầu này?"
+                  onConfirm={() => handleUpdateStatus(record.id, 'REJECTED')}
+                  okText="Từ chối"
+                  cancelText="Hủy"
+                  okButtonProps={{ danger: true }}
+                >
+                  <Button
+                    shape="circle"
+                    icon={<CloseCircleOutlined />}
+                    style={{ color: '#f44336', borderColor: '#f44336' }}
+                  />
+                </Popconfirm>
+              </Tooltip>
+            </Space>
+          );
+        }
+        return null;
       },
     },
   ];
@@ -211,14 +211,12 @@ const BloodDonationApprovalPage = () => {
               value={statusFilter}
               onChange={setStatusFilter}
               style={{ width: 150 }}
-              placeholder="Lọc theo trạng thái"
             >
-              <Select.Option value="ALL">Tất cả trạng thái</Select.Option>
+              <Select.Option value="ALL">Tất cả</Select.Option>
               <Select.Option value="APPROVED">Đã duyệt</Select.Option>
               <Select.Option value="PENDING">Chờ duyệt</Select.Option>
               <Select.Option value="REJECTED">Đã từ chối</Select.Option>
             </Select>
-            
           </Space>
         }
       >
