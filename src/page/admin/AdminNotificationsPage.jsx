@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from "react-redux";
 import api from '../../config/api';
 import { List, Card, Tag, Typography, Button, Space, Badge, Input, Select, Row, Col, Empty, Modal, Form } from 'antd';
-import { BellOutlined, SearchOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons';
+import { BellOutlined, SearchOutlined, FilterOutlined, PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -40,6 +40,8 @@ function AdminNotificationsPage() {
   // Hàm tạo thông báo mới
   const createNotification = async (values) => {
     try {
+      // Ensure recipientId is a number
+      values.recipientId = Number(values.recipientId);
       await api.post('/notifications/create', values);
       setIsModalVisible(false);
       form.resetFields();
@@ -73,15 +75,33 @@ function AdminNotificationsPage() {
     return matchesSearch && matchesType && matchesRead;
   });
 
+  // Hàm đánh dấu tất cả là đã đọc
+  const markAllAsRead = async () => {
+    if (!userId) return;
+    try {
+      await api.put(`/notifications/user/${userId}/mark-all-read`);
+      toast.success('Đã đánh dấu tất cả thông báo là đã đọc!');
+      fetchNotifications();
+    } catch (err) {
+      toast.error('Không thể đánh dấu tất cả là đã đọc!');
+      console.error('Error marking all as read:', err);
+    }
+  };
+
   return (
     <div className="p-6">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <Title level={2}>
           <BellOutlined /> Thông báo <Badge count={unreadCount} style={{ marginLeft: 8 }} />
         </Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
-          Tạo thông báo mới
-        </Button>
+        <Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
+            Tạo thông báo mới
+          </Button>
+          <Button icon={<CheckCircleOutlined />} onClick={markAllAsRead} disabled={unreadCount === 0}>
+            Đánh dấu tất cả đã đọc
+          </Button>
+        </Space>
       </div>
 
       <Card style={{ marginBottom: 24 }}>
@@ -208,11 +228,11 @@ function AdminNotificationsPage() {
             rules={[{ required: true, message: 'Vui lòng chọn loại!' }]}
           >
             <Select>
-              <Option value="user">Người dùng</Option>
-              <Option value="bloodBank">Ngân hàng máu</Option>
-              <Option value="report">Báo cáo</Option>
-              <Option value="system">Hệ thống</Option>
-              <Option value="BLOOD_REQUEST">Yêu cầu máu</Option>
+              <Option value="BLOOD_REQUEST">Yêu cầu hiến máu</Option>
+              <Option value="BLOOD_DONATION_REMINDER">Nhắc nhở hiến máu</Option>
+              <Option value="EMERGENCY_REQUEST">Yêu cầu cấp cứu</Option>
+              <Option value="DONATION_COMPLETED">Hoàn thành hiến máu</Option>
+              <Option value="SYSTEM_ANNOUNCEMENT">Thông báo hệ thống</Option>
             </Select>
           </Form.Item>
           <Form.Item
@@ -220,7 +240,7 @@ function AdminNotificationsPage() {
             label="ID người nhận"
             rules={[{ required: true, message: 'Vui lòng nhập ID người nhận!' }]}
           >
-            <Input />
+            <Input type="number" />
           </Form.Item>
         </Form>
       </Modal>
