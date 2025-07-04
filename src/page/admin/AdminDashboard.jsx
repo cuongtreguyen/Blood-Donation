@@ -146,7 +146,7 @@ function AdminDashboard() {
 
       {/* Statistics Cards */}
       <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={8} lg={8}>
           <Card>
             <Statistic
               title="Tổng người dùng"
@@ -156,17 +156,24 @@ function AdminDashboard() {
             />
           </Card>
         </Col>
-        {roles.filter(role => role !== 'admin').map(role => (
-          <Col xs={24} sm={12} lg={6} key={role}>
-            <Card>
-              <Statistic
-                title={`Số ${role === 'donor' ? 'người hiến máu' : role === 'staff' ? 'nhân viên' : 'bác sĩ'}`}
-                value={usersByRole[role] || 0}
-                valueStyle={{ color: role === 'doctor' ? '#722ed1' : role === 'staff' ? '#389e0d' : '#1890ff' }}
-              />
-            </Card>
-          </Col>
-        ))}
+        <Col xs={24} sm={8} lg={8}>
+          <Card>
+            <Statistic
+              title="Số người hiến máu"
+              value={usersByRole['donor'] || 0}
+              valueStyle={{ color: '#1890ff' }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={8} lg={8}>
+          <Card>
+            <Statistic
+              title="Số nhân viên"
+              value={usersByRole['staff'] || 0}
+              valueStyle={{ color: '#389e0d' }}
+            />
+          </Card>
+        </Col>
       </Row>
 
       {/* Main content */}

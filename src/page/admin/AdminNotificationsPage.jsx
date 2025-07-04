@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { List, Card, Tag, Typography, Button, Space, Badge, Input, Select, Row, Col, Empty } from 'antd';
-import { BellOutlined, CheckOutlined, DeleteOutlined, SearchOutlined, FilterOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from "react-redux";
+import api from '../../config/api';
+import { List, Card, Tag, Typography, Button, Space, Badge, Input, Select, Row, Col, Empty, Modal, Form } from 'antd';
+import { BellOutlined, SearchOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -8,38 +10,46 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 
 function AdminNotificationsPage() {
-  // Mock data for notifications
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: 'Người dùng mới đăng ký',
-      message: 'Nguyễn Văn A đã đăng ký tài khoản mới',
-      type: 'user',
-      read: false,
-      timestamp: '2024-03-20 10:30:00',
-    },
-    {
-      id: 2,
-      title: 'Báo cáo mới',
-      message: 'Báo cáo thống kê tháng 3 đã được tạo',
-      type: 'report',
-      read: true,
-      timestamp: '2024-03-19 15:45:00',
-    },
-    {
-      id: 3,
-      title: 'Cập nhật hệ thống',
-      message: 'Hệ thống đã được cập nhật lên phiên bản mới',
-      type: 'system',
-      read: true,
-      timestamp: '2024-03-19 14:20:00',
-    },
-  ]);
+  const userData = useSelector((state) => state.user) || {};
+  const userId = userData.id;
 
-  // State for filters
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [searchText, setSearchText] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [readFilter, setReadFilter] = useState('all');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [form] = Form.useForm();
+
+  // Lấy danh sách thông báo và số lượng chưa đọc khi userId thay đổi
+  const fetchNotifications = () => {
+    if (!userId) return;
+    api.get(`/notifications/user/${userId}`)
+      .then(res => setNotifications(res.data))
+      .catch(err => console.error('Error fetching notifications:', err));
+    api.get(`/notifications/user/${userId}/unread-count`)
+      .then(res => setUnreadCount(res.data.unreadCount))
+      .catch(err => console.error('Error fetching unread count:', err));
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    // eslint-disable-next-line
+  }, [userId]);
+
+  // Hàm tạo thông báo mới
+  const createNotification = async (values) => {
+    try {
+      await api.post('/notifications/create', values);
+      setIsModalVisible(false);
+      form.resetFields();
+      toast.success('Tạo thông báo thành công!');
+      fetchNotifications();
+    } catch (err) {
+      toast.error('Tạo thông báo thất bại!');
+      console.error('Error creating notification:', err);
+    }
+  };
 
   const getNotificationColor = (type) => {
     const colors = {
@@ -47,45 +57,15 @@ function AdminNotificationsPage() {
       bloodBank: 'green',
       report: 'purple',
       system: 'orange',
+      BLOOD_REQUEST: 'red',
     };
     return colors[type] || 'default';
   };
 
-  const markAsRead = (id) => {
-    setNotifications(notifications.map(notification =>
-      notification.id === id ? { ...notification, read: true } : notification
-    ));
-    toast.success('Đã đánh dấu thông báo là đã đọc!');
-  };
-
-  const deleteNotification = (id) => {
-    setNotifications(notifications.filter(notification => notification.id !== id));
-    toast.success('Đã xóa thông báo!');
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(notification => ({ ...notification, read: true })));
-    toast.success('Đã đánh dấu tất cả thông báo là đã đọc!');
-  };
-
-  const deleteAllRead = () => {
-    const initialCount = notifications.length;
-    const remainingNotifications = notifications.filter(notification => !notification.read);
-    const deletedCount = initialCount - remainingNotifications.length;
-
-    setNotifications(remainingNotifications);
-
-    if (deletedCount > 0) {
-      toast.success(`Đã xóa ${deletedCount} thông báo đã đọc!`);
-    } else {
-      toast.info('Không có thông báo nào đã đọc để xóa.');
-    }
-  };
-
   // Filter notifications based on search text and filters
   const filteredNotifications = notifications.filter(notification => {
-    const matchesSearch = notification.title.toLowerCase().includes(searchText.toLowerCase()) ||
-                         notification.message.toLowerCase().includes(searchText.toLowerCase());
+    const matchesSearch = notification.title?.toLowerCase().includes(searchText.toLowerCase()) ||
+                          notification.message?.toLowerCase().includes(searchText.toLowerCase());
     const matchesType = typeFilter === 'all' || notification.type === typeFilter;
     const matchesRead = readFilter === 'all' || 
                        (readFilter === 'read' && notification.read) ||
@@ -97,16 +77,11 @@ function AdminNotificationsPage() {
     <div className="p-6">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <Title level={2}>
-          <BellOutlined /> Thông báo
+          <BellOutlined /> Thông báo <Badge count={unreadCount} style={{ marginLeft: 8 }} />
         </Title>
-        <Space>
-          <Button onClick={markAllAsRead}>
-            <CheckOutlined /> Đánh dấu tất cả đã đọc
-          </Button>
-          <Button danger onClick={deleteAllRead}>
-            <DeleteOutlined /> Xóa thông báo đã đọc
-          </Button>
-        </Space>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
+          Tạo thông báo mới
+        </Button>
       </div>
 
       <Card style={{ marginBottom: 24 }}>
@@ -133,6 +108,7 @@ function AdminNotificationsPage() {
               <Option value="bloodBank">Ngân hàng máu</Option>
               <Option value="report">Báo cáo</Option>
               <Option value="system">Hệ thống</Option>
+              <Option value="BLOOD_REQUEST">Yêu cầu máu</Option>
             </Select>
           </Col>
           <Col xs={24} sm={12} md={8}>
@@ -156,18 +132,7 @@ function AdminNotificationsPage() {
             itemLayout="horizontal"
             dataSource={filteredNotifications}
             renderItem={(item) => (
-              <List.Item
-                actions={[
-                  !item.read && (
-                    <Button type="link" onClick={() => markAsRead(item.id)}>
-                      <CheckOutlined /> Đánh dấu đã đọc
-                    </Button>
-                  ),
-                  <Button type="link" danger onClick={() => deleteNotification(item.id)}>
-                    <DeleteOutlined /> Xóa
-                  </Button>
-                ]}
-              >
+              <List.Item>
                 <List.Item.Meta
                   avatar={
                     <Badge dot={!item.read}>
@@ -182,6 +147,7 @@ function AdminNotificationsPage() {
                         {item.type === 'bloodBank' && 'Ngân hàng máu'}
                         {item.type === 'report' && 'Báo cáo'}
                         {item.type === 'system' && 'Hệ thống'}
+                        {item.type === 'BLOOD_REQUEST' && 'Yêu cầu máu'}
                       </Tag>
                     </Space>
                   }
@@ -208,6 +174,56 @@ function AdminNotificationsPage() {
           />
         )}
       </Card>
+
+      <Modal
+        title="Tạo thông báo mới"
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        onOk={() => form.submit()}
+        okText="Tạo"
+        cancelText="Hủy"
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={createNotification}
+        >
+          <Form.Item
+            name="title"
+            label="Tiêu đề"
+            rules={[{ required: true, message: 'Vui lòng nhập tiêu đề!' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="message"
+            label="Nội dung"
+            rules={[{ required: true, message: 'Vui lòng nhập nội dung!' }]}
+          >
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <Form.Item
+            name="type"
+            label="Loại thông báo"
+            rules={[{ required: true, message: 'Vui lòng chọn loại!' }]}
+          >
+            <Select>
+              <Option value="user">Người dùng</Option>
+              <Option value="bloodBank">Ngân hàng máu</Option>
+              <Option value="report">Báo cáo</Option>
+              <Option value="system">Hệ thống</Option>
+              <Option value="BLOOD_REQUEST">Yêu cầu máu</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="recipientId"
+            label="ID người nhận"
+            rules={[{ required: true, message: 'Vui lòng nhập ID người nhận!' }]}
+          >
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

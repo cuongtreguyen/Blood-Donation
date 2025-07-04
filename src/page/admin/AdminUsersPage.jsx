@@ -86,6 +86,16 @@ function AdminUsersPage() {
         phone: user.phone,
         role: user.role,
         status: user.status,
+        address: user.address,
+        gender: user.gender,
+        birthdate: user.birthdate,
+        height: user.height,
+        weight: user.weight,
+        lastDonation: user.lastDonation,
+        medicalHistory: user.medicalHistory,
+        emergencyName: user.emergencyName,
+        emergencyPhone: user.emergencyPhone,
+        bloodType: user.bloodType,
       });
     } else {
       form.resetFields();
@@ -113,7 +123,7 @@ function AdminUsersPage() {
           user.key === selectedUser.key ? { ...user, ...values } : user
         );
         setUsers(updatedUsers);
-        await api.put(`/api/users/${selectedUser.id}`, values);
+        await api.put(`/user/update-user`, values);
         toast.success('Cập nhật thông tin thành công!');
       }
       setIsModalVisible(false);

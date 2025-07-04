@@ -102,12 +102,12 @@ function AdminLayout() {
     {
       key: '/admin/blood-donation-approval',
       icon: <ExclamationCircleOutlined />,
-      label: 'Xác nhận yêu cầu nhận máu',
+      label: 'Yêu cầu nhận máu',
     },
     {
       key: '/admin/donation-confirmation',
       icon: <HeartOutlined />,
-      label: 'Xác nhận yêu cầu hiến máu',
+      label: 'Yêu cầu hiến máu',
     },
     {
       key: '/admin/blogs',
