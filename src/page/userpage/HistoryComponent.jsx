@@ -1,35 +1,34 @@
-// src/page/userpage/HistoryComponent.jsx
+
 import React, { useEffect, useState } from "react";
 import { FaHistory } from "react-icons/fa";
 import api from "../../config/api";
+import { useSelector } from "react-redux";
 
 const HistoryComponent = () => {
   const [donationHistory, setDonationHistory] = useState([]);
+  const userData = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchDonationHistory = async () => {
       try {
-        const response = await api.get("/api/blood-register/history");
+        const response = await api.get(`/blood-register/history/${userData.id}`);
         setDonationHistory(response.data);
       } catch (error) {
-        setDonationHistory([
-          {
-            date: "05-19-2023",
-            location: "Bệnh Viện Chợ Rẫy",
-            amount: "210ml",
-          },
-        ]);
+        console.error("Lỗi khi lấy lịch sử hiến máu:", error);
+        setDonationHistory([]);
       }
     };
 
     fetchDonationHistory();
-  }, []);
+  }, [userData.id]);
 
   return (
     <div className="bg-white p-8 rounded-xl shadow-2xl">
-      <h3 className="text-2xl font-bold mb-6 text-gray-800">
+      <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+        <FaHistory className="text-red-600" />
         Lịch Sử Hiến Máu
       </h3>
+
       <div className="space-y-6">
         {donationHistory.length === 0 ? (
           <p className="text-gray-600">Chưa có lịch sử hiến máu.</p>
@@ -42,12 +41,14 @@ const HistoryComponent = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-semibold text-lg text-gray-800">
-                    {donation.location}
+                    {donation.fullName}
                   </p>
-                  <p className="text-gray-600">{donation.date}</p>
+                  <p className="text-gray-600">
+                    {new Date(donation.completedDate).toLocaleDateString("vi-VN")}
+                  </p>
                 </div>
                 <div className="text-red-600 font-bold text-lg">
-                  {donation.amount}
+                  {(donation.unit ).toFixed(0)} ml
                 </div>
               </div>
             </div>
@@ -59,72 +60,3 @@ const HistoryComponent = () => {
 };
 
 export default HistoryComponent;
-
-
-
-
-
-
-
-
-// import React, { useEffect, useState } from "react";
-// import { FaHistory } from "react-icons/fa";
-// import api from "../../config/api";
-// import { useSelector } from "react-redux";
-
-// const HistoryComponent = () => {
-//   const [donationHistory, setDonationHistory] = useState([]);
-//   const userData = useSelector((state) => state.user);
-
-//   useEffect(() => {
-//     const fetchDonationHistory = async () => {
-//       try {
-//         const response = await api.get(`/blood-register/history/${userData.id}`);
-//         setDonationHistory(response.data);
-//       } catch (error) {
-//         console.error("Lỗi khi lấy lịch sử hiến máu:", error);
-//         setDonationHistory([]);
-//       }
-//     };
-
-//     fetchDonationHistory();
-//   }, [userData.id]);
-
-//   return (
-//     <div className="bg-white p-8 rounded-xl shadow-2xl">
-//       <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
-//         <FaHistory className="text-red-600" />
-//         Lịch Sử Hiến Máu
-//       </h3>
-
-//       <div className="space-y-6">
-//         {donationHistory.length === 0 ? (
-//           <p className="text-gray-600">Chưa có lịch sử hiến máu.</p>
-//         ) : (
-//           donationHistory.map((donation, index) => (
-//             <div
-//               key={index}
-//               className="bg-gradient-to-r from-red-50 to-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
-//             >
-//               <div className="flex justify-between items-center">
-//                 <div>
-//                   <p className="font-semibold text-lg text-gray-800">
-//                     {donation.fullName}
-//                   </p>
-//                   <p className="text-gray-600">
-//                     {new Date(donation.completedDate).toLocaleDateString("vi-VN")}
-//                   </p>
-//                 </div>
-//                 <div className="text-red-600 font-bold text-lg">
-//                   {(donation.unit ).toFixed(0)} ml
-//                 </div>
-//               </div>
-//             </div>
-//           ))
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default HistoryComponent;
