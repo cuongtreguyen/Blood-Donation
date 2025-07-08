@@ -312,20 +312,6 @@
 
 // export default ProfileComponent;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // src/page/userpage/ProfileComponent.jsx
 // src/page/userpage/ProfileComponent.jsx
 import React, { useState, useEffect } from "react";
@@ -388,13 +374,16 @@ const ProfileComponent = () => {
   useEffect(() => {
     setFormData(userData);
   }, [userData]);
-  
 
-  
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+    console.log("Giá trị gửi lên:", {
+      height: formData.height,
+      weight: formData.weight,
+      parsedHeight: parseFloat(formData.height),
+      parsedWeight: parseFloat(formData.weight),
+    });
     if (!formData.fullName) {
       toast.error("Tên là bắt buộc!");
       setIsLoading(false);
@@ -408,21 +397,21 @@ const ProfileComponent = () => {
         return;
       }
       const formatDateForAPI = (dateString) => {
-    if (!dateString || dateString.trim() === "") return null;
-    
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        console.error("Invalid date:", dateString);
-        return null;
-      }
-      // Trả về format YYYY-MM-DD
-      return date.toISOString().split('T')[0];
-    } catch (error) {
-      console.error("Date formatting error:", error);
-      return null;
-    }
-  };
+        if (!dateString || dateString.trim() === "") return null;
+
+        try {
+          const date = new Date(dateString);
+          if (isNaN(date.getTime())) {
+            console.error("Invalid date:", dateString);
+            return null;
+          }
+          // Trả về format YYYY-MM-DD
+          return date.toISOString().split("T")[0];
+        } catch (error) {
+          console.error("Date formatting error:", error);
+          return null;
+        }
+      };
 
       const response = await api.put(
         "/user/update-user",
@@ -513,7 +502,7 @@ const ProfileComponent = () => {
         role: response.data.role || userData.role,
         profileImage: response.data.profileImage,
       };
-      
+
       dispatch(login(updatedUser));
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setFormData(updatedUser);
@@ -734,6 +723,7 @@ const ProfileComponent = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, height: e.target.value })
                   }
+                  onWheel={(e) => e.target.blur()}
                   className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   min="0"
                   disabled={isLoading}
@@ -750,6 +740,7 @@ const ProfileComponent = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, weight: e.target.value })
                   }
+                  onWheel={(e) => e.target.blur()}
                   className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   min="0"
                   disabled={isLoading}
