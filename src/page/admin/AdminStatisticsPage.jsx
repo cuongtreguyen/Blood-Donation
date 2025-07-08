@@ -66,7 +66,7 @@ const AdminStatisticsPage = () => {
 
       {/* Summary Cards */}
       <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Space direction="horizontal" size="large" align="start">
               <UserOutlined style={{ fontSize: '30px', color: '#1890ff' }} />
@@ -77,7 +77,7 @@ const AdminStatisticsPage = () => {
             </Space>
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Space direction="horizontal" size="large" align="start">
               <HeartOutlined style={{ fontSize: '30px', color: '#f5222d' }} />
@@ -88,18 +88,7 @@ const AdminStatisticsPage = () => {
             </Space>
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Space direction="horizontal" size="large" align="start">
-              <TeamOutlined style={{ fontSize: '30px', color: '#52c41a' }} />
-              <div>
-                <Text type="secondary">Tổng số ngân hàng máu</Text>
-                <Title level={4} style={{ margin: 0 }}>{loading ? '...' : stats.totalBloodBanks}</Title>
-              </div>
-            </Space>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Space direction="horizontal" size="large" align="start">
               <BarChartOutlined style={{ fontSize: '30px', color: '#fa8c16' }} />

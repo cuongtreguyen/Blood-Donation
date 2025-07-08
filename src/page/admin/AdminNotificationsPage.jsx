@@ -53,15 +53,20 @@ function AdminNotificationsPage() {
     }
   };
 
-  const getNotificationColor = (type) => {
-    const colors = {
-      user: 'blue',
-      bloodBank: 'green',
-      report: 'purple',
-      system: 'orange',
-      BLOOD_REQUEST: 'red',
-    };
-    return colors[type] || 'default';
+  // Hàm lấy màu tag theo loại thông báo
+  const getTypeTagColor = (type) => {
+    switch (type) {
+      case 'BLOOD_REQUEST': return 'red';
+      case 'BLOOD_DONATION_REMINDER': return 'blue';
+      case 'EMERGENCY_REQUEST': return 'orange';
+      case 'DONATION_COMPLETED': return 'green';
+      case 'SYSTEM_ANNOUNCEMENT': return 'purple';
+      case 'user': return 'geekblue';
+      case 'bloodBank': return 'lime';
+      case 'report': return 'gold';
+      case 'system': return 'gray';
+      default: return 'default';
+    }
   };
 
   // Filter notifications based on search text and filters
@@ -85,6 +90,18 @@ function AdminNotificationsPage() {
     } catch (err) {
       toast.error('Không thể đánh dấu tất cả là đã đọc!');
       console.error('Error marking all as read:', err);
+    }
+  };
+
+  // Hàm đánh dấu 1 thông báo là đã đọc
+  const markAsRead = async (notificationId) => {
+    try {
+      await api.put(`/notifications/${notificationId}/mark-read`);
+      fetchNotifications();
+      toast.success('Đã đánh dấu thông báo là đã đọc!');
+    } catch (err) {
+      toast.error('Không thể đánh dấu thông báo là đã đọc!');
+      console.error('Error marking as read:', err);
     }
   };
 
@@ -152,23 +169,60 @@ function AdminNotificationsPage() {
             itemLayout="horizontal"
             dataSource={filteredNotifications}
             renderItem={(item) => (
-              <List.Item>
+              <List.Item
+                style={{ background: !item.read ? '#fff7f6' : 'white', borderLeft: !item.read ? '4px solid #ff4d4f' : '4px solid #f0f0f0', transition: 'background 0.2s' }}
+                actions={
+                  !item.read
+                    ? [
+                        <Button
+                          icon={<CheckCircleOutlined />}
+                          size="small"
+                          style={{ color: '#595959', borderColor: '#d9d9d9', background: '#fff' }}
+                          onClick={e => {
+                            e.stopPropagation();
+                            markAsRead(item.id);
+                          }}
+                        >Đã đọc</Button>
+                      ]
+                    : []
+                }
+              >
                 <List.Item.Meta
                   avatar={
                     <Badge dot={!item.read}>
-                      <BellOutlined style={{ fontSize: '24px', color: getNotificationColor(item.type) }} />
+                      <BellOutlined style={{ fontSize: '24px', color: !item.read ? '#ff4d4f' : '#bfbfbf' }} />
                     </Badge>
                   }
                   title={
                     <Space>
-                      <Text strong>{item.title}</Text>
-                      <Tag color={getNotificationColor(item.type)}>
-                        {item.type === 'user' && 'Người dùng'}
-                        {item.type === 'bloodBank' && 'Ngân hàng máu'}
-                        {item.type === 'report' && 'Báo cáo'}
-                        {item.type === 'system' && 'Hệ thống'}
-                        {item.type === 'BLOOD_REQUEST' && 'Yêu cầu máu'}
-                      </Tag>
+                      <Text strong={!item.read} style={{ color: !item.read ? '#d32f2f' : undefined }}>
+                        {item.title}
+                      </Text>
+                      <Tag color={!item.read ? 'red' : 'default'}>{!item.read ? 'Chưa đọc' : 'Đã đọc'}</Tag>
+                      {item.type && (
+                        <Tag color={getTypeTagColor(item.type)}>
+                          {item.type === 'BLOOD_REQUEST' && 'Yêu cầu máu'}
+                          {item.type === 'BLOOD_DONATION_REMINDER' && 'Nhắc nhở hiến máu'}
+                          {item.type === 'EMERGENCY_REQUEST' && 'Yêu cầu cấp cứu'}
+                          {item.type === 'DONATION_COMPLETED' && 'Hoàn thành hiến máu'}
+                          {item.type === 'SYSTEM_ANNOUNCEMENT' && 'Thông báo hệ thống'}
+                          {item.type === 'user' && 'Người dùng'}
+                          {item.type === 'bloodBank' && 'Ngân hàng máu'}
+                          {item.type === 'report' && 'Báo cáo'}
+                          {item.type === 'system' && 'Hệ thống'}
+                          {![
+                            'BLOOD_REQUEST',
+                            'BLOOD_DONATION_REMINDER',
+                            'EMERGENCY_REQUEST',
+                            'DONATION_COMPLETED',
+                            'SYSTEM_ANNOUNCEMENT',
+                            'user',
+                            'bloodBank',
+                            'report',
+                            'system',
+                          ].includes(item.type) && item.type}
+                        </Tag>
+                      )}
                     </Space>
                   }
                   description={
