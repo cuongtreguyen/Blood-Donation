@@ -10,6 +10,7 @@ const BloodDonationApprovalPage = () => {
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [requestsWithNames, setRequestsWithNames] = useState([]);
 
   const fetchBloodReceiveList = async () => {
     setLoading(true);
@@ -49,6 +50,27 @@ const BloodDonationApprovalPage = () => {
     fetchBloodReceiveList();
   }, []);
 
+  useEffect(() => {
+    const fetchAllNames = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      const updated = await Promise.all(
+        requests.map(async (req) => {
+          if (req.fullName && req.fullName !== 'string' && req.fullName !== null && req.fullName !== '') return req;
+          try {
+            const res = await api.get(`/blood-receive/get/${req.id}`, { headers: { Authorization: `Bearer ${token}` } });
+            return { ...req, fullName: res.data.fullName };
+          } catch {
+            return req;
+          }
+        })
+      );
+      setRequestsWithNames(updated);
+    };
+    if (requests.length > 0) fetchAllNames();
+    else setRequestsWithNames([]);
+  }, [requests]);
+
   const handleUpdateStatus = async (id, status) => {
     try {
       const token = localStorage.getItem("token");
@@ -69,16 +91,18 @@ const BloodDonationApprovalPage = () => {
     setSearchText(e.target.value);
   };
 
-  const filteredRequests = requests.filter(request => {
-    const searchLower = searchText.toLowerCase();
-    const matchSearch =
-      (request.id ? request.id.toString().toLowerCase().includes(searchLower) : false) ||
-      (request.name ? request.name.toLowerCase().includes(searchLower) : false) ||
-      (request.status ? request.status.toLowerCase().includes(searchLower) : false);
-    const matchStatus =
-      statusFilter === 'ALL' ? true : request.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  const filteredRequests = requestsWithNames
+    .filter(request => ['APPROVED', 'PENDING', 'REJECTED'].includes(request.status))
+    .filter(request => {
+      const searchLower = searchText.toLowerCase();
+      const matchSearch =
+        (request.id ? request.id.toString().toLowerCase().includes(searchLower) : false) ||
+        (request.fullName ? request.fullName.toLowerCase().includes(searchLower) : false) ||
+        (request.status ? request.status.toLowerCase().includes(searchLower) : false);
+      const matchStatus =
+        statusFilter === 'ALL' ? true : request.status === statusFilter;
+      return matchSearch && matchStatus;
+    });
   
   const formatWantedHour = (wantedHour) => {
     if (typeof wantedHour === 'string') {
@@ -99,6 +123,7 @@ const BloodDonationApprovalPage = () => {
 
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', sorter: (a, b) => a.id - b.id },
+    { title: 'Họ tên', dataIndex: 'fullName', key: 'fullName', render: (text) => text || '-', width: 180 },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
@@ -110,9 +135,6 @@ const BloodDonationApprovalPage = () => {
           case 'APPROVED': color = 'green'; text = 'Đã duyệt'; break;
           case 'PENDING': color = 'gold'; text = 'Chờ duyệt'; break;
           case 'REJECTED': color = 'red'; text = 'Đã từ chối'; break;
-          case 'COMPLETED': color = 'blue'; text = 'Đã hoàn thành'; break;
-          case 'INCOMPLETED': color = 'purple'; text = 'Chưa hoàn thành'; break;
-          case 'CANCELED': color = 'grey'; text = 'Đã hủy'; break;
           default: color = 'default'; text = status;
         }
         return <Tag color={color}>{text}</Tag>;
@@ -148,7 +170,7 @@ const BloodDonationApprovalPage = () => {
         return <Tag color="geekblue" style={{ fontWeight: 500 }}>{bloodMap[type] || type}</Tag>;
       }
     },
-    { title: 'Khẩn cấp', dataIndex: 'isEmergency', key: 'isEmergency', render: (isEmergency) => (isEmergency ? <Tag color="red">Có</Tag> : <Tag color="blue">Không</Tag>) },
+    { title: 'Khẩn cấp', dataIndex: 'emergency', key: 'emergency', render: (emergency) => (emergency ? <Tag color="red">Có</Tag> : <Tag color="blue">Không</Tag>), align: 'center', width: 100 },
     {
       title: 'Hành động',
       key: 'action',
@@ -194,6 +216,26 @@ const BloodDonationApprovalPage = () => {
     },
   ];
 
+  // Hàm lấy chi tiết yêu cầu nhận máu theo id
+  const fetchBloodReceiveDetail = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Không tìm thấy token xác thực!");
+        return;
+      }
+      const res = await api.get(`/blood-receive/get/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.data) {
+        // Ví dụ: lấy tên người đăng ký
+        toast.info(`Tên người đăng ký: ${res.data.fullName}`);
+        // Bạn có thể xử lý dữ liệu chi tiết ở đây
+      }
+    } catch (err) {
+      toast.error("Không thể lấy chi tiết yêu cầu nhận máu!");
+      console.log(err);
+    }
+  };
+
   return (
     <div style={{ padding: '24px' }}>
       <Card
@@ -231,6 +273,9 @@ const BloodDonationApprovalPage = () => {
             pagination={{ pageSize: 10 }}
             bordered
             rowKey="id"
+            onRow={record => ({
+              onClick: () => fetchBloodReceiveDetail(record.id)
+            })}
           />
         )}
       </Card>
