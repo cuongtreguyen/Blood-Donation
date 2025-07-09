@@ -150,7 +150,7 @@ class AuthService {
   // Cập nhật thông tin user
   async updateUser(userData) {
     try {
-      const response = await api.put('/update-user', userData);
+      const response = await api.put('/user/update-user', userData);
       return {
         success: true,
         data: response.data

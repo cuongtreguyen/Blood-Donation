@@ -339,14 +339,14 @@ const ProfileComponent = () => {
   const [formData, setFormData] = useState(userData);
 
   const bloodGroups = [
-    { label: "A+", value: "A_POSITIVE" },
-    { label: "A-", value: "A_NEGATIVE" },
-    { label: "B+", value: "B_POSITIVE" },
-    { label: "B-", value: "B_NEGATIVE" },
-    { label: "AB+", value: "AB_POSITIVE" },
-    { label: "AB-", value: "AB_NEGATIVE" },
-    { label: "O+", value: "O_POSITIVE" },
-    { label: "O-", value: "O_NEGATIVE" },
+    { label: "A_POSITIVE", value: "A+" },
+    { label: "A_NEGATIVE", value: "A-" },
+    { label: "B_POSITIVE", value: "B+" },
+    { label: "B_NEGATIVE", value: "B-" },
+    { label: "AB_POSITIVE", value: "AB+" },
+    { label: "AB_NEGATIVE", value: "AB-" },
+    { label: "O_POSITIVE", value: "O+" },
+    { label: "O_NEGATIVE", value: "O-" },
   ];
 
   const genderOptions = [
@@ -374,9 +374,7 @@ const ProfileComponent = () => {
   useEffect(() => {
     setFormData(userData);
   }, [userData]);
-  
 
-  
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -394,21 +392,21 @@ const ProfileComponent = () => {
         return;
       }
       const formatDateForAPI = (dateString) => {
-    if (!dateString || dateString.trim() === "") return null;
-    
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        console.error("Invalid date:", dateString);
-        return null;
-      }
-      // Trả về format YYYY-MM-DD
-      return date.toISOString().split('T')[0];
-    } catch (error) {
-      console.error("Date formatting error:", error);
-      return null;
-    }
-  };
+        if (!dateString || dateString.trim() === "") return null;
+
+        try {
+          const date = new Date(dateString);
+          if (isNaN(date.getTime())) {
+            console.error("Invalid date:", dateString);
+            return null;
+          }
+          // Trả về format YYYY-MM-DD
+          return date.toISOString().split("T")[0];
+        } catch (error) {
+          console.error("Date formatting error:", error);
+          return null;
+        }
+      };
 
       const response = await api.put(
         "/user/update-user",
@@ -499,7 +497,7 @@ const ProfileComponent = () => {
         role: response.data.role || userData.role,
         profileImage: response.data.profileImage,
       };
-      
+
       dispatch(login(updatedUser));
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setFormData(updatedUser);

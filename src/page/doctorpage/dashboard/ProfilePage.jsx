@@ -24,7 +24,20 @@ const ProfilePage = () => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      const result = await authService.updateUser({ ...userData, ...values });
+      const payload = {
+        ...userData,
+        ...values,
+        birthdate: values.birthdate || userData.birthdate || "1990-01-01",
+        height: values.height || userData.height || 170,
+        weight: values.weight || userData.weight || 60,
+        lastDonation: values.lastDonation || userData.lastDonation || "2024-06-01",
+        medicalHistory: values.medicalHistory || userData.medicalHistory || "Không có",
+        emergencyName: values.emergencyName || userData.emergencyName || "Người thân",
+        emergencyPhone: values.emergencyPhone || userData.emergencyPhone || "0912345678",
+        bloodType: values.bloodType || userData.bloodType || "A_POSITIVE",
+        gender: (values.gender || userData.gender || "MALE").toUpperCase() 
+      };
+      const result = await authService.updateUser(payload);
       if (result.success) {
         message.success('Đã cập nhật thông tin thành công');
         setEditing(false);

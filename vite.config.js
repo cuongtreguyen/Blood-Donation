@@ -7,4 +7,9 @@ export default defineConfig({
   optimizeDeps: {
     include: ['@ant-design/icons'],
   },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8080', // Sửa lại port nếu backend không phải 8080
+    },
+  },
 })

@@ -70,33 +70,32 @@
 import React, { useEffect, useState } from "react";
 import { FaHistory } from "react-icons/fa";
 import api from "../../config/api";
-import { useSelector } from "react-redux";
 
-const HistoryComponent = () => {
+const HistoryComponent = ({ userId: propUserId }) => {
   const [donationHistory, setDonationHistory] = useState([]);
-  const userData = useSelector((state) => state.user);
+  const userId = propUserId || localStorage.getItem("userId");
 
   useEffect(() => {
     const fetchDonationHistory = async () => {
       try {
-        const response = await api.get(`/blood-register/history/${userData.id}`);
+        if (!userId) {
+          setDonationHistory([]);
+          return;
+        }
+        const response = await api.get(`/api/blood-register/history/${userId}`);
         setDonationHistory(response.data);
-      } catch (error) {
-        console.error("Lỗi khi lấy lịch sử hiến máu:", error);
+      } catch {
         setDonationHistory([]);
       }
     };
-
     fetchDonationHistory();
-  }, [userData.id]);
+  }, [userId]);
 
   return (
     <div className="bg-white p-8 rounded-xl shadow-2xl">
-      <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
-        <FaHistory className="text-red-600" />
-        Lịch Sử Hiến Máu
+      <h3 className="text-2xl font-bold mb-6 text-gray-800">
+        Lịch sử hiến máu
       </h3>
-
       <div className="space-y-6">
         {donationHistory.length === 0 ? (
           <p className="text-gray-600">Chưa có lịch sử hiến máu.</p>
@@ -109,14 +108,12 @@ const HistoryComponent = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-semibold text-lg text-gray-800">
-                    {donation.fullName}
+                    {donation.fullName || "Ẩn danh"}
                   </p>
-                  <p className="text-gray-600">
-                    {new Date(donation.completedDate).toLocaleDateString("vi-VN")}
-                  </p>
+                  <p className="text-gray-600">{donation.completedDate}</p>
                 </div>
                 <div className="text-red-600 font-bold text-lg">
-                  {(donation.unit ).toFixed(0)} ml
+                  {donation.unit} đơn vị
                 </div>
               </div>
             </div>

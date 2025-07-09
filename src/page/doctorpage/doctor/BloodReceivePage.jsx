@@ -44,7 +44,7 @@ const statusColors = {
 const BloodReceivePage = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState("ALL");
+  const [status, setStatus] = useState("PENDING");
   const [searchText, setSearchText] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
@@ -54,7 +54,14 @@ const BloodReceivePage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const allStatuses = ["PENDING", "APPROVED", "REJECTED", "COMPLETED", "INCOMPLETED", "CANCELED"];
+        const allStatuses = [
+          "PENDING",
+          "APPROVED",
+          "REJECTED",
+          "COMPLETED",
+          "INCOMPLETED",
+          "CANCELED",
+        ];
         const statusArr = status === "ALL" ? allStatuses : [status];
         const res = await getBloodReceiveByStatus(statusArr);
         setData(res);

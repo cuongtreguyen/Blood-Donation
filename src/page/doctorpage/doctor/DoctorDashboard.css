@@ -1,0 +1,110 @@
+/* Sidebar */
+.doctor-sidebar {
+  background: #e60012;
+  min-height: 100vh;
+  padding: 24px 0 0 0;
+  border-radius: 0 24px 24px 0;
+  box-shadow: 2px 0 12px #f0f1f2;
+}
+.doctor-sidebar .menu-item {
+  color: #fff;
+  font-weight: 500;
+  border-radius: 8px;
+  margin: 8px 12px;
+  padding: 10px 18px;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+}
+.doctor-sidebar .menu-item.active,
+.doctor-sidebar .menu-item:hover {
+  background: #fff;
+  color: #e60012;
+}
+
+/* Header */
+.doctor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 32px 12px 32px;
+  background: #fff;
+  box-shadow: 0 2px 8px #f0f1f2;
+  border-radius: 0 0 18px 18px;
+  margin-bottom: 18px;
+}
+.doctor-header .logout-btn {
+  background: #e60012;
+  color: #fff;
+  border-radius: 20px;
+  font-weight: 600;
+  padding: 6px 22px;
+  border: none;
+  transition: background 0.2s;
+}
+.doctor-header .logout-btn:hover {
+  background: #b8000f;
+}
+
+/* Dashboard Cards */
+.doctor-dashboard-cards .ant-card {
+  border-radius: 18px !important;
+  box-shadow: 0 2px 12px #f0f1f2;
+  margin-bottom: 12px;
+}
+.doctor-dashboard-cards .ant-statistic-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Table */
+.doctor-dashboard-table .ant-table {
+  border-radius: 16px !important;
+  overflow: hidden;
+  box-shadow: 0 2px 12px #f0f1f2;
+}
+.doctor-dashboard-table .ant-table-thead > tr > th {
+  background: #fafbfc;
+  font-weight: 600;
+  font-size: 15px;
+}
+.doctor-dashboard-table .ant-table-tbody > tr:hover > td {
+  background: #f5f7fa;
+}
+
+/* Status Tag */
+.doctor-status-tag {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  padding: 2px 14px !important;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Input Search */
+.doctor-dashboard-search {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 6px 14px;
+  min-width: 200px;
+  font-size: 15px;
+  transition: border 0.2s;
+}
+.doctor-dashboard-search:focus {
+  border: 1.5px solid #e60012;
+  outline: none;
+}
+
+/* Modal */
+.ant-modal-content {
+  border-radius: 16px !important;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .doctor-dashboard-cards .ant-col {
+    margin-bottom: 12px;
+  }
+} 

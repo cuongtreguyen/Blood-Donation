@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Progress, Tag, Button, Statistic, Table, Modal, Form, InputNumber, Select, message } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined, PlusOutlined, HistoryOutlined } from '@ant-design/icons';
-import { fetchData } from '../../api/fakeData';
+import { getAllBloodInventory } from '../../services/bloodInventoryService';
 import { useUser } from '../../contexts/UserContext';
+import api from '../../services/api';
 
 const { Option } = Select;
+
+// Map mã nhóm máu sang ký hiệu
+const bloodTypeMap = {
+  "A_POSITIVE": "A+",
+  "A_NEGATIVE": "A-",
+  "B_POSITIVE": "B+",
+  "B_NEGATIVE": "B-",
+  "AB_POSITIVE": "AB+",
+  "AB_NEGATIVE": "AB-",
+  "O_POSITIVE": "O+",
+  "O_NEGATIVE": "O-"
+};
 
 const BloodInventoryPage = () => {
   const { role } = useUser();
@@ -15,14 +28,32 @@ const BloodInventoryPage = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([
-      fetchData('bloodInventory'),
-      fetchData('donations')
-    ]).then(([inventoryData, donationsData]) => {
-      setInventory(inventoryData);
-      setDonations(donationsData);
-      setLoading(false);
-    });
+      getAllBloodInventory(),
+      api.get('/api/blood-register/list-all')
+    ])
+      .then(([data, donationRes]) => {
+        // Xử lý kho máu
+        const inventoryObj = {};
+        data.forEach(item => {
+          inventoryObj[item.bloodType] = {
+            amount: item.unitsAvailable,
+            status: item.status || (item.unitsAvailable <= 20 ? 'critical' : item.unitsAvailable <= 50 ? 'low' : item.unitsAvailable <= 100 ? 'normal' : 'high'),
+            lastUpdated: item.updatedAt || item.lastUpdated || new Date().toISOString()
+          };
+        });
+        setInventory(inventoryObj);
+        // Xử lý lịch sử hiến máu
+        setDonations(donationRes.data || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setInventory({});
+        setDonations([]);
+        message.error('Không thể tải dữ liệu kho máu hoặc lịch sử hiến máu.');
+      });
   }, []);
 
   const getStatusColor = (status) => {
@@ -76,7 +107,7 @@ const BloodInventoryPage = () => {
       title: 'Nhóm máu',
       dataIndex: 'bloodType',
       key: 'bloodType',
-      render: (text) => <Tag color="red">{text}</Tag>,
+      render: (text) => <Tag color="red">{bloodTypeMap[text] || text}</Tag>,
     },
     {
       title: 'Lượng máu',
@@ -163,7 +194,7 @@ const BloodInventoryPage = () => {
                 <Col span={6} key={type}>
                   <Card>
                     <Statistic
-                      title={`Nhóm máu ${type}`}
+                      title={`Nhóm máu ${bloodTypeMap[type] || type}`}
                       value={data.amount}
                       suffix="đơn vị"
                       valueStyle={{ color: getStatusColor(data.status) }}

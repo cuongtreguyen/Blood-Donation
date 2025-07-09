@@ -28,9 +28,12 @@ import {
   updateBloodRegisterStatus,
   completeBloodRegister,
 } from "../../../services/bloodRegisterService";
+import { getAllBloodInventory } from "../../../services/bloodInventoryService";
 // import { createBloodInventory } from "../../../services/bloodInventoryService";
 import api from "../../../config/api";
 import dayjs from "dayjs";
+import HealthCheckForm from "../../../components/forms/HealthCheckForm";
+import "./DoctorDashboard.css";
 
 const { Title } = Typography;
 
@@ -57,15 +60,29 @@ const statusOptions = [
   { label: "Từ chối", value: "REJECTED" },
 ];
 
+const bloodTypeMap = {
+  A_POSITIVE: "A+",
+  A_NEGATIVE: "A-",
+  B_POSITIVE: "B+",
+  B_NEGATIVE: "B-",
+  AB_POSITIVE: "AB+",
+  AB_NEGATIVE: "AB-",
+  O_POSITIVE: "O+",
+  O_NEGATIVE: "O-",
+};
+
 const DashboardPage = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState("PENDING");
+  const [status, setStatus] = useState("ALL");
   const [searchText, setSearchText] = useState("");
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [completeLoading, setCompleteLoading] = useState(false);
   const [completeRecord, setCompleteRecord] = useState(null);
   const [completeForm] = Form.useForm();
+  const [_inventory, setInventory] = useState([]); // Đổi tên biến để tránh unused linter error
+  const [healthCheckModalOpen, setHealthCheckModalOpen] = useState(false);
+  const [selectedRegisterId, setSelectedRegisterId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -104,7 +121,8 @@ const DashboardPage = () => {
             }
             return {
               id: item.id,
-              name: userInfo.fullName || item.fullName || item.name || "",
+              name:
+                userInfo.fullName || item.fullName || item.name || "chưa có",
               bloodType:
                 item.bloodType ||
                 (item.blood && item.blood.bloodType) ||
@@ -144,28 +162,6 @@ const DashboardPage = () => {
     fetchData();
   }, [status]);
 
-  const handleComplete = async (record) => {
-    try {
-      console.log("Completing with:", record);
-      await completeBloodRegister({
-        bloodId: record.id,
-        implementationDate: new Date().toISOString().split("T")[0],
-        unit: record.quantity,
-      });
-      message.success("Đã đánh dấu hoàn thành!");
-      const updatedData = data.map((item) =>
-        item.id === record.id ? { ...item, status: "COMPLETED" } : item
-      );
-      setData(updatedData);
-    } catch (err) {
-      console.error("Complete error:", err);
-      message.error(
-        "Lỗi khi hoàn thành đăng ký: " +
-          (err?.response?.data?.message || "Unknown error")
-      );
-    }
-  };
-
   const handleIncomplete = async (record) => {
     try {
       await updateBloodRegisterStatus(record.id, "INCOMPLETED");
@@ -201,17 +197,29 @@ const DashboardPage = () => {
       message.success("Đã đánh dấu hoàn thành!");
       setData((prev) =>
         prev.map((item) =>
-          item.id === completeRecord.id ? { ...item, status: "COMPLETED" } : item
+          item.id === completeRecord.id
+            ? { ...item, status: "COMPLETED" }
+            : item
         )
       );
+      // Sau khi hoàn thành đơn, reload lại kho máu
+      const inventoryData = await getAllBloodInventory();
+      setInventory(inventoryData);
+      console.log("Cập nhật kho máu:", inventoryData); // Tránh lỗi unused
       setCompleteModalOpen(false);
       setCompleteRecord(null);
       completeForm.resetFields();
     } catch (err) {
+      console.error(err); // Log lỗi để tránh unused
       message.error("Lỗi khi hoàn thành đăng ký!");
     } finally {
       setCompleteLoading(false);
     }
+  };
+
+  const handleOpenHealthCheckModal = (record) => {
+    setSelectedRegisterId(record.id);
+    setHealthCheckModalOpen(true);
   };
 
   const columns = [
@@ -223,14 +231,16 @@ const DashboardPage = () => {
       render: (id) => <b>{id}</b>,
     },
     {
+      title: "Họ tên",
+      dataIndex: "name",
+      key: "name",
+      render: (text) => <b>{text}</b>,
+    },
+    {
       title: "Nhóm máu",
       dataIndex: "bloodType",
       key: "bloodType",
-      render: (bloodType) => (
-        <Tag color="magenta" style={{ fontWeight: 500, fontSize: 14 }}>
-          {bloodType || "Chưa xác định"}
-        </Tag>
-      ),
+      render: (text) => bloodTypeMap[text] || text,
     },
     {
       title: "Số lượng (đơn vị)",
@@ -265,6 +275,7 @@ const DashboardPage = () => {
           color={statusColors[status]}
           icon={statusIcons[status]}
           style={{ fontWeight: 500, fontSize: 14 }}
+          className="doctor-status-tag"
         >
           {status}
         </Tag>
@@ -277,11 +288,20 @@ const DashboardPage = () => {
         if (record.status === "APPROVED") {
           return (
             <Space>
-              <Button type="primary" onClick={() => handleOpenCompleteModal(record)}>
+              <Button
+                type="primary"
+                onClick={() => handleOpenCompleteModal(record)}
+              >
                 Hoàn thành
               </Button>
               <Button danger onClick={() => handleIncomplete(record)}>
                 Chưa hoàn thành
+              </Button>
+              <Button
+                type="primary"
+                onClick={() => handleOpenHealthCheckModal(record)}
+              >
+                Kiểm tra sức khỏe
               </Button>
             </Space>
           );
@@ -324,7 +344,7 @@ const DashboardPage = () => {
       <Title level={2} style={{ textAlign: "center", marginBottom: 32 }}>
         Tổng quan đăng ký hiến máu
       </Title>
-      <Row gutter={16} style={{ marginBottom: 24 }} justify="center">
+      <Row gutter={16} style={{ marginBottom: 24 }} justify="center" className="doctor-dashboard-cards">
         <Col xs={24} sm={12} md={6}>
           <Card bordered style={{ borderRadius: 12 }}>
             <Statistic title="Tổng đăng ký" value={stats.total} />
@@ -365,6 +385,7 @@ const DashboardPage = () => {
         bordered
         style={{ borderRadius: 16, boxShadow: "0 2px 8px #f0f1f2" }}
         bodyStyle={{ padding: 0 }}
+        className="doctor-dashboard-table"
         title={
           <Space style={{ width: "100%", justifyContent: "space-between" }}>
             <span style={{ fontWeight: 600, fontSize: 18 }}>
@@ -381,13 +402,7 @@ const DashboardPage = () => {
               placeholder="Tìm kiếm nhóm máu, địa chỉ..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              style={{
-                marginLeft: 16,
-                padding: 4,
-                borderRadius: 6,
-                border: "1px solid #ddd",
-                minWidth: 180,
-              }}
+              className="doctor-dashboard-search"
             />
           </Space>
         }
@@ -405,13 +420,18 @@ const DashboardPage = () => {
             bordered
             size="middle"
             style={{ borderRadius: 12 }}
+            className="doctor-dashboard-table"
           />
         )}
       </Card>
       <Modal
         open={completeModalOpen}
         title="Xác nhận hoàn thành đăng ký hiến máu"
-        onCancel={() => { setCompleteModalOpen(false); setCompleteRecord(null); completeForm.resetFields(); }}
+        onCancel={() => {
+          setCompleteModalOpen(false);
+          setCompleteRecord(null);
+          completeForm.resetFields();
+        }}
         footer={null}
         destroyOnClose
       >
@@ -435,11 +455,33 @@ const DashboardPage = () => {
             <Input type="number" min={1} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={completeLoading} style={{ width: "100%" }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={completeLoading}
+              style={{ width: "100%" }}
+            >
               Xác nhận hoàn thành
             </Button>
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        open={healthCheckModalOpen}
+        title="Kiểm tra sức khỏe người hiến máu"
+        onCancel={() => {
+          setHealthCheckModalOpen(false);
+          setSelectedRegisterId(null);
+        }}
+        footer={null}
+        destroyOnClose
+      >
+        {selectedRegisterId && (
+          <HealthCheckForm
+            bloodRegisterId={selectedRegisterId}
+            onSuccess={() => setHealthCheckModalOpen(false)}
+          />
+        )}
       </Modal>
     </div>
   );

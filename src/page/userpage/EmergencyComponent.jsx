@@ -12,14 +12,14 @@ const EmergencyComponent = () => {
   });
 
   const bloodGroups = [
-    { label: "A+", value: "A_POSITIVE" },
-    { label: "A-", value: "A_NEGATIVE" },
-    { label: "B+", value: "B_POSITIVE" },
-    { label: "B-", value: "B_NEGATIVE" },
-    { label: "AB+", value: "AB_POSITIVE" },
-    { label: "AB-", value: "AB_NEGATIVE" },
-    { label: "O+", value: "O_POSITIVE" },
-    { label: "O-", value: "O_NEGATIVE" },
+    { label: "A_POSITIVE", value: "A+" },
+    { label: "A_NEGATIVE", value: "A-" },
+    { label: "B_POSITIVE", value: "B+" },
+    { label: "B_NEGATIVE", value: "B-" },
+    { label: "AB_POSITIVE", value: "AB+" },
+    { label: "AB_NEGATIVE", value: "AB-" },
+    { label: "O_POSITIVE", value: "O+" },
+    { label: "O_NEGATIVE", value: "O-" },
   ];
 
   const handleSearchDonors = async (e) => {

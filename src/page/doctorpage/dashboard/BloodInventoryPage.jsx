@@ -232,21 +232,28 @@ const BloodInventoryPage = () => {
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => {
-            if (!record.id || record.id === 0) {
-              message.error("Không thể sửa nhóm máu này do thiếu id từ backend.");
-              console.log("Record không hợp lệ:", record);
-              return;
-            }
-            handleEdit(record);
-          }}>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => {
+              if (!record.id || record.id === 0) {
+                message.error(
+                  "Không thể sửa nhóm máu này do thiếu id từ backend."
+                );
+                console.log("Record không hợp lệ:", record);
+                return;
+              }
+              handleEdit(record);
+            }}
+          >
             Sửa
           </Button>
           <Popconfirm
             title="Bạn có chắc chắn muốn xóa nhóm máu này không?"
             onConfirm={() => {
               if (!record.id || record.id === 0) {
-                message.error("Không thể xóa nhóm máu này do thiếu id từ backend.");
+                message.error(
+                  "Không thể xóa nhóm máu này do thiếu id từ backend."
+                );
                 console.log("Record không hợp lệ:", record);
                 return;
               }
@@ -256,7 +263,9 @@ const BloodInventoryPage = () => {
             cancelText="Hủy"
             okButtonProps={{ danger: true }}
           >
-            <Button danger icon={<DeleteOutlined />}>Xóa</Button>
+            <Button danger icon={<DeleteOutlined />}>
+              Xóa
+            </Button>
           </Popconfirm>
         </Space>
       ),
