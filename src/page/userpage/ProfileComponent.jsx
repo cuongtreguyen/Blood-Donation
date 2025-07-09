@@ -27,14 +27,14 @@ const ProfileComponent = () => {
   const [formData, setFormData] = useState(userData);
 
   const bloodGroups = [
-    { label: "A_POSITIVE", value: "A+" },
-    { label: "A_NEGATIVE", value: "A-" },
-    { label: "B_POSITIVE", value: "B+" },
-    { label: "B_NEGATIVE", value: "B-" },
-    { label: "AB_POSITIVE", value: "AB+" },
-    { label: "AB_NEGATIVE", value: "AB-" },
-    { label: "O_POSITIVE", value: "O+" },
-    { label: "O_NEGATIVE", value: "O-" },
+    { label: "A+", value: "A_POSITIVE" },
+    { label: "A-", value: "A_NEGATIVE" },
+    { label: "B+", value: "B_POSITIVE" },
+    { label: "B-", value: "B_NEGATIVE" },
+    { label: "AB+", value: "AB_POSITIVE" },
+    { label: "AB-", value: "AB_NEGATIVE" },
+    { label: "O+", value: "O_POSITIVE" },
+    { label: "O-", value: "O_NEGATIVE" },
   ];
 
   const genderOptions = [
@@ -61,29 +61,41 @@ const ProfileComponent = () => {
 
   // Hàm kiểm tra điều kiện hiến máu
   const checkDonationEligibility = async () => {
-    if (!userData.id) return;
+  if (!userData.id) return;
 
-    setIsCheckingEligibility(true);
-    try {
-      const token = userData.token;
-      if (!token) {
-        toast.error("Không tìm thấy token xác thực!");
-        return;
-      }
+  setIsCheckingEligibility(true);
+  try {
+    const token = userData.token;
+    if (!token) {
+      toast.error("Không tìm thấy token xác thực!");
+      return;
+    }
 
-      const response = await api.get(`/user/check-donation-ability?id=${userData.id}`, {
+    const response = await api.get(
+      `/user/check-donation-ability?id=${userData.id}`,
+      {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      }
+    );
 
-      setDonationEligibility(response.data.message);
-    } catch (err) {
-      console.error("Error checking donation eligibility:", err);
+    setDonationEligibility(response.data.message);
+  } catch (err) {
+    console.error("Error checking donation eligibility:", err);
+
+    // ✅ Cập nhật thông báo và kết quả nếu lỗi 400 (chưa đủ điều kiện)
+    if (err.response && err.response.status === 400) {
+      const message = err.response.data?.message || "Bạn chưa đủ điều kiện hiến máu!";
+      setDonationEligibility(message);
+    } else {
+      // Các lỗi khác
       setDonationEligibility("Không thể kiểm tra điều kiện hiến máu");
       toast.error("Không thể kiểm tra điều kiện hiến máu!");
-    } finally {
-      setIsCheckingEligibility(false);
     }
-  };
+  } finally {
+    // ✅ Luôn tắt trạng thái kiểm tra
+    setIsCheckingEligibility(false);
+  }
+};
 
   useEffect(() => {
     setFormData(userData);
@@ -153,7 +165,7 @@ const ProfileComponent = () => {
       const updatedUser = {
         ...userData,
         ...response.data,
-        id:userData.id,
+        id: userData.id,
         email: response.data.email || userData.email,
         role: response.data.role || userData.role,
       };
@@ -234,44 +246,49 @@ const ProfileComponent = () => {
     }
   };
 
-  // Xác định icon và style dựa trên kết quả kiểm tra
   const getEligibilityDisplay = () => {
-    if (isCheckingEligibility) {
-      return {
-        icon: <FaSpinner className="text-blue-500 text-xl mr-3 animate-spin" />,
-        text: "Đang kiểm tra điều kiện hiến máu...",
-        bgColor: "bg-gradient-to-r from-blue-50 to-blue-100",
-        textColor: "text-blue-700",
-      };
-    }
+  if (isCheckingEligibility) {
+    return {
+      icon: <FaSpinner className="text-blue-500 text-xl mr-3 animate-spin" />,
+      text: "Đang kiểm tra điều kiện hiến máu...",
+      bgColor: "bg-gradient-to-r from-blue-50 to-blue-100",
+      textColor: "text-blue-700",
+    };
+  }
 
-    if (!donationEligibility) {
-      return {
-        icon: <FaTimesCircle className="text-gray-500 text-xl mr-3" />,
-        text: "Chưa kiểm tra điều kiện hiến máu",
-        bgColor: "bg-gradient-to-r from-gray-50 to-gray-100",
-        textColor: "text-gray-700",
-      };
-    }
+  if (!donationEligibility) {
+    return {
+      icon: <FaTimesCircle className="text-gray-500 text-xl mr-3" />,
+      text: "Chưa kiểm tra điều kiện hiến máu",
+      bgColor: "bg-gradient-to-r from-gray-50 to-gray-100",
+      textColor: "text-gray-700",
+    };
+  }
 
-    const isEligible = donationEligibility.toLowerCase().includes("đủ điều kiện");
+  // ✅ Xử lý logic phân biệt đủ và chưa đủ điều kiện
+  const normalizedMsg = donationEligibility.toLowerCase().trim();
+  const isEligible =
+    normalizedMsg.includes("đủ điều kiện") &&
+    !normalizedMsg.includes("chưa") &&
+    !normalizedMsg.includes("không");
 
-    if (isEligible) {
-      return {
-        icon: <FaCheckCircle className="text-green-500 text-xl mr-3" />,
-        text: donationEligibility,
-        bgColor: "bg-gradient-to-r from-green-50 to-green-100",
-        textColor: "text-green-700",
-      };
-    } else {
-      return {
-        icon: <FaTimesCircle className="text-red-500 text-xl mr-3" />,
-        text: donationEligibility,
-        bgColor: "bg-gradient-to-r from-red-50 to-red-100",
-        textColor: "text-red-700",
-      };
-    }
-  };
+  if (isEligible) {
+    return {
+      icon: <FaCheckCircle className="text-green-500 text-xl mr-3" />,
+      text: donationEligibility,
+      bgColor: "bg-gradient-to-r from-green-50 to-green-100",
+      textColor: "text-green-700",
+    };
+  } else {
+    return {
+      icon: <FaTimesCircle className="text-red-500 text-xl mr-3" />,
+      text: donationEligibility,
+      bgColor: "bg-gradient-to-r from-red-50 to-red-100",
+      textColor: "text-red-700",
+    };
+  }
+};
+
 
   const eligibilityDisplay = getEligibilityDisplay();
 
@@ -622,11 +639,15 @@ const ProfileComponent = () => {
           </form>
         )}
 
-        <div className={`mt-8 p-6 ${eligibilityDisplay.bgColor} rounded-xl shadow-sm`}>
+        <div
+          className={`mt-8 p-6 ${eligibilityDisplay.bgColor} rounded-xl shadow-sm`}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               {eligibilityDisplay.icon}
-              <span className={`${eligibilityDisplay.textColor} font-semibold text-lg`}>
+              <span
+                className={`${eligibilityDisplay.textColor} font-semibold text-lg`}
+              >
                 {eligibilityDisplay.text}
               </span>
             </div>

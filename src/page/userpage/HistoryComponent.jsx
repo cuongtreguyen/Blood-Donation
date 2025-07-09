@@ -2,10 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { FaHistory } from "react-icons/fa";
 import api from "../../config/api";
+import { useSelector } from "react-redux";
 
 const HistoryComponent = ({ userId: propUserId }) => {
   const [donationHistory, setDonationHistory] = useState([]);
-  const userId = propUserId || localStorage.getItem("userId");
+  const user = useSelector((state) => state.user);
+const userId = propUserId || user.id;
 
   useEffect(() => {
     const fetchDonationHistory = async () => {
@@ -14,7 +16,7 @@ const HistoryComponent = ({ userId: propUserId }) => {
           setDonationHistory([]);
           return;
         }
-        const response = await api.get(`/api/blood-register/history/${userId}`);
+        const response = await api.get(`/blood-register/history/${userId}`);
         setDonationHistory(response.data);
       } catch {
         setDonationHistory([]);
@@ -45,7 +47,7 @@ const HistoryComponent = ({ userId: propUserId }) => {
                   <p className="text-gray-600">{donation.completedDate}</p>
                 </div>
                 <div className="text-red-600 font-bold text-lg">
-                  {donation.unit} đơn vị
+                  {donation.unit} ml
                 </div>
               </div>
             </div>
