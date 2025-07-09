@@ -108,14 +108,14 @@ function AdminUsersPage() {
       if (modalMode === 'add') {
         // Add new user
         const newUser = {
-          key: String(users.length + 1),
-          id: `U${String(users.length + 1).padStart(3, '0')}`,
-          ...values,
-          joinDate: new Date().toLocaleDateString('vi-VN'),
-          lastLogin: '-',
+          fullName: values.name,
+          email: values.email,
+          password: values.password,
+          phone: values.phone,
+          address: values.address,
+          bloodType: values.bloodType,
         };
-        setUsers([...users, newUser]);
-        await api.post('/api/users', newUser);
+        await api.post('/register', newUser);
         toast.success('Thêm người dùng thành công!');
       } else {
         // Update existing user
@@ -193,15 +193,11 @@ function AdminUsersPage() {
     { title: 'Email', dataIndex: 'email', key: 'email', render: (text) => <Tooltip title={text}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: 140 }}>{text}</span></Tooltip>, width: 160 },
     { title: 'Số điện thoại', dataIndex: 'phone', key: 'phone', align: 'center', width: 120 },
     { title: 'Địa chỉ', dataIndex: 'address', key: 'address', render: (text) => <Tooltip title={text}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: 120 }}>{text}</span></Tooltip>, width: 130 },
-    { title: 'Giới tính', dataIndex: 'gender', key: 'gender', align: 'center', render: (gender) => gender === 'MALE' ? 'Nam' : gender === 'FEMALE' ? 'Nữ' : gender === 'OTHER' ? 'Khác' : '' },
-    { title: 'Ngày sinh', dataIndex: 'birthdate', key: 'birthdate', align: 'center', render: (date) => date ? new Date(date).toLocaleDateString('vi-VN') : '' },
-    { title: 'Chiều cao', dataIndex: 'height', key: 'height', align: 'center', width: 90 },
-    { title: 'Cân nặng', dataIndex: 'weight', key: 'weight', align: 'center', width: 90 },
-    { title: 'Lần hiến máu gần nhất', dataIndex: 'lastDonation', key: 'lastDonation', align: 'center', render: (date) => date ? new Date(date).toLocaleDateString('vi-VN') : '' },
-    { title: 'Tiền sử bệnh', dataIndex: 'medicalHistory', key: 'medicalHistory', render: (text) => <Tooltip title={text}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: 120 }}>{text}</span></Tooltip>, width: 130 },
+    { title: 'Giới tính', dataIndex: 'gender', key: 'gender', align: 'center', width: 100, render: (gender) => gender === 'MALE' ? 'Nam' : gender === 'FEMALE' ? 'Nữ' : gender === 'OTHER' ? 'Khác' : '' },
+    { title: 'Ngày sinh', dataIndex: 'birthdate', key: 'birthdate', align: 'center', width: 120, render: (date) => date ? new Date(date).toLocaleDateString('vi-VN') : '' },
     { title: 'Người liên hệ khẩn cấp', dataIndex: 'emergencyName', key: 'emergencyName', render: (text) => <Tooltip title={text}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: 120 }}>{text}</span></Tooltip>, width: 130 },
     { title: 'SĐT khẩn cấp', dataIndex: 'emergencyPhone', key: 'emergencyPhone', align: 'center', width: 120 },
-    { title: 'Nhóm máu', dataIndex: 'bloodType', key: 'bloodType', align: 'center', render: (type) => {
+    { title: 'Nhóm máu', dataIndex: 'bloodType', key: 'bloodType', align: 'center', width: 100, render: (type) => {
       if (!type) return '';
       const bloodMap = {
         'A_POSITIVE': 'A+', 'A_NEGATIVE': 'A-',
@@ -253,6 +249,7 @@ function AdminUsersPage() {
       title: 'Hành động',
       key: 'action',
       align: 'center',
+      width: 90,
       render: (_, record) => (
         <Space size="small">
           <Tooltip title="Chỉnh sửa">
@@ -356,8 +353,7 @@ function AdminUsersPage() {
               rules={[
                 { required: true, message: 'Vui lòng nhập tên người dùng!' },
                 { min: 3, message: 'Tên người dùng phải có ít nhất 3 ký tự!' },
-                { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' },
-                { pattern: /^[a-zA-Z\sÀÁẠẢÃĂẰẮẶẲẴÂẦẤẬẨẪÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐđ]+$/, message: 'Tên người dùng chỉ được chứa chữ cái và khoảng trắng!' }
+                { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' }
               ]}
             >
               <Input prefix={<UserOutlined />} placeholder="Nhập tên người dùng" size="large" />
@@ -367,8 +363,7 @@ function AdminUsersPage() {
               label={<b>Email</b>}
               rules={[
                 { required: true, message: 'Vui lòng nhập email!' },
-                { type: 'email', message: 'Email không hợp lệ!' },
-                { pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: 'Email phải có định dạng hợp lệ (ví dụ: example@domain.com)!' }
+                { type: 'email', message: 'Email không hợp lệ!' }
               ]}
             >
               <Input prefix={<MailOutlined />} placeholder="Nhập email" size="large" />
@@ -386,76 +381,24 @@ function AdminUsersPage() {
             <Form.Item name="address" label={<b>Địa chỉ</b>}>
               <Input placeholder="Nhập địa chỉ" size="large" />
             </Form.Item>
-            <Form.Item name="gender" label={<b>Giới tính</b>}>
-              <Select placeholder="Chọn giới tính" size="large">
-                {genderOptions.map(opt => <Option key={opt.value} value={opt.value}>{opt.label}</Option>)}
-              </Select>
-            </Form.Item>
-            <Form.Item name="birthdate" label={<b>Ngày sinh</b>}>
-              <Input type="date" size="large" />
-            </Form.Item>
           </div>
           <div style={{ flex: 1, minWidth: 280 }}>
-            <Form.Item name="height" label={<b>Chiều cao (cm)</b>}>
-              <Input type="number" min={0} size="large" />
-            </Form.Item>
-            <Form.Item name="weight" label={<b>Cân nặng (kg)</b>}>
-              <Input type="number" min={0} size="large" />
-            </Form.Item>
-            <Form.Item name="lastDonation" label={<b>Lần hiến máu gần nhất</b>}>
-              <Input type="date" size="large" />
-            </Form.Item>
-            <Form.Item name="medicalHistory" label={<b>Tiền sử bệnh</b>}>
-              <Input placeholder="Nhập tiền sử bệnh" size="large" />
-            </Form.Item>
-            <Form.Item name="emergencyName" label={<b>Người liên hệ khẩn cấp</b>}>
-              <Input placeholder="Nhập tên người liên hệ khẩn cấp" size="large" />
-            </Form.Item>
-            <Form.Item name="emergencyPhone" label={<b>SĐT khẩn cấp</b>}>
-              <Input placeholder="Nhập số điện thoại khẩn cấp" size="large" />
-            </Form.Item>
-            <Form.Item name="bloodType" label={<b>Nhóm máu</b>}>
+            <Form.Item name="bloodType" label={<b>Nhóm máu</b>} rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}> 
               <Select placeholder="Chọn nhóm máu" size="large">
                 {bloodTypeOptions.map(type => <Option key={type} value={type}>{type.replace('_', ' ')}</Option>)}
               </Select>
             </Form.Item>
-            {modalMode === 'add' && (
-              <Form.Item
-                name="password"
-                label={<b>Mật khẩu</b>}
-                rules={[
-                  { required: true, message: 'Vui lòng nhập mật khẩu!' },
-                  { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
-                  { max: 50, message: 'Mật khẩu không được vượt quá 50 ký tự!' }
-                ]}
-              >
-                <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" size="large" />
-              </Form.Item>
-            )}
             <Form.Item
-              name="role"
-              label={<b>Vai trò</b>}
-              rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
+              name="password"
+              label={<b>Mật khẩu</b>}
+              rules={[
+                { required: true, message: 'Vui lòng nhập mật khẩu!' },
+                { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
+                { max: 50, message: 'Mật khẩu không được vượt quá 50 ký tự!' }
+              ]}
             >
-              <Select placeholder="Chọn vai trò" size="large">
-                <Option value="donor">Người hiến máu</Option>
-                <Option value="staff">Nhân viên</Option>
-                <Option value="doctor">Bác sĩ</Option>
-                <Option value="admin">Quản trị viên</Option>
-              </Select>
+              <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" size="large" />
             </Form.Item>
-            {modalMode === 'edit' && (
-              <Form.Item
-                name="status"
-                label={<b>Trạng thái</b>}
-                rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
-              >
-                <Select placeholder="Chọn trạng thái" size="large">
-                  <Option value="active">Đang hoạt động</Option>
-                  <Option value="inactive">Không hoạt động</Option>
-                </Select>
-              </Form.Item>
-            )}
           </div>
         </Form>
       </Modal>

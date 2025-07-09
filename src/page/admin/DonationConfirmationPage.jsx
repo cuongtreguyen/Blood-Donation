@@ -21,8 +21,20 @@ const DonationConfirmationPage = () => {
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const userId = null; // TODO: Truyền userId thực tế vào đây
 
   // Fetch blood register list
+  const fetchUserFullName = async (userId, token) => {
+    try {
+      const res = await api.get(`/blood-register/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return res.data && res.data.length > 0 ? res.data[0].fullName : '';
+    } catch (e) {
+      return '';
+    }
+  };
+
   const fetchBloodRegisterList = async () => {
     setLoading(true);
     try {
@@ -42,16 +54,26 @@ const DonationConfirmationPage = () => {
           allResults = allResults.concat(res.data);
         }
       }
-      if (allResults.length === 0) {
+      // Bổ sung họ tên cho từng bản ghi nếu chưa có
+      const donationsWithName = await Promise.all(
+        allResults.map(async (item) => {
+          if ((!item.fullName || item.fullName === null) && item.userId) {
+            const fullName = await fetchUserFullName(item.userId, token);
+            return { ...item, fullName };
+          }
+          return item;
+        })
+      );
+      if (donationsWithName.length === 0) {
         setDonations([]);
         toast.warning("Không có dữ liệu hiến máu nào!", {
           toastId: "no-data-warning",
           position: "top-right",
         });
       } else {
-        setDonations(allResults.flat());
-        console.log('Donations chi tiết:', allResults.flat());
-        allResults.flat().forEach((item, idx) => console.log('Donation', idx, item));
+        setDonations(donationsWithName);
+        console.log('Donations chi tiết:', donationsWithName);
+        donationsWithName.forEach((item, idx) => console.log('Donation', idx, item));
       }
     } catch(err) {
       setDonations([]);
@@ -66,7 +88,7 @@ const DonationConfirmationPage = () => {
 
   useEffect(() => {
     fetchBloodRegisterList();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     console.log('Donations:', donations);
@@ -153,6 +175,13 @@ const DonationConfirmationPage = () => {
       key: 'id',
       sorter: (a, b) => a.id - b.id,
       sortDirections: ['descend', 'ascend'],
+    },
+    { 
+      title: 'Họ tên', 
+      dataIndex: 'fullName', 
+      key: 'fullName',
+      render: (text) => text || '-',
+      width: 180,
     },
     { 
       title: 'Trạng thái', 
