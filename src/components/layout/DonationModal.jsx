@@ -679,7 +679,7 @@ const DonationModal = ({ show, onClose, userData }) => {
       other: "OTHER",
     };
 
-    const formatTime = (time) => (time ? `${time}:00` : null);
+    const formatTime = (time) => (time ? `${time}` : null);
 
     return {
       gender: genderMap[data.gender] || null,
