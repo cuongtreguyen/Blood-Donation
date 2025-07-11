@@ -26,6 +26,7 @@ const AdminProfilePage = () => {
     return <div>Đang tải thông tin người dùng...</div>;
   }
 
+  // Xử lý khi submit form cập nhật thông tin người dùng
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
@@ -48,6 +49,7 @@ const AdminProfilePage = () => {
     }
   };
 
+  // Bắt đầu chế độ chỉnh sửa, điền dữ liệu hiện tại vào form
   const handleEdit = () => {
     form.setFieldsValue({
       ...userData,
@@ -56,12 +58,13 @@ const AdminProfilePage = () => {
     setEditing(true);
   };
 
+  // Hủy chỉnh sửa, reset lại form về trạng thái ban đầu
   const handleCancelEdit = () => {
     setEditing(false);
     form.resetFields();
   };
 
-  // Giả lập upload ảnh, bạn có thể thay thế bằng logic upload thật
+  // Xử lý upload ảnh đại diện (giả lập), kiểm tra file và cập nhật avatar cho user
   const handleAvatarUpload = (file) => {
     const isImage = file.type.startsWith('image/');
     if (!isImage) {

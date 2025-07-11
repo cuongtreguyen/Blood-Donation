@@ -12,6 +12,7 @@ const AdminSettingsPage = () => {
   const [systemConfigForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
+  // Xử lý khi submit form đổi mật khẩu
   const handlePasswordSubmit = async (values) => {
     try {
       setLoading(true);
@@ -35,6 +36,7 @@ const AdminSettingsPage = () => {
     }
   };
 
+  // Xử lý khi submit form cấu hình hệ thống
   const handleSystemConfigSubmit = async (values) => {
     try {
       setLoading(true);
