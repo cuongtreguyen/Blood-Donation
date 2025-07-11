@@ -12,6 +12,7 @@ const BloodDonationApprovalPage = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [requestsWithNames, setRequestsWithNames] = useState([]);
 
+  // Hàm lấy danh sách các yêu cầu nhận máu từ server theo nhiều trạng thái
   const fetchBloodReceiveList = async () => {
     setLoading(true);
     try {
@@ -51,6 +52,7 @@ const BloodDonationApprovalPage = () => {
   }, []);
 
   useEffect(() => {
+    // Hàm lấy tên người đăng ký cho từng yêu cầu nếu chưa có
     const fetchAllNames = async () => {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -71,6 +73,7 @@ const BloodDonationApprovalPage = () => {
     else setRequestsWithNames([]);
   }, [requests]);
 
+  // Hàm cập nhật trạng thái của một yêu cầu nhận máu
   const handleUpdateStatus = async (id, status) => {
     try {
       const token = localStorage.getItem("token");
@@ -87,6 +90,7 @@ const BloodDonationApprovalPage = () => {
     }
   };
 
+  // Hàm xử lý tìm kiếm theo từ khóa
   const handleSearch = (e) => {
     setSearchText(e.target.value);
   };
@@ -104,6 +108,8 @@ const BloodDonationApprovalPage = () => {
       return matchSearch && matchStatus;
     });
   
+
+  // Hàm định dạng giờ hẹn hiển thị ra giao diện
   const formatWantedHour = (wantedHour) => {
     if (typeof wantedHour === 'string') {
       return wantedHour.split('.')[0];
@@ -121,6 +127,7 @@ const BloodDonationApprovalPage = () => {
     return JSON.stringify(wantedHour);
   };
 
+  // Cấu hình các cột cho bảng danh sách yêu cầu nhận máu
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', sorter: (a, b) => a.id - b.id },
     { title: 'Họ tên', dataIndex: 'fullName', key: 'fullName', render: (text) => text || '-', width: 180 },
@@ -216,7 +223,7 @@ const BloodDonationApprovalPage = () => {
     },
   ];
 
-  // Hàm lấy chi tiết yêu cầu nhận máu theo id
+  // Hàm lấy chi tiết yêu cầu nhận máu theo id (hiển thị thông tin chi tiết khi click vào dòng)
   const fetchBloodReceiveDetail = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -242,6 +249,7 @@ const BloodDonationApprovalPage = () => {
         title="Xác nhận Yêu cầu Nhận máu"
         extra={
           <Space>
+            {/* Ô tìm kiếm và bộ lọc trạng thái */}
             <Input
               placeholder="Tìm kiếm theo ID, tên, trạng thái..."
               prefix={<SearchOutlined />}
@@ -264,6 +272,7 @@ const BloodDonationApprovalPage = () => {
       >
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            {/* Hiển thị loading khi đang tải dữ liệu */}
             <Spin size="large" tip="Đang tải..." />
           </div>
         ) : (

@@ -16,6 +16,7 @@ const AdminStatisticsPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Hàm lấy dữ liệu thống kê người dùng từ API khi trang được tải
     const fetchStats = async () => {
       setLoading(true);
       try {
@@ -41,7 +42,7 @@ const AdminStatisticsPage = () => {
     fetchStats();
   }, []);
 
-  // Mock data for charts (example: monthly donations)
+  // Dữ liệu mẫu cho biểu đồ lượt hiến máu theo tháng
   const monthlyDonations = [
     { month: 'Tháng 1', donations: 400 },
     { month: 'Tháng 2', donations: 300 },
@@ -51,7 +52,7 @@ const AdminStatisticsPage = () => {
     { month: 'Tháng 6', donations: 550 },
   ];
 
-  // Mock data for recent activities (more detailed)
+  // Dữ liệu mẫu cho hoạt động gần đây
   const recentActivities = [
     { id: 1, type: 'Đăng ký', description: 'Người dùng Nguyễn Văn A đã đăng ký.', time: '2 giờ trước' },
     { id: 2, type: 'Cập nhật', description: 'Ngân hàng máu Chợ Rẫy đã cập nhật thông tin.', time: '1 ngày trước' },
@@ -64,7 +65,7 @@ const AdminStatisticsPage = () => {
     <div className="p-6">
       <Title level={2}>Thống kê tổng quan</Title>
 
-      {/* Summary Cards */}
+      {/* Thẻ tổng hợp số liệu nhanh */}
       <Row gutter={[16, 16]} className="mb-6">
         <Col xs={24} sm={12} lg={8}>
           <Card>
@@ -101,7 +102,7 @@ const AdminStatisticsPage = () => {
         </Col>
       </Row>
 
-      {/* Charts and Recent Activities */}
+      {/* Biểu đồ và hoạt động gần đây */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={16}>
           <Card title="Thống kê lượt hiến máu theo tháng">

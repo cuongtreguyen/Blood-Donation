@@ -306,7 +306,7 @@ function HeroSection({ onLearnMoreClick }) {
             </div>
             <div className="col-lg-6 text-center">
               <img
-                src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto-format&fit=crop&w=800&q=80"
+                src="https://i.pinimg.com/736x/a8/bc/16/a8bc16135c4752c9274f4c4e7177c31f.jpg"
                 alt="Blood Donation"
                 className="img-fluid rounded-3 shadow-lg"
                 style={{ maxHeight: "500px", objectFit: "cover" }}
