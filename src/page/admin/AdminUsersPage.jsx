@@ -346,60 +346,153 @@ function AdminUsersPage() {
           name="userForm"
           style={{ display: 'flex', flexWrap: 'wrap', gap: 24 }}
         >
-          <div style={{ flex: 1, minWidth: 280 }}>
-            <Form.Item
-              name="name"
-              label={<b>Tên người dùng</b>}
-              rules={[
-                { required: true, message: 'Vui lòng nhập tên người dùng!' },
-                { min: 3, message: 'Tên người dùng phải có ít nhất 3 ký tự!' },
-                { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' }
-              ]}
-            >
-              <Input prefix={<UserOutlined />} placeholder="Nhập tên người dùng" size="large" />
-            </Form.Item>
-            <Form.Item
-              name="email"
-              label={<b>Email</b>}
-              rules={[
-                { required: true, message: 'Vui lòng nhập email!' },
-                { type: 'email', message: 'Email không hợp lệ!' }
-              ]}
-            >
-              <Input prefix={<MailOutlined />} placeholder="Nhập email" size="large" />
-            </Form.Item>
-            <Form.Item
-              name="phone"
-              label={<b>Số điện thoại</b>}
-              rules={[
-                { required: true, message: 'Vui lòng nhập số điện thoại!' },
-                { pattern: /^[0-9+]{10,15}$/, message: 'Số điện thoại phải hợp lệ!' }
-              ]}
-            >
-              <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" size="large" />
-            </Form.Item>
-            <Form.Item name="address" label={<b>Địa chỉ</b>}>
-              <Input placeholder="Nhập địa chỉ" size="large" />
-            </Form.Item>
-          </div>
-          <div style={{ flex: 1, minWidth: 280 }}>
-            <Form.Item name="bloodType" label={<b>Nhóm máu</b>} rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}> 
-              <Select placeholder="Chọn nhóm máu" size="large">
-                {bloodTypeOptions.map(type => <Option key={type} value={type}>{type.replace('_', ' ')}</Option>)}
-              </Select>
-            </Form.Item>
-            <Form.Item
-              name="password"
-              label={<b>Mật khẩu</b>}
-              rules={[
-                { required: true, message: 'Vui lòng nhập mật khẩu!' },
-                { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
-                { max: 50, message: 'Mật khẩu không được vượt quá 50 ký tự!' }
-              ]}
-            >
-              <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" size="large" />
-            </Form.Item>
-          </div>
+          {modalMode === 'add' ? (
+            <>
+              <div style={{ flex: 1, minWidth: 280 }}>
+                <Form.Item
+                  name="name"
+                  label={<b>Tên người dùng</b>}
+                  rules={[
+                    { required: true, message: 'Vui lòng nhập tên người dùng!' },
+                    { min: 3, message: 'Tên người dùng phải có ít nhất 3 ký tự!' },
+                    { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' }
+                  ]}
+                >
+                  <Input prefix={<UserOutlined />} placeholder="Nhập tên người dùng" size="large" />
+                </Form.Item>
+                <Form.Item
+                  name="email"
+                  label={<b>Email</b>}
+                  rules={[
+                    { required: true, message: 'Vui lòng nhập email!' },
+                    { type: 'email', message: 'Email không hợp lệ!' }
+                  ]}
+                >
+                  <Input prefix={<MailOutlined />} placeholder="Nhập email" size="large" />
+                </Form.Item>
+                <Form.Item
+                  name="phone"
+                  label={<b>Số điện thoại</b>}
+                  rules={[
+                    { required: true, message: 'Vui lòng nhập số điện thoại!' },
+                    { pattern: /^[0-9+]{10,15}$/, message: 'Số điện thoại phải hợp lệ!' }
+                  ]}
+                >
+                  <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" size="large" />
+                </Form.Item>
+                <Form.Item name="address" label={<b>Địa chỉ</b>}>
+                  <Input placeholder="Nhập địa chỉ" size="large" />
+                </Form.Item>
+              </div>
+              <div style={{ flex: 1, minWidth: 280 }}>
+                <Form.Item name="bloodType" label={<b>Nhóm máu</b>} rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}> 
+                  <Select placeholder="Chọn nhóm máu" size="large">
+                    <Option value="A_POSITIVE">A+</Option>
+                    <Option value="A_NEGATIVE">A-</Option>
+                    <Option value="B_POSITIVE">B+</Option>
+                    <Option value="B_NEGATIVE">B-</Option>
+                    <Option value="O_POSITIVE">O+</Option>
+                    <Option value="O_NEGATIVE">O-</Option>
+                    <Option value="AB_POSITIVE">AB+</Option>
+                    <Option value="AB_NEGATIVE">AB-</Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item
+                  name="password"
+                  label={<b>Mật khẩu</b>}
+                  rules={[
+                    { required: true, message: 'Vui lòng nhập mật khẩu!' },
+                    { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
+                    { max: 50, message: 'Mật khẩu không được vượt quá 50 ký tự!' }
+                  ]}
+                >
+                  <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" size="large" />
+                </Form.Item>
+                <Form.Item name="role" label={<b>Vai trò</b>} rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}> 
+                  <Select placeholder="Chọn vai trò" size="large">
+                    <Option value="donor">Người hiến máu</Option>
+                    <Option value="staff">Nhân viên</Option>
+                  </Select>
+                </Form.Item>
+              </div>
+            </>
+          ) : (
+            // Sửa: hiển thị tất cả trường, chia đều 2 cột, không lặp, không hiển thị mật khẩu và lần hiến máu cuối
+            <>
+              <div style={{ flex: 1, minWidth: 280 }}>
+                <Form.Item
+                  name="name"
+                  label={<b>Tên người dùng</b>}
+                  rules={[
+                    { required: true, message: 'Vui lòng nhập tên người dùng!' },
+                    { min: 3, message: 'Tên người dùng phải có ít nhất 3 ký tự!' },
+                    { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' }
+                  ]}
+                >
+                  <Input prefix={<UserOutlined />} placeholder="Nhập tên người dùng" size="large" />
+                </Form.Item>
+                <Form.Item
+                  name="email"
+                  label={<b>Email</b>}
+                  rules={[
+                    { required: true, message: 'Vui lòng nhập email!' },
+                    { type: 'email', message: 'Email không hợp lệ!' }
+                  ]}
+                >
+                  <Input prefix={<MailOutlined />} placeholder="Nhập email" size="large" />
+                </Form.Item>
+                <Form.Item
+                  name="phone"
+                  label={<b>Số điện thoại</b>}
+                  rules={[
+                    { required: true, message: 'Vui lòng nhập số điện thoại!' },
+                    { pattern: /^[0-9+]{10,15}$/, message: 'Số điện thoại phải hợp lệ!' }
+                  ]}
+                >
+                  <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" size="large" />
+                </Form.Item>
+                <Form.Item name="address" label={<b>Địa chỉ</b>}>
+                  <Input placeholder="Nhập địa chỉ" size="large" />
+                </Form.Item>
+                <Form.Item name="gender" label={<b>Giới tính</b>}>
+                  <Select placeholder="Chọn giới tính" size="large">
+                    {genderOptions.map(option => (
+                      <Option key={option.value} value={option.value}>{option.label}</Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item name="birthdate" label={<b>Ngày sinh</b>}>
+                  <Input type="date" size="large" />
+                </Form.Item>
+              </div>
+              <div style={{ flex: 1, minWidth: 280 }}>
+                <Form.Item name="bloodType" label={<b>Nhóm máu</b>} rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}> 
+                  <Select placeholder="Chọn nhóm máu" size="large">
+                    <Option value="A_POSITIVE">A+</Option>
+                    <Option value="A_NEGATIVE">A-</Option>
+                    <Option value="B_POSITIVE">B+</Option>
+                    <Option value="B_NEGATIVE">B-</Option>
+                    <Option value="O_POSITIVE">O+</Option>
+                    <Option value="O_NEGATIVE">O-</Option>
+                    <Option value="AB_POSITIVE">AB+</Option>
+                    <Option value="AB_NEGATIVE">AB-</Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item name="role" label={<b>Vai trò</b>} rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}> 
+                  <Select placeholder="Chọn vai trò" size="large">
+                    <Option value="donor">Người hiến máu</Option>
+                    <Option value="staff">Nhân viên</Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item name="emergencyName" label={<b>Tên người liên hệ khẩn cấp</b>}>
+                  <Input placeholder="Nhập tên người liên hệ khẩn cấp" size="large" />
+                </Form.Item>
+                <Form.Item name="emergencyPhone" label={<b>SĐT người liên hệ khẩn cấp</b>}>
+                  <Input placeholder="Nhập SĐT người liên hệ khẩn cấp" size="large" />
+                </Form.Item>
+              </div>
+            </>
+          )}
         </Form>
       </Modal>
     </div>
