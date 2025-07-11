@@ -222,12 +222,6 @@ const BloodInventoryPage = () => {
       render: (status) => getStatusTag(status),
     },
     {
-      title: "Ngày hết hạn",
-      dataIndex: "expirationDate",
-      key: "expirationDate",
-      render: (date) => (date ? moment(date).format("DD/MM/YYYY") : "N/A"),
-    },
-    {
       title: "Thao tác",
       key: "action",
       render: (_, record) => (
@@ -414,13 +408,6 @@ const BloodInventoryPage = () => {
             rules={[{ required: true, message: "Vui lòng nhập số lượng" }]}
           >
             <InputNumber min={0} step={1} style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item
-            name="expirationDate"
-            label="Ngày hết hạn"
-            rules={[{ required: true, message: "Vui lòng chọn ngày hết hạn" }]}
-          >
-            <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
           </Form.Item>
         </Form>
       </Modal>

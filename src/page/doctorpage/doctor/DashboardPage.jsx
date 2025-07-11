@@ -29,7 +29,6 @@ import {
   completeBloodRegister,
 } from "../../../services/bloodRegisterService";
 import { getAllBloodInventory } from "../../../services/bloodInventoryService";
-// import { createBloodInventory } from "../../../services/bloodInventoryService";
 import api from "../../../config/api";
 import dayjs from "dayjs";
 import HealthCheckForm from "../../../components/forms/HealthCheckForm";
@@ -80,7 +79,7 @@ const DashboardPage = () => {
   const [completeLoading, setCompleteLoading] = useState(false);
   const [completeRecord, setCompleteRecord] = useState(null);
   const [completeForm] = Form.useForm();
-  const [_inventory, setInventory] = useState([]); // Đổi tên biến để tránh unused linter error
+  const [_inventory, setInventory] = useState([]);
   const [healthCheckModalOpen, setHealthCheckModalOpen] = useState(false);
   const [selectedRegisterId, setSelectedRegisterId] = useState(null);
 
@@ -89,25 +88,16 @@ const DashboardPage = () => {
       setLoading(true);
       try {
         let res = [];
+
         if (status === "ALL") {
           const allStatuses = statusOptions
-            .map((option) => option.value)
-            .filter((value) => value !== "ALL");
-
-          const responses = await Promise.all(
-            allStatuses.map((s) =>
-              getBloodRegisterByStatus(s).catch((e) => {
-                console.error(`Failed to fetch status ${s}`, e);
-                return [];
-              })
-            )
-          );
-          res = responses.flat();
+            .map((opt) => opt.value)
+            .filter((v) => v !== "ALL");
+          res = await getBloodRegisterByStatus(allStatuses);
         } else {
           res = await getBloodRegisterByStatus(status);
         }
-        console.log("API APPROVED response:", res);
-        // Mapping dữ liệu từ API
+
         const dataWithUser = await Promise.all(
           res.map(async (item) => {
             let userInfo = {};
@@ -119,46 +109,40 @@ const DashboardPage = () => {
                 userInfo = {};
               }
             }
+
             return {
               id: item.id,
               name:
-                userInfo.fullName || item.fullName || item.name || "chưa có",
+                userInfo.fullName || item.fullName || item.name || "Chưa có",
               bloodType:
                 item.bloodType ||
-                (item.blood && item.blood.bloodType) ||
+                item.blood?.bloodType ||
                 userInfo.bloodType ||
-                userInfo.blood_type ||
                 "Chưa xác định",
-              quantity:
-                (item.blood && item.blood.unit) ||
-                item.quantity ||
-                item.amount ||
-                1,
+              quantity: item.blood?.unit || item.quantity || item.amount || 1,
               wantedHour:
-                item.wantedHour ||
-                (item.blood && item.blood.wantedHour) ||
-                item.hour ||
-                "",
+                item.wantedHour || item.blood?.wantedHour || item.hour || "",
               wantedDate:
                 item.wantedDate ||
-                (item.blood && item.blood.donationDate) ||
+                item.blood?.donationDate ||
                 item.registerDate ||
                 item.created_at ||
-                item.date ||
                 "",
               status: item.status,
               address: userInfo.address || item.address || "",
             };
           })
         );
-        console.log(dataWithUser);
+
         setData(dataWithUser);
-      } catch {
+      } catch (err) {
+        console.error(err);
         message.error("Không thể tải danh sách đăng ký!");
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [status]);
 
@@ -202,15 +186,12 @@ const DashboardPage = () => {
             : item
         )
       );
-      // Sau khi hoàn thành đơn, reload lại kho máu
       const inventoryData = await getAllBloodInventory();
       setInventory(inventoryData);
-      console.log("Cập nhật kho máu:", inventoryData); // Tránh lỗi unused
       setCompleteModalOpen(false);
       setCompleteRecord(null);
       completeForm.resetFields();
     } catch (err) {
-      console.error(err); // Log lỗi để tránh unused
       message.error("Lỗi khi hoàn thành đăng ký!");
     } finally {
       setCompleteLoading(false);
@@ -275,7 +256,6 @@ const DashboardPage = () => {
           color={statusColors[status]}
           icon={statusIcons[status]}
           style={{ fontWeight: 500, fontSize: 14 }}
-          className="doctor-status-tag"
         >
           {status}
         </Tag>
@@ -297,10 +277,7 @@ const DashboardPage = () => {
               <Button danger onClick={() => handleIncomplete(record)}>
                 Chưa hoàn thành
               </Button>
-              <Button
-                type="primary"
-                onClick={() => handleOpenHealthCheckModal(record)}
-              >
+              <Button onClick={() => handleOpenHealthCheckModal(record)}>
                 Kiểm tra sức khỏe
               </Button>
             </Space>
@@ -311,7 +288,6 @@ const DashboardPage = () => {
     },
   ];
 
-  // Thống kê số lượng theo trạng thái (luôn có đủ các trạng thái)
   const stats = data.reduce(
     (acc, cur) => {
       acc.total++;
@@ -324,11 +300,9 @@ const DashboardPage = () => {
     { total: 0, pending: 0, completed: 0, rejected: 0, approved: 0 }
   );
 
-  // Lọc data theo trạng thái nếu không phải ALL
   let filteredData =
     status === "ALL" ? data : data.filter((item) => item.status === status);
 
-  // Thêm chức năng search kết hợp filter
   if (searchText) {
     filteredData = filteredData.filter(
       (item) =>
@@ -344,14 +318,15 @@ const DashboardPage = () => {
       <Title level={2} style={{ textAlign: "center", marginBottom: 32 }}>
         Tổng quan đăng ký hiến máu
       </Title>
-      <Row gutter={16} style={{ marginBottom: 24 }} justify="center" className="doctor-dashboard-cards">
+
+      <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
-          <Card bordered style={{ borderRadius: 12 }}>
+          <Card bordered>
             <Statistic title="Tổng đăng ký" value={stats.total} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card bordered style={{ borderRadius: 12 }}>
+          <Card bordered>
             <Statistic
               title="Hoàn thành"
               value={stats.completed}
@@ -361,7 +336,7 @@ const DashboardPage = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card bordered style={{ borderRadius: 12 }}>
+          <Card bordered>
             <Statistic
               title="Đã duyệt"
               value={stats.approved}
@@ -371,7 +346,7 @@ const DashboardPage = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card bordered style={{ borderRadius: 12 }}>
+          <Card bordered>
             <Statistic
               title="Từ chối"
               value={stats.rejected}
@@ -381,11 +356,9 @@ const DashboardPage = () => {
           </Card>
         </Col>
       </Row>
+
       <Card
         bordered
-        style={{ borderRadius: 16, boxShadow: "0 2px 8px #f0f1f2" }}
-        bodyStyle={{ padding: 0 }}
-        className="doctor-dashboard-table"
         title={
           <Space style={{ width: "100%", justifyContent: "space-between" }}>
             <span style={{ fontWeight: 600, fontSize: 18 }}>
@@ -402,7 +375,6 @@ const DashboardPage = () => {
               placeholder="Tìm kiếm nhóm máu, địa chỉ..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="doctor-dashboard-search"
             />
           </Space>
         }
@@ -418,12 +390,11 @@ const DashboardPage = () => {
             rowKey="id"
             pagination={{ pageSize: 8, showSizeChanger: false }}
             bordered
-            size="middle"
-            style={{ borderRadius: 12 }}
-            className="doctor-dashboard-table"
           />
         )}
       </Card>
+
+      {/* Modal Hoàn thành */}
       <Modal
         open={completeModalOpen}
         title="Xác nhận hoàn thành đăng ký hiến máu"
@@ -459,13 +430,14 @@ const DashboardPage = () => {
               type="primary"
               htmlType="submit"
               loading={completeLoading}
-              style={{ width: "100%" }}
+              block
             >
               Xác nhận hoàn thành
             </Button>
           </Form.Item>
         </Form>
       </Modal>
+      {/* Modal kiểm tra sức khỏe */}
       <Modal
         open={healthCheckModalOpen}
         title="Kiểm tra sức khỏe người hiến máu"

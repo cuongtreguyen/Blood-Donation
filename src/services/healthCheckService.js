@@ -1,8 +1,11 @@
-import axios from 'axios';
-
-const API_URL = '/health-check';
+import api from '../config/api';
 
 export const createHealthCheck = async (healthCheckData) => {
-  const response = await axios.post(`${API_URL}/create`, healthCheckData);
+  const response = await api.post('/health-check/create', healthCheckData);
+  return response.data;
+};
+
+export const getHealthCheckById = async (id) => {
+  const response = await api.get(`/health-check/get/${id}`);
   return response.data;
 }; 
