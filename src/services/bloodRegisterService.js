@@ -1,9 +1,16 @@
 import api from "../config/api";
+export const getBloodRegisterByStatus = async (statuses) => {
+  const params = new URLSearchParams();
+  const statusArray = Array.isArray(statuses) ? statuses : [statuses];
 
-//  Lấy danh sách đăng ký hiến máu theo trạng thái
-export const getBloodRegisterByStatus = async (status) => {
-  const response = await api.get(`/blood-register/list-by-status?status=${status}`);
-  return response.data;
+  statusArray.forEach((status) => {
+    if (status && status !== "ALL") {
+      params.append("status", status);
+    }
+  });
+
+  const response = await api.get(`/blood-register/list-by-status?${params.toString()}`);
+  return response.data || [];
 };
 
 //  Cập nhật trạng thái đơn đăng ký hiến máu (ví dụ: INCOMPLETED)
