@@ -6,22 +6,23 @@ import { BellOutlined, SearchOutlined, FilterOutlined, PlusOutlined, CheckCircle
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const { Title, Text } = Typography;
-const { Option } = Select;
+const { Title, Text } = Typography; // Lấy các component Title, Text từ thư viện Typography của Ant Design để sử dụng cho tiêu đề và văn bản
+const { Option } = Select; // Lấy component Option từ Select của Ant Design để sử dụng cho các lựa chọn trong dropdown
 
 function AdminNotificationsPage() {
-  const userData = useSelector((state) => state.user) || {};
-  const userId = userData.id;
+  const userData = useSelector((state) => state.user) || {}; // Lấy thông tin người dùng từ Redux store
+  const userId = userData.id; // Lấy id của người dùng hiện tại
 
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [searchText, setSearchText] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [readFilter, setReadFilter] = useState('all');
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [form] = Form.useForm();
+  const [notifications, setNotifications] = useState([]); // State lưu danh sách thông báo
+  const [unreadCount, setUnreadCount] = useState(0); // State lưu số lượng thông báo chưa đọc
+  const [searchText, setSearchText] = useState(''); // State lưu từ khóa tìm kiếm thông báo
+  const [typeFilter, setTypeFilter] = useState('all'); // State lưu loại thông báo được chọn để lọc
+  const [readFilter, setReadFilter] = useState('all'); // State lưu trạng thái đọc/chưa đọc để lọc
+  const [isModalVisible, setIsModalVisible] = useState(false); // State kiểm soát hiển thị modal tạo thông báo mới
+  const [form] = Form.useForm(); // Khởi tạo instance form của Ant Design để quản lý form tạo thông báo mới
 
-  // Lấy danh sách thông báo và số lượng chưa đọc khi userId thay đổi
+  // Lấy các thông báo và số lượng chưa đọc khi userId thay đổi
+  // Hàm này gọi API để lấy danh sách thông báo và số lượng thông báo chưa đọc của người dùng
   const fetchNotifications = () => {
     if (!userId) return;
     api.get(`/notifications/user/${userId}`)
@@ -38,6 +39,7 @@ function AdminNotificationsPage() {
   }, [userId]);
 
   // Hàm tạo thông báo mới
+  // Gửi dữ liệu từ form lên server để tạo một thông báo mới, sau đó làm mới danh sách
   const createNotification = async (values) => {
     try {
       // Ensure recipientId is a number
@@ -54,6 +56,7 @@ function AdminNotificationsPage() {
   };
 
   // Hàm lấy màu tag theo loại thông báo
+  // Trả về màu sắc cho tag dựa trên loại thông báo truyền vào
   const getTypeTagColor = (type) => {
     switch (type) {
       case 'BLOOD_REQUEST': return 'red';
@@ -69,18 +72,28 @@ function AdminNotificationsPage() {
     }
   };
 
-  // Filter notifications based on search text and filters
+  // Lọc thông báo dựa trên từ khóa tìm kiếm và các bộ lọc
+  const allowedTypes = [
+    'BLOOD_REQUEST',
+    'BLOOD_DONATION_REMINDER',
+    'EMERGENCY_REQUEST',
+    'DONATION_COMPLETED',
+    'SYSTEM_ANNOUNCEMENT'
+  ];
   const filteredNotifications = notifications.filter(notification => {
     const matchesSearch = notification.title?.toLowerCase().includes(searchText.toLowerCase()) ||
                           notification.message?.toLowerCase().includes(searchText.toLowerCase());
-    const matchesType = typeFilter === 'all' || notification.type === typeFilter;
+    const matchesType =
+      (typeFilter === 'all' && allowedTypes.includes(notification.type)) ||
+      notification.type === typeFilter;
     const matchesRead = readFilter === 'all' || 
                        (readFilter === 'read' && notification.read) ||
                        (readFilter === 'unread' && !notification.read);
     return matchesSearch && matchesType && matchesRead;
   });
 
-  // Hàm đánh dấu tất cả là đã đọc
+  // Hàm đánh dấu tất cả thông báo là đã đọc
+  // Gọi API để đánh dấu tất cả thông báo của người dùng là đã đọc
   const markAllAsRead = async () => {
     if (!userId) return;
     try {
@@ -93,7 +106,8 @@ function AdminNotificationsPage() {
     }
   };
 
-  // Hàm đánh dấu 1 thông báo là đã đọc
+  // Hàm đánh dấu một thông báo là đã đọc
+  // Gọi API để đánh dấu một thông báo cụ thể là đã đọc
   const markAsRead = async (notificationId) => {
     try {
       await api.put(`/notifications/${notificationId}/mark-read`);
@@ -141,11 +155,11 @@ function AdminNotificationsPage() {
               prefix={<FilterOutlined />}
             >
               <Option value="all">Tất cả loại</Option>
-              <Option value="user">Người dùng</Option>
-              <Option value="bloodBank">Ngân hàng máu</Option>
-              <Option value="report">Báo cáo</Option>
-              <Option value="system">Hệ thống</Option>
-              <Option value="BLOOD_REQUEST">Yêu cầu máu</Option>
+              <Option value="BLOOD_REQUEST">Yêu cầu hiến máu</Option>
+              <Option value="BLOOD_DONATION_REMINDER">Nhắc nhở hiến máu</Option>
+              <Option value="EMERGENCY_REQUEST">Yêu cầu cấp cứu</Option>
+              <Option value="DONATION_COMPLETED">Hoàn thành hiến máu</Option>
+              <Option value="SYSTEM_ANNOUNCEMENT">Thông báo hệ thống</Option>
             </Select>
           </Col>
           <Col xs={24} sm={12} md={8}>
@@ -201,7 +215,7 @@ function AdminNotificationsPage() {
                       <Tag color={!item.read ? 'red' : 'default'}>{!item.read ? 'Chưa đọc' : 'Đã đọc'}</Tag>
                       {item.type && (
                         <Tag color={getTypeTagColor(item.type)}>
-                          {item.type === 'BLOOD_REQUEST' && 'Yêu cầu máu'}
+                          {item.type === 'BLOOD_REQUEST' && 'Yêu cầu hiến máu'}
                           {item.type === 'BLOOD_DONATION_REMINDER' && 'Nhắc nhở hiến máu'}
                           {item.type === 'EMERGENCY_REQUEST' && 'Yêu cầu cấp cứu'}
                           {item.type === 'DONATION_COMPLETED' && 'Hoàn thành hiến máu'}

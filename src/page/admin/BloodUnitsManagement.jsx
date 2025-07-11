@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { SearchOutlined, BarChartOutlined, WarningOutlined } from '@ant-design/icons';
 import api from '../../config/api';
 
+// Bản đồ chuyển đổi mã nhóm máu sang tên hiển thị
 const bloodTypeMap = {
   A_POSITIVE: 'A+',
   A_NEGATIVE: 'A-',
@@ -18,10 +19,14 @@ const bloodTypeMap = {
 };
 
 const BloodUnitsManagement = () => {
+  // State lưu danh sách các đơn vị máu trong kho
   const [bloodUnits, setBloodUnits] = useState([]);
+  // State kiểm soát trạng thái loading khi lấy dữ liệu
   const [loading, setLoading] = useState(true);
+  // State lưu từ khóa tìm kiếm
   const [searchText, setSearchText] = useState('');
 
+  // Hàm lấy dữ liệu kho máu từ server
   const fetchBloodInventory = async () => {
     setLoading(true);
     try {
@@ -53,10 +58,12 @@ const BloodUnitsManagement = () => {
     fetchBloodInventory();
   }, []);
 
+  // Hàm xử lý tìm kiếm theo từ khóa
   const handleSearch = (e) => {
     setSearchText(e.target.value.toLowerCase());
   };
 
+  // Lọc danh sách đơn vị máu theo từ khóa tìm kiếm
   const filteredBloodUnits = bloodUnits.filter(unit => {
     const bloodTypeName = bloodTypeMap[unit.bloodType] || unit.bloodType;
     return (
@@ -65,13 +72,17 @@ const BloodUnitsManagement = () => {
     );
   });
 
+  // Tổng số đơn vị máu (ml) sau khi lọc
   const totalUnits = filteredBloodUnits.reduce((acc, unit) => acc + (unit.unitsAvailable || 0), 0);
+  // Ngưỡng cảnh báo số lượng máu thấp
   const lowStockThreshold = 10;
+  // Thống kê số lượng máu theo từng nhóm máu
   const bloodTypeCounts = filteredBloodUnits.reduce((acc, unit) => {
     acc[unit.bloodType] = (acc[unit.bloodType] || 0) + (unit.unitsAvailable || 0);
     return acc;
   }, {});
 
+  // Cấu hình các cột cho bảng danh sách kho máu
   const columns = [
     {
       title: 'Nhóm Máu',
@@ -97,6 +108,7 @@ const BloodUnitsManagement = () => {
 
   return (
     <div style={{ padding: '24px' }}>
+      {/* Thẻ thống kê tổng quan kho máu và cảnh báo */}
       <Card title="Thống kê Kho Máu" style={{ marginBottom: 24 }}>
         <Row gutter={16}>
           <Col span={8}>
@@ -118,6 +130,7 @@ const BloodUnitsManagement = () => {
         </Row>
       </Card>
       
+      {/* Bảng danh sách kho máu và tìm kiếm */}
       <Card
         title="Danh sách Kho Máu"
         extra={
@@ -142,6 +155,7 @@ const BloodUnitsManagement = () => {
             pagination={{ pageSize: 10 }}
             bordered
             summary={pageData => {
+              // Tính tổng số đơn vị máu trên trang hiện tại
               let totalPageUnits = 0;
               pageData.forEach(({ unitsAvailable }) => {
                 totalPageUnits += (unitsAvailable || 0);
