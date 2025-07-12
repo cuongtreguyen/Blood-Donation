@@ -88,9 +88,9 @@ const DonorsPage = () => {
     },
     {
       title: "Số lần hiến",
-      dataIndex: "donationCount",
-      key: "donationCount",
-      sorter: (a, b) => a.donationCount - b.donationCount,
+      dataIndex: "unitDonation",
+      key: "unitDonation",
+      sorter: (a, b) => a.unitDonation - b.unitDonation,
     },
     {
       title: "Ngày hiến gần nhất",
