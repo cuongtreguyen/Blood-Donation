@@ -198,7 +198,15 @@ function AdminDashboard() {
               bloodInventory.map(item => (
                 <div key={item.bloodType} style={{ marginBottom: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Nhóm máu {item.bloodType.replace('_', ' +')}</span>
+                    <span>Nhóm máu {(() => {
+                      const bloodMap = {
+                        'A_POSITIVE': 'A+', 'A_NEGATIVE': 'A-',
+                        'B_POSITIVE': 'B+', 'B_NEGATIVE': 'B-',
+                        'O_POSITIVE': 'O+', 'O_NEGATIVE': 'O-',
+                        'AB_POSITIVE': 'AB+', 'AB_NEGATIVE': 'AB-'
+                      };
+                      return bloodMap[item.bloodType] || item.bloodType;
+                    })()}</span>
                     <span>{item.unitsAvailable} đơn vị</span>
                   </div>
                   <Progress

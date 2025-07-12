@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal } from 'antd';
-import { getAllDonors, getDonationHistoryByUserId } from '../../../services/donorsService';
+import React, { useEffect, useState } from "react";
+import { Table, Button, Modal } from "antd";
+import {
+  getAllDonors,
+  getDonationHistoryByUserId,
+} from "../../../services/donorsService";
 
 const DonorsPage = () => {
   const [donors, setDonors] = useState([]);
@@ -14,7 +17,10 @@ const DonorsPage = () => {
       setLoading(true);
       try {
         const data = await getAllDonors();
+      
         setDonors(data);
+   
+        
       } catch {
         setDonors([]);
       } finally {
@@ -36,17 +42,21 @@ const DonorsPage = () => {
       setHistoryLoading(false);
     }
   };
-
+ 
   const columns = [
-    { title: 'Họ tên', dataIndex: 'fullName', key: 'fullName' },
-    { title: 'SĐT', dataIndex: 'phone', key: 'phone' },
-    { title: 'Nhóm máu', dataIndex: 'bloodType', key: 'bloodType' },
-    { title: 'Số lần hiến', dataIndex: 'unitDonation', key: 'unitDonation' },
-    { title: 'Ngày hiến gần nhất', dataIndex: 'lastDonation', key: 'lastDonation' },
-    { title: 'Email', dataIndex: 'email', key: 'email' },
+    { title: "Họ tên", dataIndex: "fullName", key: "fullName" },
+    { title: "SĐT", dataIndex: "phone", key: "phone" },
+    { title: "Nhóm máu", dataIndex: "bloodType", key: "bloodType" },
+    { title: "Số lần hiến", dataIndex: "unitDonation", key: "unitDonation" },
     {
-      title: 'Thao tác',
-      key: 'action',
+      title: "Ngày hiến gần nhất",
+      dataIndex: "lastDonation",
+      key: "lastDonation",
+    },
+    { title: "Email", dataIndex: "email", key: "email" },
+    {
+      title: "Thao tác",
+      key: "action",
       render: (_, record) => (
         <Button onClick={() => handleViewHistory(record.id)}>
           Xem lịch sử
@@ -57,7 +67,9 @@ const DonorsPage = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2 style={{ fontSize: 24, fontWeight: 600, marginBottom: 16 }}>Danh sách người hiến máu</h2>
+      <h2 style={{ fontSize: 24, fontWeight: 600, marginBottom: 16 }}>
+        Danh sách người hiến máu
+      </h2>
       <Table
         columns={columns}
         dataSource={donors}
@@ -79,8 +91,13 @@ const DonorsPage = () => {
         ) : (
           <Table
             columns={[
-              { title: 'Ngày hoàn thành', dataIndex: 'completedDate', key: 'completedDate' },
+              {
+                title: "Ngày hoàn thành",
+                dataIndex: "completedDate",
+                key: "completedDate",
+              },
               { title: 'Số đơn vị', dataIndex: 'unit', key: 'unit' },
+             
             ]}
             dataSource={donationHistory}
             rowKey="id"
@@ -93,4 +110,4 @@ const DonorsPage = () => {
   );
 };
 
-export default DonorsPage; 
+export default DonorsPage;
