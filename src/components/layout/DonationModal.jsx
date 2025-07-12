@@ -730,6 +730,9 @@ const DonationModal = ({ show, onClose, userData }) => {
       toast.success(
         `Cảm ơn ${formData.fullName}, đăng ký hiến máu thành công!`
       );
+      toast.success(
+        "ĐƠN CỦA BẠN SẼ ĐƯỢC PHẢN HỒI VÀ PHÊ DUYỆT TRONG VÒNG 24H,TRÂN TRỌNG CẢM ƠN!!"
+      );
       onClose();
     } catch (err) {
       console.error(err);
