@@ -6,6 +6,9 @@ export const getBloodRegisterByStatus = async (status) => {
   return response.data;
 };
 
+
+
+
 //  Cập nhật trạng thái đơn đăng ký hiến máu (ví dụ: INCOMPLETED)
 export const updateBloodRegisterStatus = async (id, status) => {
   const response = await api.patch(`/blood-register/update-status/${id}?status=${status}`);
@@ -32,6 +35,8 @@ export const getAllMedicalRecords = async (status) => {
     throw error;
   }
 };
+
+
 
 // Lấy danh sách hồ sơ y tế của một user
 export const getMedicalRecordsByUser = async (userId) => {

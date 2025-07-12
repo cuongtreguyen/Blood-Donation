@@ -1143,13 +1143,3 @@ const AppointmentManager = () => {
 };
 
 export default AppointmentManager;
-
-
-
-
-
-
-
-
-
-
