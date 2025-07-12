@@ -125,7 +125,7 @@ const DonorsPage = () => {
       title: "Lượng máu (ml)",
       dataIndex: "unit",
       key: "unit",
-      render: (u) => `${u * 1000} ml`,
+      render: (u) => `${u} ml`,
     },
   ];
 
