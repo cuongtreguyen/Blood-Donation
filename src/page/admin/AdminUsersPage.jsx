@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm, message, Tooltip } from 'antd';
+import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm, Tooltip } from 'antd';
 import SearchOutlined from '@ant-design/icons/lib/icons/SearchOutlined';
 import UserOutlined from '@ant-design/icons/lib/icons/UserOutlined';
 import EditOutlined from '@ant-design/icons/lib/icons/EditOutlined';
@@ -28,10 +28,6 @@ function AdminUsersPage() {
     { label: 'Nữ', value: 'FEMALE' },
     { label: 'Khác', value: 'OTHER' },
   ];
-  const bloodTypeOptions = [
-    'A_POSITIVE', 'A_NEGATIVE', 'B_POSITIVE', 'B_NEGATIVE',
-    'O_POSITIVE', 'O_NEGATIVE', 'AB_POSITIVE', 'AB_NEGATIVE'
-  ];
 
   useEffect(() => {
     const fetchUsersByRole = async () => {
@@ -51,7 +47,7 @@ function AdminUsersPage() {
           email: user.email,
           phone: user.phone,
           role: user.role === "MEMBER" ? "donor" : user.role?.toLowerCase(),
-          status: "active",
+          status: user.status, // lấy đúng trường status từ API
           joinDate: user.joinDate || (user.birthdate ? new Date(user.birthdate).toLocaleDateString('vi-VN') : "-"),
           lastLogin: "-",
           address: user.address || '',
@@ -114,16 +110,34 @@ function AdminUsersPage() {
           phone: values.phone,
           address: values.address,
           bloodType: values.bloodType,
+          status: 'ACTIVE', // Mặc định là hoạt động
         };
         await api.post('/register', newUser);
         toast.success('Thêm người dùng thành công!');
       } else {
-        // Update existing user
+        // Update existing user (KHÔNG gọi updateUserStatus ở đây nữa)
         const updatedUsers = users.map(user => 
           user.key === selectedUser.key ? { ...user, ...values } : user
         );
         setUsers(updatedUsers);
-        await api.put(`/user/update-user`, values);
+        // Chuẩn hóa dữ liệu gửi lên
+        const requestBody = {
+          id: selectedUser.id,
+          fullName: values.name,
+          phone: values.phone,
+          address: values.address,
+          gender: values.gender,
+          birthdate: values.birthdate,
+          height: values.height || 0,
+          weight: values.weight || 0,
+          lastDonation: values.lastDonation || null,
+          medicalHistory: values.medicalHistory || null,
+          emergencyName: values.emergencyName,
+          emergencyPhone: values.emergencyPhone,
+          bloodType: values.bloodType,
+          role: values.role === 'staff' ? 'STAFF' : values.role === 'donor' ? 'MEMBER' : values.role
+        };
+        await api.put(`/user/update-user`, requestBody);
         toast.success('Cập nhật thông tin thành công!');
       }
       setIsModalVisible(false);
@@ -138,23 +152,33 @@ function AdminUsersPage() {
     form.resetFields();
   };
 
+  // Khi bấm nút xóa, đổi trạng thái thành không hoạt động
   const handleDelete = async (key) => {
     try {
-      // Tìm user cần xóa từ danh sách users
       const userToDelete = users.find(user => user.key === key);
       if (!userToDelete) {
         toast.error('Không tìm thấy người dùng!');
         return;
       }
-
-      // Cập nhật state để xóa user
-      const updatedUsers = users.filter(user => user.key !== key);
-      setUsers(updatedUsers);
-      await api.delete(`/api/users/${userToDelete.id}`);
-      toast.success('Xóa người dùng thành công!');
+      // Gọi API đổi trạng thái
+      const ok = await updateUserStatus(userToDelete.id, 'INACTIVE');
+      if (ok) {
+        // Cập nhật lại users trong state
+        setUsers(users.map(u => u.key === key ? { ...u, status: 'INACTIVE' } : u));
+        toast.success('Đã chuyển trạng thái người dùng sang không hoạt động!');
+      }
     } catch (error) {
-      console.error('Lỗi khi xóa người dùng:', error);
-      toast.error('Xóa người dùng thất bại. Vui lòng thử lại sau!');
+      console.error('Lỗi khi đổi trạng thái người dùng:', error);
+      toast.error('Chuyển trạng thái người dùng thất bại. Vui lòng thử lại sau!');
+    }
+  };
+
+  // Thêm hàm xử lý đổi trạng thái
+  const handleToggleStatus = async (user) => {
+    const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    const ok = await updateUserStatus(user.id, newStatus);
+    if (ok) {
+      setUsers(users.map(u => u.key === user.key ? { ...u, status: newStatus } : u));
     }
   };
 
@@ -164,10 +188,10 @@ function AdminUsersPage() {
   };
 
   // Lọc dữ liệu chỉ dựa trên searchText trước khi truyền vào Table
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = users.filter((user) => {
     const matchesSearch = user.name.toLowerCase().includes(searchText.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchText.toLowerCase()) ||
-                         user.phone.includes(searchText);
+      user.email.toLowerCase().includes(searchText.toLowerCase()) ||
+      user.phone.includes(searchText);
     return matchesSearch;
   });
 
@@ -203,7 +227,7 @@ function AdminUsersPage() {
         'A_POSITIVE': 'A+', 'A_NEGATIVE': 'A-',
         'B_POSITIVE': 'B+', 'B_NEGATIVE': 'B-',
         'O_POSITIVE': 'O+', 'O_NEGATIVE': 'O-',
-        'AB_POSITIVE': 'AB+', 'AB_NEGATIVE': 'AB-'
+        'AB_POSITIVE': 'AB+', 'AB_NEGATIVE': 'AB-',
       };
       return <Tag color="geekblue" style={{ fontWeight: 500 }}>{bloodMap[type] || type}</Tag>;
     } },
@@ -236,7 +260,7 @@ function AdminUsersPage() {
               textAlign: 'center',
               width: '100%',
               display: 'block',
-              margin: 0
+              margin: 0,
             }}
           >
             {labels[role]}
@@ -245,11 +269,30 @@ function AdminUsersPage() {
       },
       align: 'center',
     },
+    // Thêm cột trạng thái ngay sau vai trò
+    {
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      width: 120,
+      align: 'center',
+      render: (status) => {
+        let color = 'green', text = status;
+        if (status === 'ACTIVE' || status === null) { // Thêm điều kiện status === null
+          color = 'green'; text = 'Đang hoạt động';
+        } else {
+          color = 'red'; text = 'Không hoạt động';
+        }
+        return (
+          <Tag color={color} style={{ fontWeight: 500 }}>{text}</Tag>
+        );
+      },
+    },
     {
       title: 'Hành động',
       key: 'action',
       align: 'center',
-      width: 90,
+      width: 150,
       render: (_, record) => (
         <Space size="small">
           <Tooltip title="Chỉnh sửa">
@@ -262,23 +305,17 @@ function AdminUsersPage() {
               shape="circle"
             />
           </Tooltip>
-          <Popconfirm
-            title="Xác nhận xóa"
-            description="Bạn có chắc chắn muốn xóa người dùng này?"
-            onConfirm={() => handleDelete(record.key)}
-            okText="Xóa"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
-          >
-            <Tooltip title="Xóa">
-              <Button
-                danger
-                icon={<DeleteOutlined />}
-                size="middle"
-                shape="circle"
-              />
-            </Tooltip>
-          </Popconfirm>
+          {/* Đã ẩn nút xóa ở đây */}
+          {/* Nút đổi trạng thái */}
+          <Tooltip title={record.status === 'ACTIVE' ? "Khóa tài khoản" : "Mở khóa tài khoản"}>
+            <Button
+              icon={<LockOutlined />}
+              size="middle"
+              onClick={() => handleToggleStatus(record)}
+              style={{ background: record.status === 'ACTIVE' ? '#faad14' : '#52c41a', borderColor: record.status === 'ACTIVE' ? '#faad14' : '#52c41a', color: '#fff' }}
+              shape="circle"
+            />
+          </Tooltip>
         </Space>
       ),
     },
@@ -414,10 +451,16 @@ function AdminUsersPage() {
                     <Option value="staff">Nhân viên</Option>
                   </Select>
                 </Form.Item>
+                <Form.Item name="status" label={<b>Trạng thái</b>} rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}> 
+                  <Select>
+                    <Option value="ACTIVE">Đang hoạt động</Option>
+                    <Option value="INACTIVE">Không hoạt động</Option>
+                  </Select>
+                </Form.Item>
               </div>
             </>
           ) : (
-            // Sửa: hiển thị tất cả trường, chia đều 2 cột, không lặp, không hiển thị mật khẩu và lần hiến máu cuối
+            // Sửa: hiển thị tất cả trường, chia đều 2 cột, không lặp, không hiển thị mật khẩu, lần hiến máu cuối và trạng thái
             <>
               <div style={{ flex: 1, minWidth: 280 }}>
                 <Form.Item
@@ -490,6 +533,7 @@ function AdminUsersPage() {
                 <Form.Item name="emergencyPhone" label={<b>SĐT người liên hệ khẩn cấp</b>}>
                   <Input placeholder="Nhập SĐT người liên hệ khẩn cấp" size="large" />
                 </Form.Item>
+                {/* ĐÃ ẨN Form.Item name='status' ở đây */}
               </div>
             </>
           )}
@@ -498,5 +542,23 @@ function AdminUsersPage() {
     </div>
   );
 }
+
+const updateUserStatus = async (userId, status) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Không tìm thấy token xác thực!');
+      return false;
+    }
+    await api.put('/user/update-status', { userId, status }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    toast.success('Cập nhật trạng thái thành công!');
+    return true;
+  } catch {
+    toast.error('Cập nhật trạng thái thất bại!');
+    return false;
+  }
+};
 
 export default AdminUsersPage; 
