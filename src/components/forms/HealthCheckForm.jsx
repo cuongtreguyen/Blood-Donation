@@ -31,7 +31,8 @@ const validateForm = (form) => {
   if (isNaN(bloodPressure) || bloodPressure < 50 || bloodPressure > 250)
     errors.push("Huyết áp phải từ 50 đến 250 mmHg");
   if (!form.checkDate) errors.push("Ngày kiểm tra không được để trống");
-  if (!form.staffName.trim()) errors.push("Tên nhân viên kiểm tra không được để trống");
+  if (!form.staffName.trim())
+    errors.push("Tên nhân viên kiểm tra không được để trống");
   if (!form.fullName.trim()) errors.push("Họ tên không được để trống");
   if (!form.status && !form.reason.trim())
     errors.push("Lý do không đủ điều kiện hiến máu là bắt buộc");
@@ -60,7 +61,8 @@ const HealthCheckForm = ({ bloodRegisterId, onSuccess }) => {
             weight: found.weight || "",
             temperature: found.temperature || "",
             bloodPressure: found.bloodPressure || "",
-            checkDate: found.checkDate || new Date().toISOString().split("T")[0],
+            checkDate:
+              found.checkDate || new Date().toISOString().split("T")[0],
             reason: found.reason || "",
           }));
         } else {
@@ -94,10 +96,22 @@ const HealthCheckForm = ({ bloodRegisterId, onSuccess }) => {
     }
     try {
       const payload = {
-        height: form.height && !isNaN(parseFloat(form.height)) ? parseFloat(form.height) : null,
-        weight: form.weight && !isNaN(parseFloat(form.weight)) ? parseFloat(form.weight) : null,
-        temperature: form.temperature && !isNaN(parseFloat(form.temperature)) ? parseFloat(form.temperature) : null,
-        bloodPressure: form.bloodPressure && !isNaN(parseFloat(form.bloodPressure)) ? parseFloat(form.bloodPressure) : null,
+        height:
+          form.height && !isNaN(parseFloat(form.height))
+            ? parseFloat(form.height)
+            : null,
+        weight:
+          form.weight && !isNaN(parseFloat(form.weight))
+            ? parseFloat(form.weight)
+            : null,
+        temperature:
+          form.temperature && !isNaN(parseFloat(form.temperature))
+            ? parseFloat(form.temperature)
+            : null,
+        bloodPressure:
+          form.bloodPressure && !isNaN(parseFloat(form.bloodPressure))
+            ? parseFloat(form.bloodPressure)
+            : null,
         medicalHistory: form.medicalHistory || null,
         checkDate: form.checkDate,
         staffName: form.staffName,
@@ -112,21 +126,50 @@ const HealthCheckForm = ({ bloodRegisterId, onSuccess }) => {
       setForm({ ...initialState }); // Reset form sau khi gửi thành công
     } catch (err) {
       setLoading(false);
-      setError([err.response?.data?.message || "Có lỗi xảy ra khi lưu dữ liệu!"]);
+      setError([
+        err.response?.data?.message || "Có lỗi xảy ra khi lưu dữ liệu!",
+      ]);
     }
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "0 auto", padding: 16, border: "1px solid #eee", borderRadius: 8 }}>
+    <div
+      style={{
+        maxWidth: 400,
+        margin: "0 auto",
+        padding: 16,
+        border: "1px solid #eee",
+        borderRadius: 8,
+      }}
+    >
       <h3>Kiểm tra sức khỏe người hiến máu</h3>
       {donorInfo && (
-        <div style={{ marginBottom: 16, background: "#f8f8f8", padding: 8, borderRadius: 6 }}>
-          <div><b>Họ tên:</b> {donorInfo.fullName || "Chưa có"}</div>
-          <div><b>Nhóm máu:</b> {donorInfo.bloodType || "Chưa có"}</div>
-          <div><b>Số điện thoại:</b> {donorInfo.phone || "Chưa có"}</div>
-          <div><b>Email:</b> {donorInfo.email || "Chưa có"}</div>
-          <div><b>Số lần hiến:</b> {donorInfo.unitDonation || "0"}</div>
-          <div><b>Lần hiến gần nhất:</b> {donorInfo.lastDonation || "Chưa có"}</div>
+        <div
+          style={{
+            marginBottom: 16,
+            background: "#f8f8f8",
+            padding: 8,
+            borderRadius: 6,
+          }}
+        >
+          <div>
+            <b>Họ tên:</b> {donorInfo.fullName || "Chưa có"}
+          </div>
+          <div>
+            <b>Nhóm máu:</b> {donorInfo.bloodType || "Chưa có"}
+          </div>
+          <div>
+            <b>Số điện thoại:</b> {donorInfo.phone || "Chưa có"}
+          </div>
+          <div>
+            <b>Email:</b> {donorInfo.email || "Chưa có"}
+          </div>
+          <div>
+            <b>Số lần hiến:</b> {donorInfo.unitDonation || "0"}
+          </div>
+          <div>
+            <b>Lần hiến gần nhất:</b> {donorInfo.lastDonation || "Chưa có"}
+          </div>
         </div>
       )}
 
