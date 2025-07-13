@@ -69,36 +69,29 @@
 
 
 
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../../config/api';
 
 function TestimonialsSection() {
-  const testimonials = [
-    {
-      name: "Nguyễn Văn Minh",
-      role: "Người hiến máu thường xuyên",
-      content: "Tôi đã hiến máu hơn 20 lần tại đây. Dịch vụ chuyên nghiệp, nhân viên tận tâm. Cảm ơn vì đã tạo điều kiện cho chúng tôi làm việc tốt.",
-      avatar: "https://scontent.fsgn5-8.fna.fbcdn.net/v/t39.30808-1/514261186_1421226419221706_1763570345444575431_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=109&ccb=1-7&_nc_sid=e99d92&_nc_ohc=tuW7umON4aUQ7kNvwEwvPo0&_nc_oc=AdkV0iEXgGnV2SmbplciYUM721KlYLykEZMt1l6wQJAyukFRDRuPNPf6RjRF-PLrHxo&_nc_zt=24&_nc_ht=scontent.fsgn5-8.fna&_nc_gid=rM10zXJM_MRw9IT7dIRm1w&oh=00_AfRNdRgWq2-j6sSf8r26cdmk4bpJXHfQpq7BYiVAWwt6jA&oe=6876A122"
-    },
-    {
-      name: "Trần Thị Hoa",
-      role: "Bệnh nhân được cứu sống",
-      content: "Nhờ có máu hiến tặng, tôi đã vượt qua ca phẫu thuật khó khăn. Tôi vô cùng biết ơn những người hiến máu tình nguyện.",
-      avatar: "https://scontent.fsgn5-12.fna.fbcdn.net/v/t39.30808-1/341128599_549182920623736_5160836108154107558_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=103&ccb=1-7&_nc_sid=e99d92&_nc_ohc=6zGCJpqj1joQ7kNvwH1dq6u&_nc_oc=AdmsbSebymEAEKfUKSLOQP0dzxmOYLdg232Pccsbrzao0PBTigj6C2-i7vGL3TWwWmg&_nc_zt=24&_nc_ht=scontent.fsgn5-12.fna&_nc_gid=3DRroxQIrsbfIDfUgHWlJg&oh=00_AfRfwE47F9ZxF6jV5MTXQxT-weUgPc0pAjWoSKHECBHkZg&oe=6876A7FB"
-    },
-    {
-      name: "Lê Hoàng Nam",
-      role: "Bác sĩ điều trị",
-      content: "Chất lượng máu từ trung tâm luôn đảm bảo tiêu chuẩn cao nhất. Điều này rất quan trọng trong việc điều trị bệnh nhân.",
-      avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150"
-    }
-  ];
-
+  const [testimonials, setTestimonials] = useState([]);
   const [index, setIndex] = useState(0);
 
-  // Tự động chuyển testimonial sau mỗi 5 giây
+  // Lấy tất cả các bài có trường status (không filter giá trị)
   useEffect(() => {
+    api.get('/blogs').then(res => {
+      const allWithStatus = res.data.filter(blog => blog.status !== undefined && blog.status !== null);
+      setTestimonials(allWithStatus.map(blog => ({
+        name: blog.author,
+        role: '', // Nếu muốn lấy role thì cần backend trả về
+        content: blog.content,
+        avatar: blog.img && blog.img !== 'string' ? blog.img : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(blog.author),
+      })));
+    });
+  }, []);
+
+  useEffect(() => {
+    if (testimonials.length === 0) return;
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % testimonials.length);
     }, 5000);
@@ -119,6 +112,8 @@ function TestimonialsSection() {
       opacity: 0,
     }),
   };
+
+  if (testimonials.length === 0) return null;
 
   return (
     <section className="py-12 px-4 md:px-20 bg-gray-50 text-center">
