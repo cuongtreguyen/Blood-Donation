@@ -1,18 +1,15 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaUser,
   FaCalendar,
   FaHistory,
-  FaTint,
   FaClock,
   FaBell,
 } from "react-icons/fa";
 import ProfileComponent from "./ProfileComponent";
 import HistoryComponent from "./HistoryComponent";
 import AppointmentsComponent from "./AppointmentsComponent";
-import EmergencyComponent from "./EmergencyComponent";
 import InvitationsComponent from "./InvitationsComponent";
 import RemindersComponent from "./RemindersComponent";
 import api from "../../config/api";
@@ -110,7 +107,6 @@ const DonateUser = () => {
             "profile",
             "history",
             "appointments",
-            "emergency",
             "invitations",
             "reminders",
           ].map((tab) => (
@@ -126,7 +122,6 @@ const DonateUser = () => {
               {tab === "profile" && <FaUser />}
               {tab === "history" && <FaHistory />}
               {tab === "appointments" && <FaCalendar />}
-              {tab === "emergency" && <FaTint />}
               {tab === "invitations" && <FaBell />}
               {tab === "reminders" && <FaClock />}
               <span className="capitalize">
@@ -136,8 +131,6 @@ const DonateUser = () => {
                   ? "Lịch sử"
                   : tab === "appointments"
                   ? "Lịch hẹn"
-                  : tab === "emergency"
-                  ? "Nhận máu khẩn cấp"
                   : tab === "invitations"
                   ? "Lời mời"
                   : "Nhắc nhở"}
@@ -149,7 +142,6 @@ const DonateUser = () => {
           {activeTab === "profile" && <ProfileComponent />}
           {activeTab === "history" && <HistoryComponent />}
           {activeTab === "appointments" && <AppointmentsComponent />}
-          {activeTab === "emergency" && <EmergencyComponent />}
           {activeTab === "invitations" && <InvitationsComponent />}
           {activeTab === "reminders" && <RemindersComponent />}
         </div>
