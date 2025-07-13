@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Tag, Button, Modal, Descriptions, Input, Select, Space, Tooltip, Popconfirm, Form } from 'antd';
 import { EyeOutlined, EditOutlined, DeleteOutlined, FileTextOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
@@ -32,11 +32,11 @@ const statusOptions = [
   { value: 'hidden', label: 'Ẩn' },
 ];
 
-const categoryOptions = [
-  { value: 'Kiến thức', label: 'Kiến thức' },
-  { value: 'Câu chuyện', label: 'Câu chuyện' },
-  { value: 'Tin tức', label: 'Tin tức' },
-];
+// const categoryOptions = [
+//   { value: 'Kiến thức', label: 'Kiến thức' },
+//   { value: 'Câu chuyện', label: 'Câu chuyện' },
+//   { value: 'Tin tức', label: 'Tin tức' },
+// ];
 
 function BlogPage() {
   const [data, setData] = useState([]); // Chuẩn bị cho việc lấy danh sách từ API thật
@@ -57,161 +57,149 @@ function BlogPage() {
     (search === '' ? true : item.title.toLowerCase().includes(search.toLowerCase()))
   );
 
-  // Các hàm API chuyển xuống dưới function BlogPage
-const getAdminBlogs = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.error('Không tìm thấy token xác thực!');
+  // ================== API CALLS FOR BLOG ==================
+  // Lấy danh sách blog cho admin
+  const getAdminBlogs = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Không tìm thấy token xác thực!');
+        return null;
+      }
+      const res = await api.get('/blogs/admin', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    } catch (error) {
+      toast.error('Không thể lấy danh sách bài viết!');
+      console.log(error);
       return null;
     }
-    const res = await api.get('/blogs/admin', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.data;
-  } catch (error) {
-    toast.error('Không thể lấy danh sách bài viết!');
-    return null;
-  }
-};
+  };
 
-const getBlogDetail = async (id) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.error('Không tìm thấy token xác thực!');
+  // Lấy chi tiết một blog
+  const getBlogDetail = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Không tìm thấy token xác thực!');
+        return null;
+      }
+      const res = await api.get(`/blogs/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    } catch (error) {
+      toast.error('Không thể lấy chi tiết bài viết!');
+      console.log(error);
       return null;
     }
-    const res = await api.get(`/blogs/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.data;
-  } catch (error) {
-    toast.error('Không thể lấy chi tiết bài viết!');
-    return null;
-  }
-};
+  };
 
-const updateBlog = async (id, values) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.error('Không tìm thấy token xác thực!');
+  // Cập nhật một blog
+  const updateBlog = async (id, values) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Không tìm thấy token xác thực!');
+        return null;
+      }
+      const res = await api.put(`/blogs/${id}`, values, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Cập nhật bài viết thành công!');
+      return res.data;
+    } catch (error) {
+      toast.error('Cập nhật bài viết thất bại!');
+      console.log(error);
       return null;
     }
-    const res = await api.put(`/blogs/${id}`, values, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    toast.success('Cập nhật bài viết thành công!');
-    return res.data;
-  } catch (error) {
-    toast.error('Cập nhật bài viết thất bại!');
-    return null;
-  }
-};
+  };
 
-const deleteBlog = async (id) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.error('Không tìm thấy token xác thực!');
-      return null;
-    }
-    await api.delete(`/blogs/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    toast.success('Xóa bài viết thành công!');
-    return true;
-  } catch (error) {
-    toast.error('Xóa bài viết thất bại!');
-    return false;
-  }
-};
-
-const restoreBlog = async (id) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.error('Không tìm thấy token xác thực!');
+  // Xóa một blog (chuyển trạng thái sang DELETED)
+  const deleteBlog = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Không tìm thấy token xác thực!');
+        return false;
+      }
+      await api.delete(`/blogs/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Xóa bài viết thành công!');
+      return true;
+    } catch (error) {
+      toast.error('Xóa bài viết thất bại!');
+      console.log(error);
       return false;
     }
-    await api.put(`/blogs/${id}/restore`, {}, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    toast.success('Khôi phục bài viết thành công!');
-    return true;
-  } catch (error) {
-    toast.error('Khôi phục bài viết thất bại!');
-    return false;
-  }
-};
+  };
 
-const createBlog = async (data) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.error('Không tìm thấy token xác thực!');
+  // Khôi phục blog bị xóa
+  const restoreBlog = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Không tìm thấy token xác thực!');
+        return false;
+      }
+      await api.put(`/blogs/${id}/restore`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Khôi phục bài viết thành công!');
+      return true;
+    } catch (error) {
+      toast.error('Khôi phục bài viết thất bại!');
+      console.log(error);
+      return false;
+    }
+  };
+
+  // Tìm kiếm blog
+  const searchBlogs = async (keyword) => {
+    try {
+      const res = await api.get(`/blogs/search?keyword=${encodeURIComponent(keyword)}`);
+      return res.data;
+    } catch (error) {
+      toast.error('Không thể tìm kiếm bài viết!');
+      console.log(error);
       return null;
     }
-    const res = await api.post('/blogs', data, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    toast.success('Thêm bài viết thành công!');
-    return res.data;
-  } catch (error) {
-    toast.error('Thêm bài viết thất bại!');
-    return null;
-  }
-};
-
-const uploadBlogImage = async (file) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.error('Không tìm thấy token xác thực!');
-      return null;
-    }
-    const formData = new FormData();
-    formData.append('file', file);
-    const res = await api.post('/blogs/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    toast.success('Upload ảnh thành công!');
-    return res.data;
-  } catch (error) {
-    toast.error('Upload ảnh thất bại!');
-    return null;
-  }
-};
+  };
 
   // Lấy danh sách blog cho admin khi load trang hoặc sau khi thêm mới
-  const fetchAdminBlogs = async () => {
+  const fetchAdminBlogs = useCallback(async () => {
     const blogs = await getAdminBlogs();
     if (blogs) setData(blogs);
-  };
+  }, []);
   useEffect(() => {
     fetchAdminBlogs();
-  }, []);
+  }, [fetchAdminBlogs]);
 
   // Xử lý submit form thêm mới
   const handleAddBlog = async () => {
     try {
       const values = await addForm.validateFields();
+      const currentUser = JSON.parse(localStorage.getItem('user'));
+      const authorName = currentUser?.fullName || currentUser?.username || 'Admin';
       const payload = {
-        ...values,
-        status: values.status === 'public' ? 'ACTIVE' : 'HIDDEN',
+        title: values.title,
+        content: values.content,
+        author: authorName,
       };
-      const res = await createBlog(payload);
-      if (res) {
+      const res = await api.post('/blogs', payload, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      if (res.data) {
+        toast.success('Thêm bài viết thành công!'); // Thông báo thành công
         setAddModalOpen(false);
         addForm.resetFields();
-        fetchAdminBlogs();
+        fetchAdminBlogs(); // Reload lại danh sách blog ngay
       }
     } catch (err) {
       toast.error('Vui lòng điền đầy đủ thông tin!');
+      console.log(err);
     }
   };
 
@@ -231,10 +219,7 @@ const uploadBlogImage = async (file) => {
       setSelectedEditRecord(blogEdit);
       form.setFieldsValue({
         title: blogEdit.title,
-        category: blogEdit.category,
-        status: blogEdit.status === 'ACTIVE' ? 'public' : 'hidden',
         content: blogEdit.content,
-        img: blogEdit.img || '',
       });
       setEditModalOpen(true);
     }
@@ -245,13 +230,14 @@ const uploadBlogImage = async (file) => {
     form.validateFields().then(async (values) => {
       if (!selectedEditRecord) return;
       const payload = {
-        ...values,
-        status: values.status === 'public' ? 'ACTIVE' : 'HIDDEN',
+        title: values.title,
+        content: values.content,
+        author: selectedEditRecord.author,
       };
       const updated = await updateBlog(selectedEditRecord.id || selectedEditRecord.key, payload);
       if (updated) {
         setEditModalOpen(false);
-        // Cập nhật lại danh sách nếu cần
+        fetchAdminBlogs();
       }
     }).catch(() => {
       toast.error('Vui lòng điền đầy đủ thông tin!');
@@ -262,7 +248,7 @@ const uploadBlogImage = async (file) => {
   const handleDelete = async (id) => {
     const result = await deleteBlog(id);
     if (result) {
-      // Cập nhật lại danh sách nếu cần
+      fetchAdminBlogs(); // Reload lại danh sách ngay sau khi xóa thành công
     }
   };
 
@@ -279,20 +265,15 @@ const uploadBlogImage = async (file) => {
       key: 'author',
     },
     {
-      title: 'Ngày đăng',
-      dataIndex: 'date',
-      key: 'date',
-    },
-    {
-      title: 'Danh mục',
-      dataIndex: 'category',
-      key: 'category',
-    },
-    {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => status === 'public' ? <Tag color="green">Công khai</Tag> : <Tag color="orange">Ẩn</Tag>,
+      render: (status) =>
+        status === 'ACTIVE'
+          ? <Tag color="green">Công khai</Tag>
+          : status === 'DELETED'
+            ? <Tag color="red">Đã xóa</Tag>
+            : <Tag color="orange">Ẩn</Tag>,
     },
     {
       title: 'Hành động',
@@ -303,7 +284,7 @@ const uploadBlogImage = async (file) => {
             <Button icon={<EyeOutlined />} size="small" onClick={() => handleViewDetail(record.id || record.key)} shape="circle" />
           </Tooltip>
           <Tooltip title="Sửa">
-            <Button icon={<EditOutlined />} size="small" style={{ color: '#d32f2f', borderColor: '#d32f2f' }} onClick={() => handleEdit(record)} shape="circle" />
+            <Button icon={<EditOutlined />} size="small" style={{ color: '#d32f2f', borderColor: '#d32f2f', background: '#fff' }} onClick={() => handleEdit(record)} shape="circle" />
           </Tooltip>
           <Popconfirm
             title="Bạn có chắc chắn muốn xóa bài viết này?"
@@ -316,10 +297,37 @@ const uploadBlogImage = async (file) => {
               <Button icon={<DeleteOutlined />} size="small" danger shape="circle" />
             </Tooltip>
           </Popconfirm>
+          {record.status === 'DELETED' && (
+            <Tooltip title="Khôi phục">
+              <Button
+                type="primary"
+                size="small"
+                style={{ background: '#52c41a', borderColor: '#52c41a' }}
+                onClick={async () => {
+                  const ok = await restoreBlog(record.id);
+                  if (ok) fetchAdminBlogs();
+                }}
+              >
+                Khôi phục
+              </Button>
+            </Tooltip>
+          )}
         </Space>
       ),
     },
   ];
+
+  // Hàm xử lý tìm kiếm tiêu đề bằng API
+  const handleSearch = async (e) => {
+    const keyword = e.target.value;
+    setSearch(keyword);
+    if (keyword.trim() === '') {
+      fetchAdminBlogs();
+    } else {
+      const result = await searchBlogs(keyword);
+      if (result) setData(result.map(item => ({ ...item, key: item.id })));
+    }
+  };
 
   return (
     <div>
@@ -329,7 +337,7 @@ const uploadBlogImage = async (file) => {
           <Input.Search
             placeholder="Tìm kiếm theo tiêu đề"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={handleSearch}
             style={{ width: 220 }}
           />
           <Select
@@ -339,7 +347,9 @@ const uploadBlogImage = async (file) => {
             style={{ width: 180 }}
           />
         </div>
-        <Button type="primary" danger onClick={() => setAddModalOpen(true)}>
+        <Button type="primary" danger onClick={() => setAddModalOpen(true)}
+          style={{ background: '#d32f2f', borderColor: '#d32f2f', color: '#fff', fontWeight: 600 }}
+        >
           Thêm bài viết
         </Button>
       </div>
@@ -352,12 +362,14 @@ const uploadBlogImage = async (file) => {
       >
         {selectedViewRecord && (
           <Descriptions bordered column={1} size="small">
+            <Descriptions.Item label="ID">{selectedViewRecord.id}</Descriptions.Item>
             <Descriptions.Item label="Tiêu đề">{selectedViewRecord.title}</Descriptions.Item>
             <Descriptions.Item label="Tác giả">{selectedViewRecord.author}</Descriptions.Item>
-            <Descriptions.Item label="Ngày đăng">{selectedViewRecord.date}</Descriptions.Item>
-            <Descriptions.Item label="Danh mục">{selectedViewRecord.category}</Descriptions.Item>
-            <Descriptions.Item label="Trạng thái">{selectedViewRecord.status === 'public' ? 'Công khai' : 'Ẩn'}</Descriptions.Item>
+            <Descriptions.Item label="Trạng thái">{selectedViewRecord.status}</Descriptions.Item>
+            <Descriptions.Item label="Ngày tạo">{selectedViewRecord.createdAt ? new Date(selectedViewRecord.createdAt).toLocaleString('vi-VN') : ''}</Descriptions.Item>
+            <Descriptions.Item label="Ngày cập nhật">{selectedViewRecord.updatedAt ? new Date(selectedViewRecord.updatedAt).toLocaleString('vi-VN') : ''}</Descriptions.Item>
             <Descriptions.Item label="Nội dung">{selectedViewRecord.content}</Descriptions.Item>
+            {selectedViewRecord.img && <Descriptions.Item label="Ảnh"><img src={selectedViewRecord.img} alt="Ảnh blog" style={{maxWidth: 200}} /></Descriptions.Item>}
           </Descriptions>
         )}
       </Modal>
@@ -367,6 +379,7 @@ const uploadBlogImage = async (file) => {
         title={selectedEditRecord ? 'Sửa bài viết' : 'Thêm bài viết mới'}
         onOk={handleSave}
         okText={selectedEditRecord ? 'Lưu' : 'Thêm'}
+        okButtonProps={selectedEditRecord ? { style: { background: '#d32f2f', borderColor: '#d32f2f', color: '#fff', fontWeight: 600 } } : {}}
         cancelText="Hủy"
       >
         <Form form={form} layout="vertical">
@@ -380,18 +393,6 @@ const uploadBlogImage = async (file) => {
             ]}
           > 
             <Input />
-          </Form.Item>
-          <Form.Item 
-            name="category" 
-            label="Danh mục" 
-            rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}> 
-            <Select options={categoryOptions} />
-          </Form.Item>
-          <Form.Item 
-            name="status" 
-            label="Trạng thái" 
-            rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}> 
-            <Select options={statusOptions.filter(opt => opt.value !== 'all')} />
           </Form.Item>
           <Form.Item 
             name="content" 
@@ -414,6 +415,7 @@ const uploadBlogImage = async (file) => {
         onOk={handleAddBlog}
         okText="Thêm"
         cancelText="Hủy"
+        okButtonProps={{ style: { background: '#d32f2f', borderColor: '#d32f2f', color: '#fff', fontWeight: 600 } }}
       >
         <Form form={addForm} layout="vertical">
           <Form.Item 
@@ -428,18 +430,6 @@ const uploadBlogImage = async (file) => {
             <Input />
           </Form.Item>
           <Form.Item 
-            name="category" 
-            label="Danh mục" 
-            rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}> 
-            <Select options={categoryOptions} />
-          </Form.Item>
-          <Form.Item 
-            name="status" 
-            label="Trạng thái" 
-            rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}> 
-            <Select options={statusOptions.filter(opt => opt.value !== 'all')} />
-          </Form.Item>
-          <Form.Item 
             name="content" 
             label="Nội dung" 
             rules={[
@@ -449,9 +439,6 @@ const uploadBlogImage = async (file) => {
             ]}
           > 
             <Input.TextArea rows={4} />
-          </Form.Item>
-          <Form.Item name="img" label="Link ảnh đại diện">
-            <Input placeholder="Nhập link ảnh..." />
           </Form.Item>
         </Form>
       </Modal>
