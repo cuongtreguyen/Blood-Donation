@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Tag, Button, Input, Space, Card, Popconfirm, Tooltip, Spin, Select } from 'antd';
 import { SearchOutlined, CheckCircleOutlined, CloseCircleOutlined, UserOutlined, CalendarOutlined, HeartOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
@@ -31,11 +31,12 @@ const DonationConfirmationPage = () => {
       });
       return res.data && res.data.length > 0 ? res.data[0].fullName : '';
     } catch (e) {
+      console.log(e);
       return '';
     }
   };
 
-  const fetchBloodRegisterList = async () => {
+  const fetchBloodRegisterList = useCallback(async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
@@ -84,11 +85,11 @@ const DonationConfirmationPage = () => {
       console.error(err);
     }
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     fetchBloodRegisterList();
-  }, [userId]);
+  }, [userId, fetchBloodRegisterList]);
 
   useEffect(() => {
     console.log('Donations:', donations);

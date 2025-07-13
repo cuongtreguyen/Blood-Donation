@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm, Tooltip } from 'antd';
+import { Table, Tag, Button, Input, Space, Card, Modal, Form, Select, Popconfirm, Tooltip, Dropdown } from 'antd';
 import SearchOutlined from '@ant-design/icons/lib/icons/SearchOutlined';
 import UserOutlined from '@ant-design/icons/lib/icons/UserOutlined';
 import EditOutlined from '@ant-design/icons/lib/icons/EditOutlined';
@@ -8,6 +8,7 @@ import PlusOutlined from '@ant-design/icons/lib/icons/PlusOutlined';
 import LockOutlined from '@ant-design/icons/lib/icons/LockOutlined';
 import MailOutlined from '@ant-design/icons/lib/icons/MailOutlined';
 import PhoneOutlined from '@ant-design/icons/lib/icons/PhoneOutlined';
+import DownOutlined from '@ant-design/icons/lib/icons/DownOutlined';
 import api from '../../config/api';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -23,6 +24,45 @@ function AdminUsersPage() {
 
   // Mock data for users
   const [users, setUsers] = useState([]);
+
+  // Helper function to refresh users data from API
+  const refreshUsersData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Không tìm thấy token xác thực!');
+        return;
+      }
+      const res = await api.get('/user/get-user-by-role', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const usersFromApi = res.data.map((user, idx) => ({
+        key: user.id || idx + 1,
+        id: user.id,
+        name: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role === "MEMBER" ? "donor" : user.role?.toLowerCase(),
+        status: (user.status || '').toUpperCase(), // CHUẨN HÓA về in hoa
+        joinDate: user.joinDate || (user.birthdate ? new Date(user.birthdate).toLocaleDateString('vi-VN') : "-"),
+        lastLogin: "-",
+        address: user.address || '',
+        gender: user.gender || '',
+        birthdate: user.birthdate || '',
+        height: user.height || '',
+        weight: user.weight || '',
+        lastDonation: user.lastDonation || '',
+        medicalHistory: user.medicalHistory || '',
+        emergencyName: user.emergencyName || '',
+        emergencyPhone: user.emergencyPhone || '',
+        bloodType: user.bloodType || '',
+      }));
+      setUsers(usersFromApi);
+    } catch (err) {
+      console.error('Error fetching users by role:', err);
+      toast.error('Không thể lấy danh sách người dùng!');
+    }
+  };
   const genderOptions = [
     { label: 'Nam', value: 'MALE' },
     { label: 'Nữ', value: 'FEMALE' },
@@ -30,44 +70,7 @@ function AdminUsersPage() {
   ];
 
   useEffect(() => {
-    const fetchUsersByRole = async () => {
-      try {
-        const token = localStorage.getItem('token'); // Lấy token từ localStorage
-        if (!token) {
-          toast.error('Không tìm thấy token xác thực!');
-          return;
-        }
-        const res = await api.get('/user/get-user-by-role', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const usersFromApi = res.data.map((user, idx) => ({
-          key: user.id || idx + 1,
-          id: user.id,
-          name: user.fullName,
-          email: user.email,
-          phone: user.phone,
-          role: user.role === "MEMBER" ? "donor" : user.role?.toLowerCase(),
-          status: user.status, // lấy đúng trường status từ API
-          joinDate: user.joinDate || (user.birthdate ? new Date(user.birthdate).toLocaleDateString('vi-VN') : "-"),
-          lastLogin: "-",
-          address: user.address || '',
-          gender: user.gender || '',
-          birthdate: user.birthdate || '',
-          height: user.height || '',
-          weight: user.weight || '',
-          lastDonation: user.lastDonation || '',
-          medicalHistory: user.medicalHistory || '',
-          emergencyName: user.emergencyName || '',
-          emergencyPhone: user.emergencyPhone || '',
-          bloodType: user.bloodType || '',
-        }));
-        setUsers(usersFromApi);
-      } catch (err) {
-        console.error('Error fetching users by role:', err);
-        toast.error('Không thể lấy danh sách người dùng!');
-      }
-    };
-    fetchUsersByRole();
+    refreshUsersData();
   }, []);
 
   const showModal = (mode, user = null) => {
@@ -81,7 +84,6 @@ function AdminUsersPage() {
         email: user.email,
         phone: user.phone,
         role: user.role,
-        status: user.status,
         address: user.address,
         gender: user.gender,
         birthdate: user.birthdate,
@@ -110,20 +112,16 @@ function AdminUsersPage() {
           phone: values.phone,
           address: values.address,
           bloodType: values.bloodType,
-          status: 'ACTIVE', // Mặc định là hoạt động
+          status: values.status, // Mặc định là hoạt động
         };
         await api.post('/register', newUser);
+        await refreshUsersData();
         toast.success('Thêm người dùng thành công!');
       } else {
-        // Update existing user (KHÔNG gọi updateUserStatus ở đây nữa)
-        const updatedUsers = users.map(user => 
-          user.key === selectedUser.key ? { ...user, ...values } : user
-        );
-        setUsers(updatedUsers);
-        // Chuẩn hóa dữ liệu gửi lên
+        // Gửi đầy đủ các trường backend yêu cầu khi cập nhật user (không gửi role)
         const requestBody = {
-          id: selectedUser.id,
           fullName: values.name,
+          email: selectedUser?.email, // Lấy email từ selectedUser (ẩn trong form)
           phone: values.phone,
           address: values.address,
           gender: values.gender,
@@ -135,9 +133,16 @@ function AdminUsersPage() {
           emergencyName: values.emergencyName,
           emergencyPhone: values.emergencyPhone,
           bloodType: values.bloodType,
-          role: values.role === 'staff' ? 'STAFF' : values.role === 'donor' ? 'MEMBER' : values.role
         };
+        console.log('Payload update user:', requestBody);
         await api.put(`/user/update-user`, requestBody);
+        // Nếu đổi vai trò, gọi thêm API set-role
+        if (values.role && selectedUser?.role !== values.role) {
+          // Chuyển đổi role sang đúng giá trị backend
+          let backendRole = values.role === 'staff' ? 'STAFF' : values.role === 'donor' ? 'MEMBER' : values.role.toUpperCase();
+          await setUserRole(selectedUser.email, backendRole);
+        }
+        await refreshUsersData();
         toast.success('Cập nhật thông tin thành công!');
       }
       setIsModalVisible(false);
@@ -163,8 +168,8 @@ function AdminUsersPage() {
       // Gọi API đổi trạng thái
       const ok = await updateUserStatus(userToDelete.id, 'INACTIVE');
       if (ok) {
-        // Cập nhật lại users trong state
-        setUsers(users.map(u => u.key === key ? { ...u, status: 'INACTIVE' } : u));
+        // Refresh lại dữ liệu từ API
+        await refreshUsersData();
         toast.success('Đã chuyển trạng thái người dùng sang không hoạt động!');
       }
     } catch (error) {
@@ -175,10 +180,28 @@ function AdminUsersPage() {
 
   // Thêm hàm xử lý đổi trạng thái
   const handleToggleStatus = async (user) => {
-    const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    const ok = await updateUserStatus(user.id, newStatus);
-    if (ok) {
-      setUsers(users.map(u => u.key === user.key ? { ...u, status: newStatus } : u));
+    try {
+      const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      const ok = await updateUserStatus(user.id, newStatus);
+      if (ok) {
+        refreshUsersData(); // Reload lại danh sách ngay sau khi đổi trạng thái thành công
+      }
+    } catch (error) {
+      console.error('Lỗi khi đổi trạng thái người dùng:', error);
+      toast.error('Chuyển trạng thái người dùng thất bại. Vui lòng thử lại sau!');
+    }
+  };
+
+  // Hàm xử lý thay đổi trạng thái từ dropdown
+  const handleStatusChange = async (user, newStatus) => {
+    try {
+      const ok = await updateUserStatus(user.id, newStatus);
+      if (ok) {
+        refreshUsersData(); // Reload lại danh sách ngay sau khi đổi trạng thái thành công
+      }
+    } catch (error) {
+      console.error('Lỗi khi đổi trạng thái người dùng:', error);
+      toast.error('Chuyển trạng thái người dùng thất bại. Vui lòng thử lại sau!');
     }
   };
 
@@ -194,6 +217,44 @@ function AdminUsersPage() {
       user.phone.includes(searchText);
     return matchesSearch;
   });
+
+  const updateUserStatus = async (userId, status) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Không tìm thấy token xác thực!');
+        return false;
+      }
+      console.log('Gửi update status:', { userId: Number(userId), status });
+      await api.put('/user/update-status', { userId: Number(userId), status }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Cập nhật trạng thái thành công!');
+      return true;
+    } catch (err) {
+      toast.error('Cập nhật trạng thái thất bại!');
+      return false;
+    }
+  };
+  
+  // Thêm hàm gọi API phân quyền
+  const setUserRole = async (email, role) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Không tìm thấy token xác thực!');
+        return false;
+      }
+      await api.put(`/set-role?email=${encodeURIComponent(email)}&role=${role}`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Cập nhật vai trò thành công!');
+      return true;
+    } catch (err) {
+      toast.error('Cập nhật vai trò thất bại!');
+      return false;
+    }
+  };
 
   const columns = [
     {
@@ -277,11 +338,10 @@ function AdminUsersPage() {
       width: 120,
       align: 'center',
       render: (status) => {
-        let color = 'green', text = status;
-        if (status === 'ACTIVE' || status === null) { // Thêm điều kiện status === null
-          color = 'green'; text = 'Đang hoạt động';
-        } else {
-          color = 'red'; text = 'Không hoạt động';
+        let color = 'green', text = 'Đang hoạt động';
+        if (status === 'INACTIVE') {
+          color = 'red'; 
+          text = 'Không hoạt động';
         }
         return (
           <Tag color={color} style={{ fontWeight: 500 }}>{text}</Tag>
@@ -306,16 +366,59 @@ function AdminUsersPage() {
             />
           </Tooltip>
           {/* Đã ẩn nút xóa ở đây */}
-          {/* Nút đổi trạng thái */}
-          <Tooltip title={record.status === 'ACTIVE' ? "Khóa tài khoản" : "Mở khóa tài khoản"}>
-            <Button
-              icon={<LockOutlined />}
-              size="middle"
-              onClick={() => handleToggleStatus(record)}
-              style={{ background: record.status === 'ACTIVE' ? '#faad14' : '#52c41a', borderColor: record.status === 'ACTIVE' ? '#faad14' : '#52c41a', color: '#fff' }}
-              shape="circle"
-            />
-          </Tooltip>
+          {/* Nút đổi trạng thái với dropdown */}
+          <Dropdown
+            overlay={
+              <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', padding: 8 }}>
+                <div 
+                  style={{ 
+                    padding: '8px 12px', 
+                    cursor: 'pointer', 
+                    borderRadius: 4,
+                    backgroundColor: record.status === 'ACTIVE' ? '#f6ffed' : '#fff',
+                    color: record.status === 'ACTIVE' ? '#52c41a' : '#666',
+                    fontWeight: record.status === 'ACTIVE' ? 600 : 400,
+                    border: record.status === 'ACTIVE' ? '1px solid #b7eb8f' : '1px solid transparent'
+                  }}
+                  onClick={() => handleStatusChange(record, 'ACTIVE')}
+                >
+                  <span style={{ marginRight: 8 }}>✓</span>
+                  Đang hoạt động
+                </div>
+                <div 
+                  style={{ 
+                    padding: '8px 12px', 
+                    cursor: 'pointer', 
+                    borderRadius: 4,
+                    backgroundColor: record.status === 'INACTIVE' ? '#fff2f0' : '#fff',
+                    color: record.status === 'INACTIVE' ? '#ff4d4f' : '#666',
+                    fontWeight: record.status === 'INACTIVE' ? 600 : 400,
+                    border: record.status === 'INACTIVE' ? '1px solid #ffccc7' : '1px solid transparent',
+                    marginTop: 4
+                  }}
+                  onClick={() => handleStatusChange(record, 'INACTIVE')}
+                >
+                  <span style={{ marginRight: 8 }}>✗</span>
+                  Không hoạt động
+                </div>
+              </div>
+            }
+            trigger={['click']}
+            placement="bottomRight"
+          >
+            <Tooltip title="Thay đổi trạng thái">
+              <Button
+                icon={<LockOutlined />}
+                size="middle"
+                style={{ 
+                  background: record.status === 'ACTIVE' ? '#faad14' : '#52c41a', 
+                  borderColor: record.status === 'ACTIVE' ? '#faad14' : '#52c41a', 
+                  color: '#fff' 
+                }}
+                shape="circle"
+              />
+            </Tooltip>
+          </Dropdown>
         </Space>
       ),
     },
@@ -477,6 +580,7 @@ function AdminUsersPage() {
                 <Form.Item
                   name="email"
                   label={<b>Email</b>}
+                  style={{ display: 'none' }}
                   rules={[
                     { required: true, message: 'Vui lòng nhập email!' },
                     { type: 'email', message: 'Email không hợp lệ!' }
@@ -543,22 +647,6 @@ function AdminUsersPage() {
   );
 }
 
-const updateUserStatus = async (userId, status) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.error('Không tìm thấy token xác thực!');
-      return false;
-    }
-    await api.put('/user/update-status', { userId, status }, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    toast.success('Cập nhật trạng thái thành công!');
-    return true;
-  } catch {
-    toast.error('Cập nhật trạng thái thất bại!');
-    return false;
-  }
-};
+
 
 export default AdminUsersPage; 

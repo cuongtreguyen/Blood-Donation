@@ -126,7 +126,9 @@ function AdminNotificationsPage() {
           <BellOutlined /> Thông báo <Badge count={unreadCount} style={{ marginLeft: 8 }} />
         </Title>
         <Space>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}
+            style={{ background: '#d32f2f', borderColor: '#d32f2f', color: '#fff', fontWeight: 600 }}
+          >
             Tạo thông báo mới
           </Button>
           <Button icon={<CheckCircleOutlined />} onClick={markAllAsRead} disabled={unreadCount === 0}>
@@ -270,6 +272,7 @@ function AdminNotificationsPage() {
         onOk={() => form.submit()}
         okText="Tạo"
         cancelText="Hủy"
+        okButtonProps={{ style: { background: '#d32f2f', borderColor: '#d32f2f', color: '#fff', fontWeight: 600 } }}
       >
         <Form
           form={form}
