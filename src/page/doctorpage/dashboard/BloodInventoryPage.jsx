@@ -31,10 +31,8 @@ import {
   updateBloodInventory,
   deleteBloodInventory,
 } from "../../../services/bloodInventoryService";
-import moment from "moment";
 
 const { Option } = Select;
-const { confirm } = Modal;
 
 const BloodInventoryPage = () => {
   const [inventory, setInventory] = useState([]);
@@ -44,6 +42,7 @@ const BloodInventoryPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [form] = Form.useForm();
+  const [loadingDelete, setLoadingDelete] = useState(false);
 
   // Lấy cài đặt ngưỡng cảnh báo từ localStorage
   const systemSettings = JSON.parse(
@@ -62,10 +61,11 @@ const BloodInventoryPage = () => {
     try {
       const data = await getAllBloodInventory();
       const updatedInventory = data.map((item) => ({
-        id: item.id,
+        id: item.inventoryId, // Sử dụng đúng trường id từ backend
         bloodType: item.bloodType,
         totalUnitsAvailable: item.unitsAvailable,
-        status: getStatus(item.unitsAvailable),
+        backendStatus: item.status, // lấy status gốc từ backend
+        status: getStatus(item.unitsAvailable), // status để hiển thị màu
       }));
       setInventory(updatedInventory);
     } catch (err) {
@@ -110,11 +110,18 @@ const BloodInventoryPage = () => {
   };
 
   const handleEdit = async (record) => {
-    if (!record.id || record.id === 0) {
-      message.warning("Không thể sửa nhóm máu này do thiếu id từ backend.");
-      console.log("Record không hợp lệ:", record);
+    if (!record.id) {
+      // Nếu không có id, chỉ mở modal với dữ liệu hiện tại để test UI
+      setEditingRecord(record);
+      form.setFieldsValue({
+        ...record,
+        type: record.bloodType,
+        unitsAvailable: record.totalUnitsAvailable,
+      });
+      setIsModalVisible(true);
       return;
     }
+    // Nếu có id, gọi API như cũ
     try {
       const fetchedRecord = await getBloodInventoryById(record.id);
       setEditingRecord(fetchedRecord);
@@ -141,9 +148,9 @@ const BloodInventoryPage = () => {
       const commonData = {
         bloodType: values.type,
         unitsAvailable: values.unitsAvailable,
-        expirationDate: values.expirationDate.toISOString(),
+        expirationDate: values.expirationDate ? values.expirationDate.toISOString() : null, // Thêm kiểm tra null
       };
-      if (editingRecord && editingRecord.id && editingRecord.id !== 0) {
+      if (editingRecord && editingRecord.id) {
         await updateBloodInventory(editingRecord.id, commonData);
         message.success("Cập nhật kho máu thành công!");
       } else {
@@ -159,29 +166,18 @@ const BloodInventoryPage = () => {
     }
   };
 
-  const handleDelete = (record) => {
-    if (!record.id || record.id === 0) {
-      message.error("Không thể xóa nhóm máu này do thiếu id từ backend.");
-      console.log("Record không hợp lệ:", record);
-      return;
+  const handleDelete = async (record) => {
+    setLoadingDelete(true);
+    try {
+      await deleteBloodInventory(record.id);
+      message.success(`Đã xóa nhóm máu ${record.bloodType}`);
+      await fetchInventory();
+    } catch (error) {
+      message.error("Có lỗi xảy ra khi xóa kho máu. Vui lòng thử lại.");
+      console.error("Error deleting blood inventory:", error);
+    } finally {
+      setLoadingDelete(false);
     }
-    confirm({
-      title: "Xác nhận xóa",
-      content: `Bạn có chắc chắn muốn xóa nhóm máu ${record.bloodType} khỏi kho không?`,
-      okText: "Xóa",
-      okType: "danger",
-      cancelText: "Hủy",
-      onOk: async () => {
-        try {
-          await deleteBloodInventory(record.id);
-          message.success(`Đã xóa nhóm máu ${record.bloodType}`);
-          fetchInventory();
-        } catch (error) {
-          message.error("Có lỗi xảy ra khi xóa kho máu. Vui lòng thử lại.");
-          console.error("Error deleting blood inventory:", error);
-        }
-      },
-    });
   };
 
   // Tính toán thống kê
@@ -196,6 +192,8 @@ const BloodInventoryPage = () => {
 
   // Lọc dữ liệu inventory
   const filteredInventory = inventory.filter((item) => {
+    // Ẩn các bản ghi đã bị xóa từ backend
+    if (item.backendStatus && item.backendStatus.toUpperCase() === "DELETED") return false;
     const matchSearch = item.bloodType
       .toLowerCase()
       .includes(searchText.toLowerCase());
@@ -204,11 +202,32 @@ const BloodInventoryPage = () => {
     return matchSearch && matchStatus;
   });
 
+  const bloodTypeMap = {
+    A_POSITIVE: 'A+',
+    A_NEGATIVE: 'A-',
+    B_POSITIVE: 'B+',
+    B_NEGATIVE: 'B-',
+    AB_POSITIVE: 'AB+',
+    AB_NEGATIVE: 'AB-',
+    O_POSITIVE: 'O+',
+    O_NEGATIVE: 'O-',
+  };
+  const displayBloodType = (type) => {
+    const label = bloodTypeMap[type] || type || '-';
+    if (label === '-') return label;
+    let color = 'default';
+    if (['A+', 'B+', 'O+', 'AB+'].includes(label)) color = 'red';
+    else if (['A-', 'B-', 'O-', 'AB-'].includes(label)) color = 'blue';
+    if (['O-', 'AB-'].includes(label)) color = 'gold';
+    return <Tag color={color}>{label}</Tag>;
+  };
+
   const columns = [
     {
       title: "Nhóm máu",
       dataIndex: "bloodType",
       key: "bloodType",
+      render: displayBloodType,
     },
     {
       title: "Số lượng (đơn vị)",
@@ -228,36 +247,18 @@ const BloodInventoryPage = () => {
         <Space>
           <Button
             icon={<EditOutlined />}
-            onClick={() => {
-              if (!record.id || record.id === 0) {
-                message.error(
-                  "Không thể sửa nhóm máu này do thiếu id từ backend."
-                );
-                console.log("Record không hợp lệ:", record);
-                return;
-              }
-              handleEdit(record);
-            }}
+            onClick={() => handleEdit(record)}
           >
             Sửa
           </Button>
           <Popconfirm
             title="Bạn có chắc chắn muốn xóa nhóm máu này không?"
-            onConfirm={() => {
-              if (!record.id || record.id === 0) {
-                message.error(
-                  "Không thể xóa nhóm máu này do thiếu id từ backend."
-                );
-                console.log("Record không hợp lệ:", record);
-                return;
-              }
-              handleDelete(record);
-            }}
+            onConfirm={() => handleDelete(record)}
             okText="Xóa"
             cancelText="Hủy"
             okButtonProps={{ danger: true }}
           >
-            <Button danger icon={<DeleteOutlined />}>
+            <Button danger icon={<DeleteOutlined />} disabled={loadingDelete || !record.id || typeof record.id !== 'number' || record.id <= 0} loading={loadingDelete}>
               Xóa
             </Button>
           </Popconfirm>
@@ -408,6 +409,13 @@ const BloodInventoryPage = () => {
             rules={[{ required: true, message: "Vui lòng nhập số lượng" }]}
           >
             <InputNumber min={0} step={1} style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item
+            name="expirationDate"
+            label="Ngày hết hạn"
+            rules={[{ required: true, message: "Vui lòng chọn ngày hết hạn" }]}
+          >
+            <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
           </Form.Item>
         </Form>
       </Modal>
