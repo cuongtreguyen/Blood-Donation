@@ -2485,6 +2485,7 @@ import { Modal } from "antd";
 
 // Component con cho Card hiển thị thông tin
 const AppointmentCard = ({ appointment, handleEdit, handleCancel }) => {
+  
   const getStatusInfo = (status) => {
     switch (status) {
       case "PENDING":
@@ -2993,9 +2994,9 @@ const AppointmentManager = () => {
         setAppointments(sortedAppointments);
         
         // Chỉ hiển thị lỗi nếu cả hai API đều thất bại
-        if (results[0].status === 'rejected' && results[1].status === 'rejected') {
-          setError("Không thể tải dữ liệu lịch hẹn. Vui lòng thử lại.");
-        }
+        // if (results[0].status === 'rejected' && results[1].status === 'rejected') {
+        //   setError("Không thể tải dữ liệu lịch hẹn. Vui lòng thử lại.");
+        // }
         
       } catch (err) {
         console.error("Lỗi khi lấy lịch hẹn:", err);
@@ -3177,7 +3178,7 @@ const AppointmentManager = () => {
             </p>
         </header>
 
-        {error && (
+        {/* {error && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -3186,7 +3187,7 @@ const AppointmentManager = () => {
             <FaExclamationCircle className="text-xl mr-3"/>
             <span>{error}</span>
           </motion.div>
-        )}
+        )} */}
 
         {appointments.length === 0 ? (
           <motion.div
