@@ -6,6 +6,7 @@ import {
   FaHistory,
   FaClock,
   FaBell,
+  FaBlog,
 } from "react-icons/fa";
 import ProfileComponent from "./ProfileComponent";
 import HistoryComponent from "./HistoryComponent";
@@ -15,6 +16,7 @@ import RemindersComponent from "./RemindersComponent";
 import api from "../../config/api";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/features/userSlice";
+import BlogComponent from "./BlogComponent";
 
 const DonateUser = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -109,6 +111,7 @@ const DonateUser = () => {
             "appointments",
             "invitations",
             "reminders",
+            "blog",
           ].map((tab) => (
             <button
               key={tab}
@@ -124,6 +127,7 @@ const DonateUser = () => {
               {tab === "appointments" && <FaCalendar />}
               {tab === "invitations" && <FaBell />}
               {tab === "reminders" && <FaClock />}
+              {tab === "blog" && <FaBlog />}
               <span className="capitalize">
                 {tab === "profile"
                   ? "Hồ sơ"
@@ -133,7 +137,9 @@ const DonateUser = () => {
                   ? "Lịch hẹn"
                   : tab === "invitations"
                   ? "Lời mời"
-                  : "Nhắc nhở"}
+                  : tab === "reminders"
+                  ? "Nhắc nhở"
+                  : "Blog"}
               </span>
             </button>
           ))}
@@ -144,6 +150,7 @@ const DonateUser = () => {
           {activeTab === "appointments" && <AppointmentsComponent />}
           {activeTab === "invitations" && <InvitationsComponent />}
           {activeTab === "reminders" && <RemindersComponent />}
+          {activeTab === "blog" && <BlogComponent />}
         </div>
       </div>
     </div>
