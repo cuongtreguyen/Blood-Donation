@@ -79,7 +79,7 @@ function TestimonialsSection() {
 
   // Lấy tất cả các bài có trường status (không filter giá trị)
   useEffect(() => {
-    api.get('/blogs').then(res => {
+    api.get('/blogs/get-all').then(res => {
       const allWithStatus = res.data.filter(blog => blog.status !== undefined && blog.status !== null);
       setTestimonials(allWithStatus.map(blog => ({
         name: blog.author,
