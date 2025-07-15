@@ -152,7 +152,7 @@ function HeroSection({ onLearnMoreClick }) {
     return {
       gender: genderMap[formData.gender] || null,
       birthdate: formData.birthdate || null,
-      height: formData.height ? parseFloat(formData.height) / 100 : null, // Convert cm to meters
+      height: formData.height ? parseFloat(formData.height) : null, // Convert cm to meters
       weight: formData.weight ? parseFloat(formData.weight) : null,
       last_donation: formData.last_donation || null,
       medicalHistory: formData.medical_history || null,
@@ -167,23 +167,61 @@ function HeroSection({ onLearnMoreClick }) {
   };
 
   // API call function
+  // const submitDonationRequest = async (apiData) => {
+  //   try {
+  //     const response = await api.post("blood-register/create", apiData);
+  //     console.log(response.data);
+  //     setShowDonationForm(false);
+
+  //     toast.success("Đăng ký máu thành công, chờ phê duyệt");
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("API Error:", error);
+  //     toast.error(error.response?.data?.message || "Đã xảy ra lỗi khi đăng ký");
+      
+  //     throw error;
+  //   }
+  // };
   const submitDonationRequest = async (apiData) => {
-    try {
-      const response = await api.post("blood-register/create", apiData);
-      console.log(response.data);
-      setShowDonationForm(false);
+  try {
+    const response = await api.post("blood-register/create", apiData, {
+      responseType: "text", // 👈 quan trọng!
+    });
 
+    console.log("✅ Response:", response.data);
+
+    // Nếu backend trả về message dưới dạng chuỗi (text)
+    if (response.data?.includes("chờ thêm")) {
+      toast.info(response.data);
+    } else {
       toast.success("Đăng ký máu thành công, chờ phê duyệt");
-      return response.data;
-    } catch (error) {
-      console.error("API Error:", error);
-      toast.error(error.response?.data?.message || "Đã xảy ra lỗi khi đăng ký");
-
-      throw error;
     }
-  };
 
-  const handleDonationSubmit = async (e) => {
+    setShowDonationForm(false);
+    return response;
+  } catch (error) {
+    console.error("❌ API Error:", error);
+    console.log("🧪 error.response:", error.response);
+    console.log("🧪 error.response.data:", error.response?.data);
+    console.log("🧪 typeof error.response.data:", typeof error.response?.data);
+
+    let message = "Đã xảy ra lỗi khi đăng ký";
+
+    const data = error.response?.data;
+
+    if (typeof data === "string") {
+      message = data;
+    } else if (data?.message) {
+      message = data.message;
+    } else if (data?.error) {
+      message = data.error;
+    }
+
+    toast.error(message);
+    throw error;
+  }
+};
+ const handleDonationSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
