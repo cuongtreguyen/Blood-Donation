@@ -59,3 +59,9 @@ export const getDonationHistoryByUserId = async (userId) => {
   const res = await api.get(`/blood-register/history/${userId}`);
   return res.data;
 };
+
+// Lấy danh sách đơn hiến máu đã hoàn thành (có đầy đủ thông tin donor)
+export const getListDonation = async () => {
+  const response = await api.get("/blood-register/get-list-donation");
+  return response.data || [];
+};

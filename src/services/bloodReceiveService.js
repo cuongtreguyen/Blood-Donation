@@ -33,9 +33,10 @@ export const updateBloodReceiveStatus = async (id, status) => {
   return response.data;
 };
 
+
 export const setCompleteBloodReceive = async ({ bloodId, implementationDate, unit }) => {
   const response = await api.post("/blood-receive/set-complete", {
-    bloodId,
+   bloodId,
     implementationDate,
     unit,
   });
