@@ -34,11 +34,16 @@ export const updateBloodReceiveStatus = async (id, status) => {
 };
 
 
-export const setCompleteBloodReceive = async ({ bloodId, implementationDate, unit }) => {
+export const setCompleteBloodReceive = async ({  bloodID , implementationDate, unit }) => {
   const response = await api.post("/blood-receive/set-complete", {
-   bloodId,
+    bloodID ,
     implementationDate,
     unit,
   });
+  return response.data;
+};
+
+export const getBloodReceiveHistory = async () => {
+  const response = await api.get("/blood-receive/get-list-receive");
   return response.data;
 }; 
