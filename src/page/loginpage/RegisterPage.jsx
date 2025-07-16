@@ -53,10 +53,11 @@ const RegisterPage = () => {
 
       if (response.status === 200) {
         toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
+        toast.success("VUI LONG KIỂM TRA MAIL ĐỂ KÍCH HOẠT TÀI KHOẢN!!!")
         form.resetFields();
         setTimeout(() => {
           navigate("/login");
-        }, 1500);
+        }, 2000);
       } else {
         toast.error("Đăng ký thất bại. Vui lòng thử lại!");
       }
