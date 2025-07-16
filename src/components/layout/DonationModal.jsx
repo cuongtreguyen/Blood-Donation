@@ -687,7 +687,7 @@ const DonationModal = ({ show, onClose, userData }) => {
       height: data.height ? parseFloat(data.height) / 100 : null,
       weight: data.weight ? parseFloat(data.weight) : null,
       last_donation: data.last_donation || null,
-      medicalHistory: data.medical_history || null,
+      medicalHistory: data.medical_history || "không có",
       bloodType: data.bloodType || null,
       wantedDate: data.preferred_date || null,
       wantedHour: formatTime(data.preferred_time),

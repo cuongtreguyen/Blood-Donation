@@ -2686,8 +2686,7 @@ const EditForm = ({ appointment, onSubmit, onCancel, isLoading, userData }) => {
       bloodType: appointment.bloodType || "",
       emergencyName: appointment.emergencyName || userData?.emergencyName || "",
       emergencyPhone: appointment.emergencyPhone || userData?.phone || "",
-      medicalHistory: appointment.medicalHistory || "",
-      quantity: appointment.quantity || ""
+      medicalHistory: appointment.medicalHistory || ""
     }
   });
 
@@ -2699,8 +2698,7 @@ const EditForm = ({ appointment, onSubmit, onCancel, isLoading, userData }) => {
       bloodType: appointment.bloodType || "",
       emergencyName: appointment.emergencyName || userData?.emergencyName || "",
       emergencyPhone: appointment.emergencyPhone || userData?.phone || "",
-      medicalHistory: appointment.medicalHistory || "",
-      quantity: appointment.quantity || ""
+      medicalHistory: appointment.medicalHistory || ""
     });
   }, [appointment, userData, reset]);
 
@@ -2845,34 +2843,6 @@ const EditForm = ({ appointment, onSubmit, onCancel, isLoading, userData }) => {
           />
         </div>
 
-        {appointment.type === "RECEIVE" && (
-          <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
-              Số lượng máu cần nhận (đơn vị) <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="quantity"
-              type="number"
-              min="1"
-              max="10"
-              {...register("quantity", {
-                required: appointment.type === "RECEIVE" ? "Vui lòng nhập số lượng" : false,
-                min: {
-                  value: 1,
-                  message: "Số lượng tối thiểu là 1",
-                },
-                max: {
-                  value: 10,
-                  message: "Số lượng tối đa là 10",
-                },
-                valueAsNumber: true
-              })}
-              className="w-full p-2 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              placeholder="Nhập số lượng"
-            />
-            {errors.quantity && <p className="text-red-600 text-sm mt-1">{errors.quantity.message}</p>}
-          </div>
-        )}
 
         <div className="flex justify-end space-x-3 pt-4">
           <button
@@ -3104,10 +3074,6 @@ const AppointmentManager = () => {
         medicalHistory: data.medicalHistory?.trim() || null
       };
 
-      // Chỉ thêm quantity nếu là appointment RECEIVE và có giá trị
-      if (appointment.type === "RECEIVE" && data.quantity) {
-        payload.quantity = parseInt(data.quantity);
-      }
 
       console.log("Payload being sent:", payload);
       console.log("Endpoint:", endpoint);
