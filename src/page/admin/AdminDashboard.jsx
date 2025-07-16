@@ -319,6 +319,18 @@ function AdminDashboard() {
     return acc;
   }, {});
 
+  // Gộp các nhóm máu trùng nhau và cộng tổng số lượng
+  const mergedBloodInventory = Object.values(
+    bloodInventory.reduce((acc, item) => {
+      if (!acc[item.bloodType]) {
+        acc[item.bloodType] = { ...item };
+      } else {
+        acc[item.bloodType].unitsAvailable += item.unitsAvailable || 0;
+      }
+      return acc;
+    }, {})
+  );
+
   // Top 5 người dùng mới nhất (ưu tiên sort theo joinDate, nếu không có thì lấy đầu mảng)
   const sortedUsers = users.slice().sort((a, b) => {
     if (a.joinDate && b.joinDate) {
@@ -412,7 +424,7 @@ function AdminDashboard() {
       {/* Main content */}
       <Row gutter={16}>
         <Col xs={24} lg={16}>
-          <Card title="Top 5 người dùng mới nhất" style={{ marginBottom: 24 }}>
+          <Card title="Người dùng mới nhất" style={{ marginBottom: 24 }}>
             <Table
               dataSource={top5Users}
               columns={topUserColumns}
@@ -425,10 +437,10 @@ function AdminDashboard() {
         </Col>
         <Col xs={24} lg={8}>
           <Card title="Tình trạng nhóm máu">
-            {!Array.isArray(bloodInventory) || bloodInventory.length === 0 ? (
+            {!Array.isArray(mergedBloodInventory) || mergedBloodInventory.length === 0 ? (
               <div>Không có dữ liệu tồn kho máu.</div>
             ) : (
-              bloodInventory.map(item => (
+              mergedBloodInventory.map(item => (
                 <div key={item.bloodType} style={{ marginBottom: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Nhóm máu {(() => {
