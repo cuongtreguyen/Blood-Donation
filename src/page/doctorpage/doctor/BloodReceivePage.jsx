@@ -225,7 +225,7 @@ const BloodReceivePage = () => {
       render: (id) => <Text strong>#{id}</Text>,
     },
     {
-      title: "Bệnh nhân",
+      title: "Người nhận máu",
       dataIndex: "fullName",
       key: "fullName",
       render: (name, record) => (
@@ -430,7 +430,7 @@ const BloodReceivePage = () => {
               placeholder={
                 status === "HISTORY"
                   ? "Tìm theo mã, nhóm máu..."
-                  : "Tìm tên bệnh nhân..."
+                  : "Tìm tên người nhận máu..."
               }
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -492,12 +492,12 @@ const BloodReceivePage = () => {
         >
           <Form.Item
             name="fullName"
-            label="Tên bệnh nhân"
+            label="Người nhận máu"
             rules={[
               { required: true, message: "Vui lòng nhập tên bệnh nhân!" },
             ]}
           >
-            <Input placeholder="Nhập tên đầy đủ của bệnh nhân" />
+            <Input placeholder="Nhập tên đầy đủ của người nhận máu" />
           </Form.Item>
           <Row gutter={16}>
             <Col span={12}>
@@ -567,7 +567,7 @@ const BloodReceivePage = () => {
       >
         {selectedRecord && (
           <Descriptions bordered layout="vertical" column={{ xs: 1, sm: 2 }}>
-            <Descriptions.Item label="Bệnh nhân">
+            <Descriptions.Item label="người nhận máu">
               <Text strong>{selectedRecord.fullName}</Text>
             </Descriptions.Item>
             <Descriptions.Item label="Trạng thái">
@@ -612,8 +612,8 @@ const BloodReceivePage = () => {
           onFinish={handleCompleteSubmit}
         >
           <p>
-            Xác nhận hoàn thành yêu cầu <b>#{selectedRecord?.id}</b> cho bệnh
-            nhân <b>{selectedRecord?.fullName}</b>?
+            Xác nhận hoàn thành yêu cầu <b>#{selectedRecord?.id}</b> cho người
+            nhận máu <b>{selectedRecord?.fullName}</b>?
           </p>
           <Form.Item
             label="Ngày thực hiện"

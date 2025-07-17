@@ -215,7 +215,7 @@ const DashboardPage = () => {
           })
         );
 
-        setData(dataWithUser);
+        setData(dataWithUser.slice().sort((a, b) => b.id - a.id));
       } catch {
         message.error("Không thể tải danh sách đăng ký!");
       } finally {
@@ -504,7 +504,9 @@ const DashboardPage = () => {
         <Spin spinning={loading} tip="Đang tải dữ liệu...">
           <Table
             columns={columns}
-            dataSource={filteredData}
+            dataSource={
+              filteredData.slice().sort((a, b) => b.id - a.id)
+            }
             rowKey="id"
             pagination={{ pageSize: 8 }}
             scroll={{ x: "max-content" }}
