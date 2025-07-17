@@ -110,7 +110,7 @@ const BloodUnitsManagement = () => {
       sorter: (a, b) => (bloodTypeMap[a.bloodType] || a.bloodType).localeCompare(bloodTypeMap[b.bloodType] || b.bloodType),
     },
     {
-      title: 'Số Lượng Hiện Có (ml)',
+      title: 'Số Lượng Hiện Có (đơn vị)',
       dataIndex: 'unitsAvailable',
       key: 'unitsAvailable',
       sorter: (a, b) => (a.unitsAvailable || 0) - (b.unitsAvailable || 0),
@@ -124,7 +124,7 @@ const BloodUnitsManagement = () => {
       <Card title="Thống kê Kho Máu" style={{ marginBottom: 24 }}>
         <Row gutter={16}>
           <Col span={8}>
-            <Statistic title="Tổng số đơn vị máu (ml)" value={totalUnits.toLocaleString()} prefix={<BarChartOutlined />} />
+            <Statistic title="Tổng số đơn vị máu (đơn vị)" value={totalUnits.toLocaleString()} prefix={<BarChartOutlined />} />
           </Col>
           {Object.entries(bloodTypeCounts).map(([type, count]) => (
             count < lowStockThreshold && (
@@ -177,7 +177,7 @@ const BloodUnitsManagement = () => {
                 <Table.Summary.Row>
                   <Table.Summary.Cell index={0} colSpan={1}><b>Tổng cộng trên trang này</b></Table.Summary.Cell>
                   <Table.Summary.Cell index={1}>
-                    <b style={{ color: '#d32f2f' }}>{totalPageUnits.toLocaleString()} ml</b>
+                    <b style={{ color: '#d32f2f' }}>{totalPageUnits.toLocaleString()} đơn vị</b>
                   </Table.Summary.Cell>
                 </Table.Summary.Row>
               );
