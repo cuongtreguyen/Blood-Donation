@@ -558,8 +558,7 @@ const ProfileComponent = () => {
         medicalHistory: formData.medicalHistory || null,
         emergencyName: formData.emergencyName || null,
         emergencyPhone: formData.emergencyPhone || null,
-        bloodType: formData.bloodType || null,
-        email: userData.email || null,
+        bloodType: formData.bloodType || null, // Đúng tên trường
       };
       
       console.log("Updating profile with payload:", payload);
