@@ -280,12 +280,12 @@ function BlogPage() {
       key: 'action',
       render: (_, record) => (
         <Space size="small">
-          <Tooltip title="Xem chi tiết">
-            <Button icon={<EyeOutlined />} size="small" onClick={() => handleViewDetail(record.id || record.key)} shape="circle" />
-          </Tooltip>
-          <Tooltip title="Sửa">
-            <Button icon={<EditOutlined />} size="small" style={{ color: '#d32f2f', borderColor: '#d32f2f', background: '#fff' }} onClick={() => handleEdit(record)} shape="circle" />
-          </Tooltip>
+          <Button icon={<EyeOutlined />} size="small" onClick={() => handleViewDetail(record.id || record.key)}>
+            Xem
+          </Button>
+          <Button icon={<EditOutlined />} size="small" style={{ color: '#d32f2f', borderColor: '#d32f2f', background: '#fff' }} onClick={() => handleEdit(record)}>
+            Sửa
+          </Button>
           <Popconfirm
             title="Bạn có chắc chắn muốn xóa bài viết này?"
             okText="Xóa"
@@ -293,24 +293,22 @@ function BlogPage() {
             okButtonProps={{ danger: true }}
             onConfirm={() => handleDelete(record.id || record.key)}
           >
-            <Tooltip title="Xóa">
-              <Button icon={<DeleteOutlined />} size="small" danger shape="circle" />
-            </Tooltip>
+            <Button icon={<DeleteOutlined />} size="small" danger>
+              Xóa
+            </Button>
           </Popconfirm>
           {record.status === 'DELETED' && (
-            <Tooltip title="Khôi phục">
-              <Button
-                type="primary"
-                size="small"
-                style={{ background: '#52c41a', borderColor: '#52c41a' }}
-                onClick={async () => {
-                  const ok = await restoreBlog(record.id);
-                  if (ok) fetchAdminBlogs();
-                }}
-              >
-                Khôi phục
-              </Button>
-            </Tooltip>
+            <Button
+              type="primary"
+              size="small"
+              style={{ background: '#52c41a', borderColor: '#52c41a' }}
+              onClick={async () => {
+                const ok = await restoreBlog(record.id);
+                if (ok) fetchAdminBlogs();
+              }}
+            >
+              Khôi phục
+            </Button>
           )}
         </Space>
       ),
