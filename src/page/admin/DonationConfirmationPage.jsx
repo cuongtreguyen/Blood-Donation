@@ -251,10 +251,10 @@ const DonationConfirmationPage = () => {
               >
                 <Button
                   type="primary"
-                  shape="circle"
-                  icon={<CheckCircleOutlined style={{ fontSize: 24 }} />}
                   style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', boxShadow: '0 2px 8px #b2f2bb' }}
-                />
+                >
+                  Duyệt
+                </Button>
               </Popconfirm>
               <Popconfirm
                 title="Bạn có chắc chắn muốn từ chối yêu cầu này?"
@@ -264,10 +264,11 @@ const DonationConfirmationPage = () => {
                 okButtonProps={{ danger: true }}
               >
                 <Button
-                  shape="circle"
-                  icon={<CloseCircleOutlined style={{ fontSize: 24, color: '#f44336' }} />}
+                  danger
                   style={{ borderColor: '#f44336', backgroundColor: 'white', boxShadow: '0 2px 8px #ffc9c9' }}
-                />
+                >
+                  Từ chối
+                </Button>
               </Popconfirm>
             </Space>
           );
