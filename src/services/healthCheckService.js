@@ -2,6 +2,7 @@ import api from "../config/api";
 
 export const getHealthCheckList = () => api.get('/health-check/get-list');
 export const getHealthCheckById = (id) => api.get(`/health-check/get/${id}`);
+export const getHealthCheckByBloodRegisterId = (bloodRegisterId) => api.get(`/health-check/get-by-register/${bloodRegisterId}`);
 export const createHealthCheck = async (healthCheckData) => {
    const formattedData = {
       height: healthCheckData.height ? Number(healthCheckData.height) : 0,

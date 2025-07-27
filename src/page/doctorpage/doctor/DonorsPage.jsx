@@ -31,6 +31,7 @@ import {
   updateBloodRegisterStatus,
   completeBloodRegister,
 } from "../../../services/bloodRegisterService";
+import { getHealthCheckByBloodRegisterId } from "../../../services/healthCheckService";
 import api from "../../../config/api";
 import dayjs from "dayjs";
 import HealthCheckForm from "../../../components/forms/HealthCheckForm";
@@ -83,6 +84,7 @@ const DonorsPage = () => {
   const [completeForm] = Form.useForm();
   const [healthCheckModalOpen, setHealthCheckModalOpen] = useState(false);
   const [selectedRegister, setSelectedRegister] = useState(null);
+  const [healthCheckStatus, setHealthCheckStatus] = useState({}); // Track health check status for each donor
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,6 +123,19 @@ const DonorsPage = () => {
             };
           })
         );
+
+        // Check health check status for each donor
+        const healthCheckStatusMap = {};
+        for (const item of dataWithUser) {
+          try {
+            const healthCheckRes = await getHealthCheckByBloodRegisterId(item.id);
+            healthCheckStatusMap[item.id] = healthCheckRes.data ? true : false;
+          } catch {
+            // If no health check found, set to false
+            healthCheckStatusMap[item.id] = false;
+          }
+        }
+        setHealthCheckStatus(healthCheckStatusMap);
 
         setData(dataWithUser.slice().sort((a, b) => b.id - a.id));
       } catch {
@@ -195,6 +210,18 @@ const DonorsPage = () => {
     setHealthCheckModalOpen(true);
   };
 
+  const handleHealthCheckSuccess = () => {
+    setHealthCheckModalOpen(false);
+    // Update health check status for the selected register
+    if (selectedRegister) {
+      setHealthCheckStatus(prev => ({
+        ...prev,
+        [selectedRegister.id]: true
+      }));
+    }
+    message.success("Phiếu kiểm tra sức khỏe đã được lưu thành công!");
+  };
+
   let filteredData =
     status === "ALL" ? data : data.filter((item) => item.status === status);
 
@@ -257,7 +284,9 @@ const DonorsPage = () => {
             <Space>
               <Button type="primary" onClick={() => handleOpenCompleteModal(record)}>Hoàn thành</Button>
               <Button danger onClick={() => handleIncomplete(record)}>Chưa hoàn thành</Button>
-              <Button onClick={() => handleOpenHealthCheckModal(record)}>Khám SK</Button>
+              {!healthCheckStatus[record.id] && (
+                <Button onClick={() => handleOpenHealthCheckModal(record)}>Khám SK</Button>
+              )}
             </Space>
           );
         }
@@ -341,7 +370,7 @@ const DonorsPage = () => {
         width={800}
         destroyOnClose
       >
-        {selectedRegister && <HealthCheckForm donorInfo={selectedRegister} onSuccess={() => setHealthCheckModalOpen(false)} />}
+        {selectedRegister && <HealthCheckForm donorInfo={selectedRegister} onSuccess={handleHealthCheckSuccess} />}
       </Modal>
     </div>
   );
