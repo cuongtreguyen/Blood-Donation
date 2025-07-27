@@ -1,239 +1,3 @@
-
-// import React, { useEffect, useState } from "react";
-// import { FaHistory } from "react-icons/fa";
-// import api from "../../config/api";
-// import { useSelector } from "react-redux";
-
-// const HistoryComponent = ({ userId: propUserId }) => {
-//   const [donationHistory, setDonationHistory] = useState([]);
-//   const user = useSelector((state) => state.user);
-// const userId = propUserId || user.id;
-
-//   useEffect(() => {
-//     const fetchDonationHistory = async () => {
-//       try {
-//         if (!userId) {
-//           setDonationHistory([]);
-//           return;
-//         }
-//         const response = await api.get(`/blood-register/history/${userId}`);
-//         setDonationHistory(response.data);
-//       } catch {
-//         setDonationHistory([]);
-//       }
-//     };
-//     fetchDonationHistory();
-//   }, [userId]);
-
-//   return (
-//     <div className="bg-white p-8 rounded-xl shadow-2xl">
-//       <h3 className="text-2xl font-bold mb-6 text-gray-800">
-//         Lịch sử hiến máu
-//       </h3>
-//       <div className="space-y-6">
-//         {donationHistory.length === 0 ? (
-//           <p className="text-gray-600">Chưa có lịch sử hiến máu.</p>
-//         ) : (
-//           donationHistory.map((donation, index) => (
-//             <div
-//               key={index}
-//               className="bg-gradient-to-r from-red-50 to-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
-//             >
-//               <div className="flex justify-between items-center">
-//                 <div>
-//                   <p className="font-semibold text-lg text-gray-800">
-//                     {donation.fullName || "Ẩn danh"}
-//                   </p>
-//                   <p className="text-gray-600">{donation.completedDate}</p>
-//                 </div>
-//                 <div className="text-red-600 font-bold text-lg">
-//                   {donation.unit} ml
-//                 </div>
-//               </div>
-//             </div>
-//           ))
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default HistoryComponent;
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useEffect, useState } from "react";
-// import { useSelector } from "react-redux";
-// import { FaHistory, FaTint, FaCalendarAlt, FaExclamationTriangle, FaInbox } from "react-icons/fa";
-// import api from "../../config/api";
-
-// // Helper function để định dạng ngày tháng
-// const formatDate = (dateString) => {
-//   if (!dateString) return "Không rõ ngày";
-//   return new Date(dateString).toLocaleDateString("vi-VN", {
-//     day: "2-digit",
-//     month: "2-digit",
-//     year: "numeric",
-//   });
-// };
-
-// // Component cho một mục trong lịch sử (Timeline Item)
-// const HistoryItem = ({ donation, isLast }) => (
-//   <div className="relative pl-12 pb-8">
-//     {/* Dấu chấm trên timeline */}
-//     <div className="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 ring-8 ring-white">
-//       <FaTint className="h-3 w-3 text-white" />
-//     </div>
-//     {/* Đường kẻ dọc của timeline */}
-//     {!isLast && (
-//       <div className="absolute left-3 top-8 h-full w-0.5 bg-red-200"></div>
-//     )}
-
-//     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 bg-red-50 border border-red-100 rounded-xl shadow-sm hover:shadow-lg hover:border-red-200 transition-all duration-300">
-//       <div>
-//         <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-//           <FaCalendarAlt />
-//           <span>{formatDate(donation.completedDate)}</span>
-//         </div>
-//         <p className="font-bold text-xl text-gray-800">
-//           {donation.fullName || "Tình nguyện viên ẩn danh"}
-//         </p>
-//       </div>
-//       <div className="mt-4 sm:mt-0 text-right">
-//         <p className="font-bold text-2xl text-red-600">
-//           {donation.unit}
-//           <span className="text-lg font-medium ml-1">ml</span>
-//         </p>
-//       </div>
-//     </div>
-//   </div>
-// );
-
-// // Component Skeleton cho trạng thái đang tải
-// const SkeletonLoader = () => (
-//   <div className="space-y-8">
-//     {[...Array(3)].map((_, i) => (
-//       <div key={i} className="flex gap-4 animate-pulse">
-//         <div className="h-12 w-12 rounded-full bg-gray-200"></div>
-//         <div className="flex-1 space-y-3">
-//           <div className="h-4 w-3/4 rounded bg-gray-200"></div>
-//           <div className="h-4 w-1/2 rounded bg-gray-200"></div>
-//         </div>
-//       </div>
-//     ))}
-//   </div>
-// );
-
-// const HistoryComponent = ({ userId: propUserId }) => {
-//   const [history, setHistory] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-
-//   const user = useSelector((state) => state.user);
-//   const userId = propUserId || user?.id;
-
-//   useEffect(() => {
-//     const fetchDonationHistory = async () => {
-//       if (!userId) {
-//         setLoading(false);
-//         setHistory([]);
-//         return;
-//       }
-
-//       setLoading(true);
-//       setError(null);
-
-//       try {
-//         const response = await api.get(`/blood-register/history/${userId}`);
-//         // Sắp xếp lịch sử theo ngày mới nhất lên đầu
-//         const sortedHistory = response.data.sort((a, b) => new Date(b.completedDate) - new Date(a.completedDate));
-//         setHistory(sortedHistory);
-//       } catch (err) {
-//         console.error("Failed to fetch donation history:", err);
-//         setError("Không thể tải lịch sử hiến máu. Vui lòng thử lại sau.");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchDonationHistory();
-//   }, [userId]);
-
-//   const renderContent = () => {
-//     if (loading) {
-//       return <SkeletonLoader />;
-//     }
-
-//     if (error) {
-//       return (
-//         <div className="text-center py-12">
-//           <FaExclamationTriangle className="mx-auto text-5xl text-yellow-500 mb-4" />
-//           <p className="text-lg text-gray-600">{error}</p>
-//         </div>
-//       );
-//     }
-
-//     if (history.length === 0) {
-//       return (
-//         <div className="text-center py-12">
-//           <FaInbox className="mx-auto text-6xl text-gray-300 mb-4" />
-//           <p className="text-xl font-semibold text-gray-700">Chưa có lịch sử</p>
-//           <p className="text-gray-500 mt-2">
-//             Mỗi lần hiến máu của bạn là một món quà vô giá.
-//           </p>
-//           {/* Bạn có thể thêm một nút kêu gọi hành động ở đây */}
-//           {/* <button className="mt-6 px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition">
-//             Đăng ký hiến máu ngay
-//           </button> */}
-//         </div>
-//       );
-//     }
-
-//     return (
-//       <div className="relative">
-//         {history.map((donation, index) => (
-//           <HistoryItem
-//             key={donation.id || index}
-//             donation={donation}
-//             isLast={index === history.length - 1}
-//           />
-//         ))}
-//       </div>
-//     );
-//   };
-
-//   return (
-//     <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-100">
-//       <div className="flex items-center gap-4 mb-8">
-//         <div className="p-3 bg-red-100 rounded-full">
-//           <FaHistory className="text-red-600 text-2xl" />
-//         </div>
-//         <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
-//           Lịch sử hiến máu
-//         </h2>
-//       </div>
-//       {renderContent()}
-//     </div>
-//   );
-// };
-
-// export default HistoryComponent;
-
-
-
-
-
-
-
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
@@ -257,14 +21,35 @@ const formatDate = (dateString) => {
 
 // 🎨 Hàm tạo HTML template cho chứng nhận
 const createCertificateHTML = (certificateData, donationData) => {
+  // Helper function để định dạng ngày tháng (bạn có thể đã có hàm này)
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
   return `
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chứng Nhận Hiến Máu</title>
+    <title>Chứng Nhận Hiến Máu Tình Nguyện</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-red: #a41e21; /* Đỏ rượu vang */
+            --accent-gold: #c9a86a; /* Vàng gold */
+            --text-dark: #333333;
+            --text-light: #555555;
+            --background-light: #fdfbf7;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -272,267 +57,235 @@ const createCertificateHTML = (certificateData, donationData) => {
         }
         
         body {
-            font-family: 'Times New Roman', serif;
-            background: linear-gradient(135deg, #fef7f7 0%, #fff5f5 100%);
+            font-family: 'Lato', sans-serif;
+            background: #f1f1f1;
             padding: 40px 20px;
-            color: #333;
+            color: var(--text-dark);
         }
         
         .certificate-container {
-            max-width: 800px;
+            max-width: 840px; /* Tăng chiều rộng để thoáng hơn */
+            min-height: 594px; /* A4 landscape ratio */
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(220, 38, 38, 0.1);
-            overflow: hidden;
+            background: var(--background-light);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             position: relative;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        
-        .certificate-header {
-            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-            position: relative;
-        }
-        
-        .certificate-header::before {
+
+        /* Họa tiết viền sang trọng */
+        .certificate-container::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
-            background-size: 50px 50px;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border: 2px solid var(--accent-gold);
+            pointer-events: none; /* Để có thể chọn text bên trong */
         }
         
-        .certificate-title {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 10px;
+        .certificate-container::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 1px solid var(--primary-red);
+            pointer-events: none;
+        }
+
+        .certificate-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            /* SVG Logo giọt máu và trái tim cách điệu */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a41e21'%3E%3Cpath d='M12 2C7.58 2 4 5.58 4 10c0 4.42 8 12 8 12s8-7.58 8-12c0-4.42-3.58-8-8-8zm-1.5 10.5H9v-3h1.5v3zm3 0h-1.5v-3H15v3z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .main-title {
+            font-family: 'Merriweather', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-red);
             text-transform: uppercase;
             letter-spacing: 2px;
-            position: relative;
-            z-index: 1;
+            margin-bottom: 5px;
         }
-        
-        .certificate-subtitle {
-            font-size: 18px;
-            opacity: 0.9;
-            position: relative;
-            z-index: 1;
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-light);
+            letter-spacing: 1px;
         }
-        
+
         .certificate-body {
-            padding: 50px 40px;
             text-align: center;
+            padding: 20px 0;
+            flex-grow: 1;
+            /* Watermark */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a41e21' opacity='0.05'%3E%3Cpath d='M12 2C7.58 2 4 5.58 4 10c0 4.42 8 12 8 12s8-7.58 8-12c0-4.42-3.58-8-8-8zm-1.5 10.5H9v-3h1.5v3zm3 0h-1.5v-3H15v3z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 50%;
         }
-        
-        .blood-drop {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-            border-radius: 50% 50% 50% 0;
-            transform: rotate(-45deg);
-            margin: 0 auto 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);
-        }
-        
-        .blood-drop::before {
-            content: '❤️';
-            transform: rotate(45deg);
-            font-size: 30px;
+
+        .acknowledgement-text {
+            font-size: 18px;
+            line-height: 1.7;
+            color: var(--text-light);
+            margin: 20px 0;
         }
         
         .donor-name {
-            font-size: 28px;
-            color: #dc2626;
-            font-weight: bold;
-            margin: 30px 0;
-            border-bottom: 3px solid #dc2626;
+            font-family: 'Merriweather', serif;
+            font-size: 36px;
+            color: var(--primary-red);
+            font-weight: 700;
+            margin: 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-gold);
             display: inline-block;
-            padding-bottom: 5px;
-        }
-        
-        .certificate-text {
-            font-size: 18px;
-            line-height: 1.8;
-            margin: 30px 0;
-            color: #555;
         }
         
         .donation-details {
-            background: #fef7f7;
-            border-left: 5px solid #dc2626;
-            padding: 20px;
-            margin: 30px 0;
-            border-radius: 0 10px 10px 0;
+            width: 80%;
+            margin: 30px auto;
+            border-collapse: collapse; /* Gộp các đường viền của bảng */
         }
-        
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
+
+        .donation-details td {
+            padding: 12px;
             font-size: 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .donation-details .detail-label {
+            font-weight: 700;
+            color: var(--primary-red);
+            text-align: left;
         }
         
-        .detail-label {
-            font-weight: bold;
-            color: #dc2626;
+        .donation-details .detail-value {
+            text-align: right;
+            font-weight: 400;
+            color: var(--text-dark);
         }
-        
+
         .signatures {
             display: flex;
-            justify-content: space-between;
-            margin-top: 60px;
-            padding: 0 40px;
+            justify-content: space-around;
+            margin-top: 40px;
         }
         
         .signature-block {
             text-align: center;
-            flex: 1;
+            width: 40%;
         }
         
         .signature-title {
-            font-weight: bold;
-            margin-bottom: 40px;
-            color: #dc2626;
+            font-family: 'Merriweather', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 50px;
         }
         
-        .signature-name {
-            border-top: 2px solid #333;
-            padding-top: 10px;
-            font-weight: bold;
+        .signature-line {
+            border-top: 1px dotted var(--text-dark);
+            padding-top: 8px;
+            font-size: 16px;
+            font-weight: 700;
         }
         
         .certificate-footer {
-            background: #f8f9fa;
-            padding: 20px;
             text-align: center;
-            color: #666;
-            font-size: 14px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #999;
         }
-        
-        .decorative-border {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            bottom: 20px;
-            border: 3px solid #dc2626;
-            border-radius: 15px;
-            pointer-events: none;
-        }
-        
-        .corner-decoration {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            border: 3px solid #dc2626;
-        }
-        
-        .corner-decoration.top-left {
-            top: 10px;
-            left: 10px;
-            border-right: none;
-            border-bottom: none;
-        }
-        
-        .corner-decoration.top-right {
-            top: 10px;
-            right: 10px;
-            border-left: none;
-            border-bottom: none;
-        }
-        
-        .corner-decoration.bottom-left {
-            bottom: 10px;
-            left: 10px;
-            border-right: none;
-            border-top: none;
-        }
-        
-        .corner-decoration.bottom-right {
-            bottom: 10px;
-            right: 10px;
-            border-left: none;
-            border-top: none;
-        }
-        
+
         @media print {
             body {
                 background: white;
                 padding: 0;
+            }
+            .certificate-container {
+                box-shadow: none;
+                margin: 0;
+                max-width: 100%;
             }
         }
     </style>
 </head>
 <body>
     <div class="certificate-container">
-        <div class="decorative-border"></div>
-        <div class="corner-decoration top-left"></div>
-        <div class="corner-decoration top-right"></div>
-        <div class="corner-decoration bottom-left"></div>
-        <div class="corner-decoration bottom-right"></div>
+        <header class="certificate-header">
+            <div class="header-logo"></div>
+            <h1 class="main-title">Chứng Nhận Hiến Máu Tình Nguyện</h1>
+            <p class="subtitle">Certificate of Voluntary Blood Donation</p>
+        </header>
         
-        <div class="certificate-header">
-            <h1 class="certificate-title">Chứng Nhận Hiến Máu</h1>
-            <p class="certificate-subtitle">Blood Donation Certificate</p>
-        </div>
-        
-        <div class="certificate-body">
-            <div class="blood-drop"></div>
-            
-            <p class="certificate-text">
-                Xin chân thành cảm ơn
-            </p>
+        <main class="certificate-body">
+            <p class="acknowledgement-text">Trân trọng chứng nhận và ghi nhận nghĩa cử cao đẹp của:</p>
             
             <div class="donor-name">${certificateData.donorName}</div>
             
-            <p class="certificate-text">
-                đã tham gia hiến máu tình nguyện, thể hiện tinh thần cao đẹp "Giọt máu hồng - Trái tim vàng". 
-                Hành động cao đẹp của bạn đã góp phần cứu chữa những sinh mạng quý giá.
+            <p class="acknowledgement-text">
+                Đã tình nguyện hiến máu cứu người, một hành động nhân văn sâu sắc.
             </p>
             
-            <div class="donation-details">
-                <div class="detail-row">
-                    <span class="detail-label">Mã chứng nhận:</span>
-                    <span>#${certificateData.id}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Ngày hiến máu:</span>
-                    <span>${formatDate(donationData.completedDate)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Lượng máu hiến:</span>
-                    <span>${donationData.unit} ml</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Ngày cấp chứng nhận:</span>
-                    <span>${formatDate(certificateData.issueDate)}</span>
-                </div>
-            </div>
-            
-            <div class="signatures">
-                <div class="signature-block">
-                    <div class="signature-title">Người hiến máu</div>
-                    <div class="signature-name">${certificateData.donorName}</div>
-                </div>
-                <div class="signature-block">
-                    <div class="signature-title">Cán bộ y tế</div>
-                    <div class="signature-name">${certificateData.staffName}</div>
-                </div>
-            </div>
-        </div>
+            <table class="donation-details">
+                <tbody>
+                    <tr>
+                        <td class="detail-label">Mã chứng nhận:</td>
+                        <td class="detail-value">#${certificateData.id}</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label">Ngày hiến máu:</td>
+                        <td class="detail-value">${formatDate(donationData.completedDate)}</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label">Lượng máu đã hiến:</td>
+                        <td class="detail-value">${donationData.unit} ml</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label">Ngày cấp chứng nhận:</td>
+                        <td class="detail-value">${formatDate(certificateData.issueDate)}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
         
-        <div class="certificate-footer">
-            <p>Cảm ơn bạn đã đồng hành cùng chúng tôi trong việc cứu chữa sinh mạng</p>
-            <p>Trung tâm Huyết học - Truyền máu</p>
+        <div class="signatures">
+            <div class="signature-block">
+                <div class="signature-title">Người Hiến Máu</div>
+                <div class="signature-line">${certificateData.donorName}</div>
+            </div>
+            <div class="signature-block">
+                <div class="signature-title">Đại Diện Đơn Vị Tiếp Nhận</div>
+                <div class="signature-line">${certificateData.staffName}</div>
+            </div>
         </div>
+
+        <footer class="certificate-footer">
+            <p>Trung tâm Huyết học - Truyền máu Quốc gia</p>
+            <p>Mỗi giọt máu cho đi, một cuộc đời ở lại. Xin chân thành cảm ơn!</p>
+        </footer>
     </div>
 </body>
 </html>`;
@@ -540,10 +293,10 @@ const createCertificateHTML = (certificateData, donationData) => {
 
 // 🔻 Component thể hiện một mục hiến máu trong timeline
 const HistoryItem = ({ donation, isLast }) => {
-  // 📥 Hàm tải chứng nhận hiến máu theo ID
+  // 📥 Hàm tải chứng nhận hiến máu theo certificateId
   const handleDownload = async () => {
     try {
-      const response = await api.get(`/blood-register/get-certificate/${donation.id}`);
+      const response = await api.get(`/certificates/get-certificate-by-id/${donation.certificateId}`);
       const certificateData = response.data;
       
       // Tạo HTML certificate
@@ -553,7 +306,7 @@ const HistoryItem = ({ donation, isLast }) => {
       const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = `ChungNhanHienMau-${donation.id}-${certificateData.donorName}.html`;
+      link.download = `ChungNhanHienMau-${donation.certificateId}-${certificateData.donorName}.html`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
