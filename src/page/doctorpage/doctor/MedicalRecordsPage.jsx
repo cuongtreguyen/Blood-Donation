@@ -81,12 +81,11 @@ function MedicalRecordsPage() {
     setLoading(true);
     try {
       const res = await getHealthCheckList();
-      // SỬA LẠI Ở ĐÂY: Dữ liệu nằm trong `res.data` theo đúng code gốc của bạn
       setMedicalRecords(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       message.error("Không thể tải danh sách hồ sơ y tế!");
       console.error(err);
-      setMedicalRecords([]); // Đảm bảo medicalRecords là mảng rỗng khi có lỗi
+      setMedicalRecords([]);
     } finally {
       setLoading(false);
     }
@@ -403,21 +402,10 @@ function MedicalRecordsPage() {
                 <Option value="failed">Không đạt</Option>
               </Select>
               <RangePicker
-                onChange={(dates) =>
-                  setFilters((f) => ({ ...f, dateRange: dates }))
-                }
+                onChange={(dates) => console.log("Date range changed: ", dates)}
               />
             </Space>
           </Col>
-          {/* <Col>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={handleOpenCreateModal}
-            >
-              Tạo hồ sơ mới
-            </Button>
-          </Col> */}
         </Row>
 
         <Spin spinning={loading}>
@@ -460,7 +448,7 @@ function MedicalRecordsPage() {
                 label="Người hiến máu"
                 rules={[{ required: true, message: "Vui lòng nhập tên" }]}
               >
-                <Input placeholder="Nhập tên người hiến máu" />
+                <Input placeholder="Nhập tên người hiến máu" readOnly />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -484,7 +472,16 @@ function MedicalRecordsPage() {
               <Form.Item
                 label="Chiều cao (cm)"
                 name="height"
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập chiều cao!" },
+                  {
+                    transform: (value) => Number(value), // SỬA Ở ĐÂY
+                    type: "number",
+                    min: 140,
+                    max: 250,
+                    message: "Chiều cao phải từ 140-250cm",
+                  },
+                ]}
               >
                 <Input type="number" placeholder="VD: 170" />
               </Form.Item>
@@ -493,7 +490,16 @@ function MedicalRecordsPage() {
               <Form.Item
                 label="Cân nặng (kg)"
                 name="weight"
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập cân nặng!" },
+                  {
+                    transform: (value) => Number(value), // SỬA Ở ĐÂY
+                    type: "number",
+                    min: 42,
+                    max: 150,
+                    message: "Cân nặng phải từ 42-150kg",
+                  },
+                ]}
               >
                 <Input type="number" placeholder="VD: 65" />
               </Form.Item>
@@ -502,7 +508,16 @@ function MedicalRecordsPage() {
               <Form.Item
                 label="Nhiệt độ (°C)"
                 name="temperature"
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập nhiệt độ!" },
+                  {
+                    transform: (value) => Number(value), // SỬA Ở ĐÂY
+                    type: "number",
+                    min: 35,
+                    max: 38,
+                    message: "Nhiệt độ phải từ 35-38°C",
+                  },
+                ]}
               >
                 <Input type="number" step="0.1" placeholder="VD: 36.5" />
               </Form.Item>
@@ -513,9 +528,18 @@ function MedicalRecordsPage() {
               <Form.Item
                 label="Huyết áp"
                 name="bloodPressure"
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập huyết áp!" },
+                  {
+                    transform: (value) => Number(value), // SỬA Ở ĐÂY
+                    type: "number",
+                    min: 50,
+                    max: 250,
+                    message: "Huyết áp phải từ 50-250mmHg",
+                  },
+                ]}
               >
-                <Input placeholder="VD: 120/80" />
+                <Input placeholder="VD: 120" type="number" />
               </Form.Item>
             </Col>
             <Col span={8}>
@@ -527,7 +551,7 @@ function MedicalRecordsPage() {
               <Form.Item
                 label="Ngày khám"
                 name="checkDate"
-                rules={[{ required: true }]}
+                rules={[{ required: true, message: "Vui lòng chọn ngày!" }]}
               >
                 <DatePicker
                   style={{ width: "100%" }}
@@ -542,7 +566,9 @@ function MedicalRecordsPage() {
               <Form.Item
                 label="Bác sĩ khám"
                 name="staffName"
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên bác sĩ!" },
+                ]}
               >
                 <Input placeholder="Nhập tên bác sĩ khám" />
               </Form.Item>
@@ -551,18 +577,20 @@ function MedicalRecordsPage() {
               <Form.Item
                 label="ID ĐK hiến máu"
                 name="bloodRegisterId"
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập ID đăng ký!" },
+                ]}
               >
-                <Input type="number" placeholder="VD: 1" />
+                <Input type="number" placeholder="VD: 1" readOnly />
               </Form.Item>
             </Col>
           </Row>
           <Form.Item
             label="Trạng thái"
             name="status"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}
           >
-            <Select>
+            <Select placeholder="Chọn trạng thái">
               <Option value={true}>Đạt</Option>
               <Option value={false}>Không đạt</Option>
             </Select>
@@ -570,6 +598,7 @@ function MedicalRecordsPage() {
           <Form.Item
             label="Lý do không đạt"
             name="reason"
+            dependencies={["status"]}
             rules={[
               ({ getFieldValue }) => ({
                 validator(_, value) {
@@ -587,16 +616,14 @@ function MedicalRecordsPage() {
             />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Lưu
-            </Button>
-            <Button
-              htmlType="button"
-              onClick={() => form.resetFields()}
-              style={{ marginLeft: 8 }}
-            >
-              Làm mới
-            </Button>
+            <Space>
+              <Button type="primary" htmlType="submit">
+                Lưu
+              </Button>
+              <Button htmlType="button" onClick={() => form.resetFields()}>
+                Làm mới
+              </Button>
+            </Space>
           </Form.Item>
         </Form>
       </Modal>
