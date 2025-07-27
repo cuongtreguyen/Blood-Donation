@@ -1,3 +1,5 @@
+
+
 // import React, { useEffect, useState } from 'react';
 // import { Card, Row, Col, Typography, Space, Tag } from 'antd';
 // import { UserOutlined, TeamOutlined, HeartOutlined, BarChartOutlined } from '@ant-design/icons';
@@ -50,16 +52,22 @@
 //     { month: 'Tháng 4', donations: 450 },
 //     { month: 'Tháng 5', donations: 600 },
 //     { month: 'Tháng 6', donations: 550 },
+//     { month: 'Tháng 7', donations: 480 },
+//     { month: 'Tháng 8', donations: 520 },
+//     { month: 'Tháng 9', donations: 610 },
+//     { month: 'Tháng 10', donations: 570 },
+//     { month: 'Tháng 11', donations: 530 },
+//     { month: 'Tháng 12', donations: 590 },
 //   ];
 
 //   // Dữ liệu mẫu cho hoạt động gần đây
-//   const recentActivities = [
-//     { id: 1, type: 'Đăng ký', description: 'Người dùng Nguyễn Văn A đã đăng ký.', time: '2 giờ trước' },
-//     { id: 2, type: 'Cập nhật', description: 'Ngân hàng máu Chợ Rẫy đã cập nhật thông tin.', time: '1 ngày trước' },
-//     { id: 3, type: 'Hiến máu', description: 'Có 1 lượt hiến máu mới được ghi nhận.', time: '3 ngày trước' },
-//     { id: 4, type: 'Đăng nhập', description: 'Nhân viên Trần Thị B đã đăng nhập hệ thống.', time: '4 ngày trước' },
-//     { id: 5, type: 'Thêm mới', description: 'Thêm ngân hàng máu Bệnh viện 115.', time: '1 tuần trước' },
-//   ];
+//   // const recentActivities = [
+//   //   { id: 1, type: 'Đăng ký', description: 'Người dùng Nguyễn Văn A đã đăng ký.', time: '2 giờ trước' },
+//   //   { id: 2, type: 'Cập nhật', description: 'Ngân hàng máu Chợ Rẫy đã cập nhật thông tin.', time: '1 ngày trước' },
+//   //   { id: 3, type: 'Hiến máu', description: 'Có 1 lượt hiến máu mới được ghi nhận.', time: '3 ngày trước' },
+//   //   { id: 4, type: 'Đăng nhập', description: 'Nhân viên Trần Thị B đã đăng nhập hệ thống.', time: '4 ngày trước' },
+//   //   { id: 5, type: 'Thêm mới', description: 'Thêm ngân hàng máu Bệnh viện 115.', time: '1 tuần trước' },
+//   // ];
 
 //   return (
 //     <div className="p-6">
@@ -104,35 +112,18 @@
 
 //       {/* Biểu đồ và hoạt động gần đây */}
 //       <Row gutter={[16, 16]}>
-//         <Col xs={24} lg={16}>
+//         <Col xs={24} lg={24}>
 //           <Card title="Thống kê lượt hiến máu theo tháng">
 //             <ResponsiveContainer width="100%" height={300}>
-//               <LineChart data={monthlyDonations}>
+//               <BarChart data={monthlyDonations}>
 //                 <CartesianGrid strokeDasharray="3 3" />
-//                 <XAxis dataKey="month" />
+//                 <XAxis dataKey="month" interval={0} />
 //                 <YAxis />
 //                 <Tooltip />
 //                 <Legend />
-//                 <Line type="monotone" dataKey="donations" stroke="#8884d8" name="Lượt hiến máu" />
-//               </LineChart>
+//                 <Bar dataKey="donations" fill="#8884d8" name="Lượt hiến máu" />
+//               </BarChart>
 //             </ResponsiveContainer>
-//           </Card>
-//         </Col>
-//         <Col xs={24} lg={8}>
-//           <Card title="Hoạt động gần đây">
-//             <ul>
-//               {recentActivities.map(activity => (
-//                 <li key={activity.id} style={{ marginBottom: '8px' }}>
-//                   <Space>
-//                     <Tag color={activity.type === 'Đăng ký' ? 'blue' : activity.type === 'Hiến máu' ? 'red' : 'default'}>
-//                       {activity.type}
-//                     </Tag>
-//                     <Text>{activity.description}</Text>
-//                     <Text type="secondary">{activity.time}</Text>
-//                   </Space>
-//                 </li>
-//               ))}
-//             </ul>
 //           </Card>
 //         </Col>
 //       </Row>
@@ -143,7 +134,7 @@
 // export default AdminStatisticsPage; 
 
 import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Typography, Space, Tag } from 'antd';
+import { Card, Row, Col, Typography, Space, Tag, Select } from 'antd';
 import { UserOutlined, TeamOutlined, HeartOutlined, BarChartOutlined } from '@ant-design/icons';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import api from '../../config/api';
@@ -158,6 +149,22 @@ const AdminStatisticsPage = () => {
     totalDonations: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [monthlyDonations, setMonthlyDonations] = useState([
+    { month: 'Tháng 1', donations: 0 },
+    { month: 'Tháng 2', donations: 0 },
+    { month: 'Tháng 3', donations: 0 },
+    { month: 'Tháng 4', donations: 0 },
+    { month: 'Tháng 5', donations: 0 },
+    { month: 'Tháng 6', donations: 0 },
+    { month: 'Tháng 7', donations: 0 },
+    { month: 'Tháng 8', donations: 0 },
+    { month: 'Tháng 9', donations: 0 },
+    { month: 'Tháng 10', donations: 0 },
+    { month: 'Tháng 11', donations: 0 },
+    { month: 'Tháng 12', donations: 0 },
+  ]);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const totalYearlyDonations = monthlyDonations.reduce((sum, m) => sum + (m.donations || 0), 0);
 
   useEffect(() => {
     // Hàm lấy dữ liệu thống kê người dùng từ API khi trang được tải
@@ -186,21 +193,27 @@ const AdminStatisticsPage = () => {
     fetchStats();
   }, []);
 
-  // Dữ liệu mẫu cho biểu đồ lượt hiến máu theo tháng
-  const monthlyDonations = [
-    { month: 'Tháng 1', donations: 400 },
-    { month: 'Tháng 2', donations: 300 },
-    { month: 'Tháng 3', donations: 500 },
-    { month: 'Tháng 4', donations: 450 },
-    { month: 'Tháng 5', donations: 600 },
-    { month: 'Tháng 6', donations: 550 },
-    { month: 'Tháng 7', donations: 480 },
-    { month: 'Tháng 8', donations: 520 },
-    { month: 'Tháng 9', donations: 610 },
-    { month: 'Tháng 10', donations: 570 },
-    { month: 'Tháng 11', donations: 530 },
-    { month: 'Tháng 12', donations: 590 },
-  ];
+  // Gọi lại API khi selectedYear thay đổi
+  useEffect(() => {
+    const fetchMonthlyDonations = async (year) => {
+      try {
+        const res = await api.get(`/blood-register/completed-monthly/${year}`);
+        const data = Array.isArray(res.data) ? res.data : [];
+        const months = Array.from({ length: 12 }, (_, i) => {
+          const found = data.find(item => item.month === i + 1);
+          return {
+            month: `Tháng ${i + 1}`,
+            donations: found ? found.totalCompletedRequests : 0
+          };
+        });
+        setMonthlyDonations(months);
+      } catch (e) {
+        console.log(e);
+        setMonthlyDonations(Array.from({ length: 12 }, (_, i) => ({ month: `Tháng ${i + 1}`, donations: 0 })));
+      }
+    };
+    fetchMonthlyDonations(selectedYear);
+  }, [selectedYear]);
 
   // Dữ liệu mẫu cho hoạt động gần đây
   // const recentActivities = [
@@ -245,7 +258,7 @@ const AdminStatisticsPage = () => {
               <BarChartOutlined style={{ fontSize: '30px', color: '#fa8c16' }} />
               <div>
                 <Text type="secondary">Tổng số lượt hiến máu</Text>
-                <Title level={4} style={{ margin: 0 }}>{loading ? '...' : stats.totalDonations}</Title>
+                <Title level={4} style={{ margin: 0 }}>{loading ? '...' : totalYearlyDonations}</Title>
               </div>
             </Space>
           </Card>
@@ -256,6 +269,19 @@ const AdminStatisticsPage = () => {
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={24}>
           <Card title="Thống kê lượt hiến máu theo tháng">
+            <div style={{ marginBottom: 16 }}>
+              <span>Chọn năm: </span>
+              <Select
+                value={selectedYear}
+                style={{ width: 120 }}
+                onChange={value => setSelectedYear(value)}
+              >
+                {[...Array(6)].map((_, idx) => {
+                  const year = new Date().getFullYear() - idx;
+                  return <Select.Option key={year} value={year}>{year}</Select.Option>;
+                })}
+              </Select>
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={monthlyDonations}>
                 <CartesianGrid strokeDasharray="3 3" />

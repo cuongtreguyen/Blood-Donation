@@ -165,3 +165,133 @@ const DonateUser = () => {
 };
 
 export default DonateUser;
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useState } from "react";
+// import { useNavigate } from "react-router-dom";
+// import {
+//   FaUser,
+//   FaCalendar,
+//   FaHistory,
+//   FaClock,
+//   FaBell,
+//   FaBlog,
+//   FaSignOutAlt,
+// } from "react-icons/fa";
+// import ProfileComponent from "./ProfileComponent";
+// import HistoryComponent from "./HistoryComponent";
+// import AppointmentsComponent from "./AppointmentsComponent";
+// import InvitationsComponent from "./InvitationsComponent";
+// import RemindersComponent from "./RemindersComponent";
+// import BlogComponent from "./BlogComponent";
+// import { useSelector, useDispatch } from "react-redux";
+// import { logout } from "../../redux/features/userSlice";
+
+// // Cấu trúc dữ liệu cho các tab để dễ quản lý và render
+// const TABS = [
+//   { id: "profile", label: "Hồ sơ", icon: FaUser, component: ProfileComponent },
+//   { id: "history", label: "Lịch sử", icon: FaHistory, component: HistoryComponent },
+//   { id: "appointments", label: "Lịch hẹn", icon: FaCalendar, component: AppointmentsComponent },
+//   { id: "invitations", label: "Lời mời", icon: FaBell, component: InvitationsComponent },
+//   { id: "reminders", label: "Nhắc nhở", icon: FaClock, component: RemindersComponent },
+//   { id: "blog", label: "Blog", icon: FaBlog, component: BlogComponent },
+// ];
+
+// const DonateUser = () => {
+//   const [activeTab, setActiveTab] = useState("profile");
+//   const navigate = useNavigate();
+//   const dispatch = useDispatch();
+//   const userData = useSelector((state) => state.user);
+
+//   const handleLogout = async () => {
+//     await dispatch(logout());
+//     navigate("/");
+//   };
+
+//   if (!userData || Object.keys(userData).length === 0) {
+//     return <div className="flex justify-center items-center h-screen bg-gray-100">Đang tải dữ liệu...</div>;
+//   }
+  
+//   const ActiveComponent = TABS.find(tab => tab.id === activeTab)?.component || ProfileComponent;
+
+//   const renderSidebar = () => (
+//     <aside className="w-72 bg-white flex flex-col shadow-lg">
+//       {/* PHẦN THÔNG TIN NGƯỜI DÙNG ĐÃ ĐƯỢC LOẠI BỎ */}
+
+//       {/* Navigation Section */}
+//       <nav className="flex-grow p-4 pt-6"> {/* Thêm padding-top để menu không quá sát lề trên */}
+//         <ul className="space-y-2">
+//           {TABS.map((tab) => (
+//             <li key={tab.id}>
+//               <button
+//                 onClick={() => setActiveTab(tab.id)}
+//                 className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg text-left transition-colors duration-200 ${
+//                   activeTab === tab.id
+//                     ? "bg-red-500 text-white shadow-md"
+//                     : "text-gray-600 hover:bg-red-50 hover:text-red-600"
+//                 }`}
+//               >
+//                 <tab.icon className="text-xl" />
+//                 <span className="font-medium">{tab.label}</span>
+//               </button>
+//             </li>
+//           ))}
+//         </ul>
+//       </nav>
+
+//       {/* Logout Section */}
+//       <div className="p-4 border-t border-gray-200">
+//         <button
+//           onClick={handleLogout}
+//           className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-red-500 transition-colors duration-200"
+//         >
+//           <FaSignOutAlt className="text-xl" />
+//           <span className="font-medium">Đăng xuất</span>
+//         </button>
+//       </div>
+//     </aside>
+//   );
+
+//   const renderBanner = () => (
+//     <div className="relative rounded-2xl overflow-hidden mb-8 shadow-lg">
+//       <img
+//         src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1450&q=80"
+//         alt="Hiến máu cứu người"
+//         className="w-full h-56 object-cover brightness-75"
+//       />
+//       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex flex-col justify-end items-start p-8 text-white">
+//         <h1 className="text-4xl font-extrabold drop-shadow-lg mb-2">
+//           Hiến máu – Kết nối sự sống
+//         </h1>
+//         <p className="text-xl font-light drop-shadow-md">
+//           Một giọt máu cho đi, một cuộc đời ở lại 💖
+//         </p>
+//       </div>
+//     </div>
+//   );
+  
+//   return (
+//     <div className="flex h-screen bg-gray-50 font-sans">
+//       {renderSidebar()}
+      
+//       <main className="flex-1 p-8 overflow-y-auto">
+//         {renderBanner()}
+        
+//         <div key={activeTab} className="bg-white p-6 rounded-xl shadow-md animate-fadeIn">
+//           <ActiveComponent />
+//         </div>
+//       </main>
+//     </div>
+//   );
+// };
+
+// export default DonateUser;

@@ -267,3 +267,273 @@ const ChatBox = () => {
 };
 
 export default ChatBox;
+
+
+
+
+// import React, { useState, useRef, useEffect } from "react";
+// import { Send, X, User, Bot, Heart, MessageSquare, MessageCircle  } from "lucide-react";
+// import clsx from "clsx"; // Thư viện tiện ích để nối các class, cài đặt: npm install clsx
+
+// // --- Custom Chat Icon ---
+// // Biểu tượng mới kết hợp giữa chat và trái tim, thể hiện đúng tinh thần ChatIcon
+// const ChatIcon = () => (
+//   <div className="relative flex items-center justify-center">
+//     <div className="relative">
+//       <div 
+//         className="rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-lg flex items-center justify-center"
+//         style={{ width: 28, height: 28 }}
+//       >
+//         <MessageCircle 
+//           size={17} 
+//           className="text-white" 
+//           fill="currentColor"
+//         />
+//       </div>
+//       {/* Heart accent */}
+//       <div className="absolute -top-1 -right-1 bg-pink-500 rounded-full p-1 shadow-sm">
+//         <Heart 
+//           size={8} 
+//           className="text-white" 
+//           fill="currentColor"
+//         />
+//       </div>
+//     </div>
+//   </div>
+// );
+// // --- Chat Message Component ---
+// // Tách ra component riêng để dễ quản lý và tái sử dụng
+// const ChatMessage = ({ message }) => {
+//   const isUser = message.type === "user";
+//   return (
+//     <div className={clsx("flex items-end gap-2", isUser ? "justify-end" : "justify-start")}>
+//       {!isUser && (
+//         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white flex-shrink-0">
+//           <Bot size={18} />
+//         </div>
+//       )}
+//       <div
+//         className={clsx(
+//           "max-w-[80%] rounded-2xl px-4 py-3",
+//           isUser
+//             ? "rounded-br-lg bg-blue-500 text-white"
+//             : "rounded-bl-lg bg-white text-gray-800 shadow-sm"
+//         )}
+//       >
+//         {/* Dùng whitespace-pre-line để tự động render các dấu xuống dòng \n */}
+//         <p className="text-sm whitespace-pre-line">{message.content}</p>
+//       </div>
+//        {isUser && (
+//         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-white flex-shrink-0">
+//           <User size={18} />
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+
+// const ChatBox = () => {
+//   const [isOpen, setIsOpen] = useState(false);
+//   const [messages, setMessages] = useState([]);
+//   const [inputMessage, setInputMessage] = useState("");
+//   const [isTyping, setIsTyping] = useState(false);
+//   const messagesEndRef = useRef(null);
+
+//   // --- Knowledge Base (Cải tiến với định dạng rõ ràng hơn) ---
+//   const knowledgeBase = {
+//     "điều kiện hiến máu": {
+//       keywords: ["điều kiện", "yêu cầu", "tiêu chuẩn"],
+//       answer: "Để hiến máu, bạn cần đảm bảo các tiêu chuẩn sau:\n\n• Độ tuổi: Từ 18 đến 60.\n• Cân nặng: Trên 45kg đối với nữ và 50kg đối với nam.\n• Sức khỏe: Hoàn toàn tỉnh táo, khỏe mạnh.\n• Không mắc các bệnh truyền nhiễm qua đường máu (HIV, Viêm gan B, C,...).\n• Khoảng cách giữa 2 lần hiến máu toàn phần là 12 tuần."
+//     },
+//     "địa điểm hiến máu": {
+//       keywords: ["địa điểm", "ở đâu", "chỗ nào", "nơi nào", "địa chỉ"],
+//       answer: "Bạn có thể hiến máu tại các địa điểm cố định hoặc các điểm lưu động.\n\n📍 Viện Huyết học - Truyền máu Trung ương (Hà Nội).\n📍 Bệnh viện Chợ Rẫy (TP.HCM).\n📍 Trung tâm Hiến máu nhân đạo (TP.HCM).\n\n💡 Mẹo: Truy cập mục 'Lịch hiến máu' trên website để xem các điểm lưu động gần bạn nhất!"
+//     },
+//     "thời gian hiến máu": {
+//       keywords: ["thời gian", "giờ", "khi nào", "lúc nào"],
+//       answer: "⏰ Thời gian làm việc của các trung tâm thường là:\n\n• Thứ 2 - Thứ 6: 7:30 - 17:00\n• Thứ 7 & Chủ nhật: 8:00 - 12:00\n\nLưu ý: Thời gian có thể thay đổi, bạn nên gọi điện xác nhận trước khi đến nhé."
+//     },
+//     "tần suất hiến máu": {
+//       keywords: ["bao lâu", "tần suất", "mấy lần", "khoảng cách"],
+//       answer: "🩸 Tần suất hiến máu an toàn được khuyến cáo là:\n\n• Hiến máu toàn phần: Tối thiểu 12 tuần/lần.\n• Hiến tiểu cầu/huyết tương: Có thể ngắn hơn, khoảng 2-4 tuần/lần.\n\nCơ thể bạn cần thời gian để tái tạo lượng máu đã cho đi, hãy tuân thủ khoảng cách an toàn nhé!"
+//     },
+//      "lợi ích hiến máu": {
+//       keywords: ["lợi ích", "tốt", "được gì"],
+//       answer: "💖 Hiến máu không chỉ cứu người mà còn mang lại nhiều lợi ích cho chính bạn:\n\n• Được khám và tư vấn sức khỏe miễn phí.\n• Sàng lọc nhanh các bệnh về máu.\n• Giảm tải lượng sắt dư thừa trong cơ thể.\n• Kích thích cơ thể sản sinh máu mới.\n• Cảm giác tự hào và hạnh phúc khi làm việc tốt."
+//     },
+//     "chuẩn bị hiến máu": {
+//       keywords: ["chuẩn bị", "trước khi", "cần làm gì"],
+//       answer: "🎯 Để buổi hiến máu diễn ra thuận lợi, bạn cần:\n\n• Đêm trước: Ngủ đủ giấc (ít nhất 6 tiếng).\n• Bữa ăn: Ăn nhẹ, không ăn đồ nhiều dầu mỡ.\n• Nước: Uống nhiều nước hoặc trà đường.\n• Tinh thần: Thoải mái, vui vẻ.\n• Giấy tờ: Mang theo CMND/CCCD hoặc giấy tờ tùy thân có ảnh."
+//     },
+//     "sau khi hiến máu": {
+//       keywords: ["sau khi", "làm gì sau", "lưu ý sau"],
+//       answer: "🔄 Những điều cần làm sau khi hiến máu:\n\n• Nghỉ tại chỗ 10-15 phút.\n• Uống nhiều nước để bổ sung lại thể tích tuần hoàn.\n• Chỉ tháo băng sau 4-6 giờ, giữ vết chích sạch sẽ.\n• Tránh làm việc nặng hoặc các hoạt động gắng sức trong ngày.\n• Nếu thấy chóng mặt, buồn nôn, hãy nằm nghỉ, kê cao chân."
+//     },
+//      "quy trình hiến máu": {
+//       keywords: ["quy trình", "các bước", "thủ tục"],
+//       answer: "📋 Quy trình hiến máu rất đơn giản và nhanh chóng:\n\n1. Đăng ký & điền thông tin.\n2. Khám sức khỏe & tư vấn.\n3. Xét nghiệm máu nhanh.\n4. Tiến hành hiến máu (chỉ 5-10 phút).\n5. Nghỉ ngơi, nhận đồ ăn nhẹ và giấy chứng nhận.\n\nToàn bộ quy trình thường mất khoảng 45 phút."
+//     },
+//   };
+
+//   const suggestions = [
+//     "Điều kiện để hiến máu là gì?",
+//     "Cần chuẩn bị gì trước khi hiến máu?",
+//     "Hiến máu ở đâu?",
+//     "Hiến máu có lợi ích gì không?",
+//   ];
+
+//   const scrollToBottom = () => {
+//     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+//   };
+
+//   useEffect(scrollToBottom, [messages]);
+
+//   useEffect(() => {
+//     if (isOpen && messages.length === 0) {
+//       setTimeout(() => {
+//         setMessages([
+//           {
+//             type: "bot",
+//             content: "Xin chào! Tôi là Trợ lý ảo của Dòng Máu Việt 🩸\n\nTôi có thể giúp gì cho bạn về việc hiến máu?",
+//             timestamp: new Date(),
+//           },
+//         ]);
+//       }, 300);
+//     }
+//   }, [isOpen]);
+
+//   const findAnswer = (message) => {
+//     const lowerMessage = message.toLowerCase().trim();
+//     let bestMatch = null;
+//     let highestScore = 0;
+
+//     for (const topic in knowledgeBase) {
+//         const { keywords } = knowledgeBase[topic];
+//         let currentScore = 0;
+//         for (const keyword of keywords) {
+//             if (lowerMessage.includes(keyword)) {
+//                 currentScore++;
+//             }
+//         }
+//         if (currentScore > highestScore) {
+//             highestScore = currentScore;
+//             bestMatch = knowledgeBase[topic].answer;
+//         }
+//     }
+
+//     if (bestMatch) {
+//       return bestMatch;
+//     }
+    
+//     return "Rất tiếc, tôi chưa hiểu rõ câu hỏi của bạn. Bạn có thể hỏi tôi về:\n\n• Điều kiện hiến máu\n• Địa điểm và thời gian\n• Chuẩn bị trước & sau khi hiến máu\n• Lợi ích của việc hiến máu\n\nHãy thử hỏi lại bằng một câu hỏi khác nhé!";
+//   };
+
+//   const handleSendMessage = async (messageText = inputMessage) => {
+//     const trimmedMessage = messageText.trim();
+//     if (!trimmedMessage) return;
+
+//     const userMessage = { type: "user", content: trimmedMessage };
+//     setMessages((prev) => [...prev, userMessage]);
+//     setInputMessage("");
+//     setIsTyping(true);
+
+//     await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 500));
+
+//     const response = findAnswer(trimmedMessage);
+//     const botMessage = { type: "bot", content: response };
+//     setMessages((prev) => [...prev, botMessage]);
+//     setIsTyping(false);
+//   };
+  
+//   return (
+//     <div className="fixed bottom-5 right-5 z-50 font-sans">
+//       {/* --- Chat Button --- */}
+//       <button
+//         onClick={() => setIsOpen(!isOpen)}
+//         className={clsx(
+//           "bg-red-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ease-in-out transform hover:scale-110",
+//            isOpen ? "w-12 h-12" : "w-16 h-16 animate-pulse-slow"
+//         )}
+//         aria-label="Mở hộp thoại"
+//       >
+//         {isOpen ? <X size={24} /> : <ChatIcon />}
+//       </button>
+
+//       {/* --- Chat Window --- */}
+//       <div
+//         className={clsx(
+//           "fixed bottom-24 right-5 w-[calc(100vw-40px)] max-w-sm h-[70vh] max-h-[580px] bg-gray-50 rounded-2xl shadow-2xl flex flex-col transition-all duration-300 ease-in-out",
+//           isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+//         )}
+//       >
+//         {/* Header */}
+//         <div className="flex-shrink-0 p-4 border-b bg-white rounded-t-2xl">
+//           <h3 className="text-lg font-bold text-gray-800">Trợ lý Dòng Máu Việt</h3>
+//           <p className="text-sm text-green-600 flex items-center gap-1.5">
+//             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+//             Đang hoạt động
+//           </p>
+//         </div>
+
+//         {/* Messages */}
+//         <div className="flex-1 overflow-y-auto p-4 space-y-4">
+//           {messages.map((msg, index) => <ChatMessage key={index} message={msg} />)}
+          
+//           {isTyping && (
+//              <div className="flex items-end gap-2 justify-start">
+//                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white flex-shrink-0">
+//                     <Bot size={18} />
+//                 </div>
+//                  <div className="max-w-[80%] rounded-2xl px-4 py-3 rounded-bl-lg bg-white text-gray-800 shadow-sm">
+//                     <div className="flex items-center gap-1.5">
+//                         <span className="h-2 w-2 bg-gray-400 rounded-full animate-bounce"></span>
+//                         <span className="h-2 w-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
+//                         <span className="h-2 w-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
+//                     </div>
+//                 </div>
+//             </div>
+//           )}
+
+//           {messages.length <= 1 && !isTyping && (
+//             <div className="pt-4 space-y-2">
+//                 <p className="text-xs font-medium text-gray-500 uppercase">Gợi ý cho bạn</p>
+//                 {suggestions.map((s, i) => (
+//                     <button key={i} onClick={() => handleSendMessage(s)} className="w-full text-left text-sm text-blue-600 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 transition-colors hover:bg-blue-100">
+//                         {s}
+//                     </button>
+//                 ))}
+//             </div>
+//           )}
+          
+//           <div ref={messagesEndRef} />
+//         </div>
+
+//         {/* Input */}
+//         <div className="flex-shrink-0 p-3 border-t bg-white rounded-b-2xl">
+//           <div className="flex items-center gap-2">
+//             <input
+//               type="text"
+//               placeholder="Nhập câu hỏi của bạn..."
+//               value={inputMessage}
+//               onChange={(e) => setInputMessage(e.target.value)}
+//               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+//               disabled={isTyping}
+//               className="flex-1 w-full bg-gray-100 border-transparent rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-60"
+//             />
+//             <button
+//               onClick={() => handleSendMessage()}
+//               disabled={isTyping || !inputMessage.trim()}
+//               className="flex-shrink-0 bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed"
+//               aria-label="Gửi tin nhắn"
+//             >
+//               <Send size={18} />
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ChatBox;

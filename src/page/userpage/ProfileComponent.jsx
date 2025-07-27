@@ -510,7 +510,7 @@ const ProfileComponent = () => {
         message: response.data.message 
       });
     } catch (err) {
-      const message = err.response?.data?.message || "Không thể kiểm tra điều kiện.";
+      const message = err.response?.data?.message || "không đủ điều kiện hiến máu";
       setDonationEligibility({ 
         status: 'error', 
         message 
