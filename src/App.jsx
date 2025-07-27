@@ -47,7 +47,7 @@ import DoctorProfilePage from "./page/doctorpage/dashboard/ProfilePage";
 import DoctorSettingsPage from "./page/doctorpage/dashboard/SettingsPage";
 import BloodReceivePage from "./page/doctorpage/doctor/BloodReceivePage";
 import DonationHistoryPage from "./page/doctorpage/doctor/DonationHistoryPage"; // Import trang mới
-import TestModal from './TestModal';
+
 
 const router = createBrowserRouter([
   {
@@ -107,7 +107,6 @@ function App() {
         <ConfigProvider locale={viVN}>
           <UserProvider>
             <RouterProvider router={router} />
-            <TestModal />
             <ToastContainer
               position="top-right"
               autoClose={3000}
