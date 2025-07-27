@@ -70,9 +70,9 @@ const BloodInventoryPage = () => {
       const updatedInventory = data.map((item) => ({
         id: item.inventoryId,
         bloodType: item.bloodType,
-        totalUnitsAvailable: item.unitsAvailable,
+        totalUnitsAvailable: item.total,
         backendStatus: item.status,
-        status: getStatus(item.unitsAvailable),
+        status: getStatus(item.total),
         expirationDate: item.expirationDate
           ? moment(item.expirationDate)
           : null,

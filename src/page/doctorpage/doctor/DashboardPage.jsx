@@ -23,7 +23,6 @@ import { getAllDonors } from "../../../services/donorsService";
 import { getBloodReceiveHistory } from "../../../services/bloodReceiveService";
 import { getAllBloodInventory } from "../../../services/bloodInventoryService";
 
-
 const { Title, Text } = Typography;
 
 const bloodTypeMap = {
@@ -37,7 +36,6 @@ const bloodTypeMap = {
   O_NEGATIVE: "O-",
 };
 
-
 const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [totalDonors, setTotalDonors] = useState(0);
@@ -46,44 +44,39 @@ const DashboardPage = () => {
   const [latestUsers, setLatestUsers] = useState([]);
   const [bloodInventory, setBloodInventory] = useState([]);
 
-
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [
-          donorsResult,
-          recipientsResult,
-          inventoryResult,
-        ] = await Promise.allSettled([
-          getAllDonors(),
-          getBloodReceiveHistory(),
-          getAllBloodInventory(),
-          // Bỏ lời gọi api.get("/user/get-user-by-role")
-        ]);
+        const [donorsResult, recipientsResult, inventoryResult] =
+          await Promise.allSettled([
+            getAllDonors(),
+            getBloodReceiveHistory(),
+            getAllBloodInventory(),
+            // Bỏ lời gọi api.get("/user/get-user-by-role")
+          ]);
 
-        if (donorsResult.status === 'fulfilled') {
+        if (donorsResult.status === "fulfilled") {
           const donors = donorsResult.value || [];
           setTotalDonors(donors.length);
-          
+
           // Lấy 5 người hiến máu mới nhất từ danh sách donor
           const sortedDonors = donors
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Sắp xếp theo ngày tạo
             .slice(0, 5);
           setLatestUsers(sortedDonors);
-
         } else {
           console.error("Error fetching donors:", donorsResult.reason);
         }
-        
-        if (recipientsResult.status === 'fulfilled') {
+
+        if (recipientsResult.status === "fulfilled") {
           const recipients = recipientsResult.value || [];
           setTotalRecipients(recipients.length);
         } else {
           console.error("Error fetching recipients:", recipientsResult.reason);
         }
 
-        if (inventoryResult.status === 'fulfilled') {
+        if (inventoryResult.status === "fulfilled") {
           const inventory = inventoryResult.value || [];
           setBloodInventory(inventory);
           const totalUnits = inventory.reduce(
@@ -96,7 +89,6 @@ const DashboardPage = () => {
         }
 
         // Bỏ logic xử lý usersResult
-        
       } catch (error) {
         message.error("Đã có lỗi xảy ra khi tải dữ liệu tổng quan!");
         console.error("Dashboard data fetch error:", error);
@@ -216,12 +208,16 @@ const DashboardPage = () => {
             >
               {bloodInventory.map((item) => (
                 <div key={item.bloodType} style={{ marginBottom: "10px" }}>
-                  <Text strong>{`Nhóm máu ${bloodTypeMap[item.bloodType] || item.bloodType}`}</Text>
-                  <Text style={{ float: 'right' }}>{`${item.unitsAvailable} đơn vị`}</Text>
+                  <Text strong>{`Nhóm máu ${
+                    bloodTypeMap[item.bloodType] || item.bloodType
+                  }`}</Text>
+                  <Text
+                    style={{ float: "right" }}
+                  >{`${item.total} đơn vị`}</Text>
                   <Progress
-                    percent={(item.unitsAvailable / 100) * 100} // Assuming max 100 units for visualisation
+                    percent={(item.total / 100) * 100} // Assuming max 100 units for visualisation
                     showInfo={false}
-                    status={item.unitsAvailable < 10 ? "exception" : "success"}
+                    status={item.total < 10 ? "exception" : "success"}
                   />
                 </div>
               ))}
