@@ -398,7 +398,7 @@ const BloodReceivePage = () => {
               </div>
             </Space>
           </Col>
-          <Col>
+          {/* <Col>
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -407,7 +407,7 @@ const BloodReceivePage = () => {
             >
               Tạo yêu cầu mới
             </Button>
-          </Col>
+          </Col> */}
         </Row>
 
         {/* --- Toolbar Mới --- */}

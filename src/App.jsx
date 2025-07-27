@@ -46,7 +46,8 @@ import DoctorBloodInventoryPage from "./page/doctorpage/dashboard/BloodInventory
 import DoctorProfilePage from "./page/doctorpage/dashboard/ProfilePage";
 import DoctorSettingsPage from "./page/doctorpage/dashboard/SettingsPage";
 import BloodReceivePage from "./page/doctorpage/doctor/BloodReceivePage";
-
+import DonationHistoryPage from "./page/doctorpage/doctor/DonationHistoryPage"; // Import trang mới
+import TestModal from './TestModal';
 
 const router = createBrowserRouter([
   {
@@ -94,6 +95,7 @@ const router = createBrowserRouter([
       { path: "profile", element: <DoctorProfilePage /> },
       { path: "settings", element: <DoctorSettingsPage /> },
       { path: "blood-receive", element: <BloodReceivePage /> },
+      { path: "donation-history", element: <DonationHistoryPage /> }, // Thêm route mới
     ],
   },
 ]);
@@ -105,6 +107,7 @@ function App() {
         <ConfigProvider locale={viVN}>
           <UserProvider>
             <RouterProvider router={router} />
+            <TestModal />
             <ToastContainer
               position="top-right"
               autoClose={3000}

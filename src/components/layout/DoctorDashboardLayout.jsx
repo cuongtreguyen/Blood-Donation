@@ -9,6 +9,7 @@ import {
   FaTint,
   FaFileAlt,
   FaUserCircle,
+  FaHistory, // Thêm icon cho Lịch sử
 } from "react-icons/fa";
 
 function DoctorDashboardLayout() {
@@ -19,7 +20,7 @@ function DoctorDashboardLayout() {
 
   const menuItems = [
     { to: "/doctor", label: "Tổng Quan", icon: <FaTachometerAlt /> },
-    { to: "/doctor/donors", label: "Người Hiến Máu", icon: <FaUser /> },
+    { to: "/doctor/donors", label: "Danh Sách Hiến Máu", icon: <FaUser /> },
     {
       to: "/doctor/medical-records",
       label: "Hồ Sơ Y Tế",
@@ -27,6 +28,7 @@ function DoctorDashboardLayout() {
     },
     { to: "/doctor/blood-inventory", label: "Kho Máu", icon: <FaTint /> },
     { to: "/doctor/blood-receive", label: "Danh Sách Nhận Máu", icon: <FaTint /> },
+    { to: "/doctor/donation-history", label: "Lịch sử hiến máu", icon: <FaHistory /> },
     { to: "/doctor/reports", label: "Báo Cáo", icon: <FaFileAlt /> },
     { to: "/doctor/profile", label: "Hồ Sơ Cá Nhân", icon: <FaUserCircle /> },
   ];

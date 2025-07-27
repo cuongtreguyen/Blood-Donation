@@ -1,150 +1,221 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Table,
-  Button,
-  Modal,
-  Avatar,
-  Typography,
-  Input,
+  Card,
   Row,
   Col,
-  Card,
+  Table,
   Tag,
-  Space,
+  Segmented,
+  message,
   Spin,
-  Empty,
-  Select,
-  message, // Thêm message để thông báo lỗi
+  Typography,
+  Space,
+  Button,
+  Modal,
+  Form,
+  Input,
+  DatePicker,
+  Avatar,
 } from "antd";
 import {
+  WarningOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ClockCircleOutlined,
   UserOutlined,
-  HistoryOutlined,
   SearchOutlined,
-  PhoneOutlined,
-  MailOutlined,
-  HeartOutlined,
+  MedicineBoxOutlined,
 } from "@ant-design/icons";
 import {
-  getAllDonors,
-  getDonationHistoryByUserId,
-} from "../../../services/donorsService";
-import moment from "moment";
+  getBloodRegisterByStatus,
+  updateBloodRegisterStatus,
+  completeBloodRegister,
+} from "../../../services/bloodRegisterService";
+import api from "../../../config/api";
+import dayjs from "dayjs";
+import HealthCheckForm from "../../../components/forms/HealthCheckForm";
 
 const { Title, Text } = Typography;
-const { Option } = Select;
 
-// Hàm tạo màu ngẫu nhiên nhưng nhất quán cho Avatar dựa trên ID
-const getColorById = (id) => {
-  if (!id) return "#ccc";
-  const colors = [
-    "#ff7a45",
-    "#ffc53d",
-    "#73d13d",
-    "#40a9ff",
-    "#597ef7",
-    "#9254de",
-  ];
-  return colors[id % colors.length];
+const statusColors = {
+  APPROVED: "blue",
+  COMPLETED: "green",
+  REJECTED: "red",
+  PENDING: "orange",
+  INCOMPLETED: "gray",
+};
+
+const statusIcons = {
+  APPROVED: <CheckCircleOutlined />,
+  COMPLETED: <CheckCircleOutlined />,
+  REJECTED: <CloseCircleOutlined />,
+  PENDING: <ClockCircleOutlined />,
+  INCOMPLETED: <WarningOutlined />,
+};
+
+const statusOptions = [
+  { label: "Tất cả", value: "ALL" },
+  { label: "Chờ duyệt", value: "PENDING" },
+  { label: "Đã duyệt", value: "APPROVED" },
+  { label: "Hoàn thành", value: "COMPLETED" },
+  { label: "Từ chối", value: "REJECTED" },
+];
+
+const bloodTypeMap = {
+  A_POSITIVE: "A+",
+  A_NEGATIVE: "A-",
+  B_POSITIVE: "B+",
+  B_NEGATIVE: "B-",
+  AB_POSITIVE: "AB+",
+  AB_NEGATIVE: "AB-",
+  O_POSITIVE: "O+",
+  O_NEGATIVE: "O-",
 };
 
 const DonorsPage = () => {
-  const [donors, setDonors] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [historyModalOpen, setHistoryModalOpen] = useState(false);
-  const [selectedDonor, setSelectedDonor] = useState(null);
-  const [donationHistory, setDonationHistory] = useState([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState("ALL");
   const [searchText, setSearchText] = useState("");
-  const [bloodTypeFilter, setBloodTypeFilter] = useState("all");
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
+  const [completeLoading, setCompleteLoading] = useState(false);
+  const [completeRecord, setCompleteRecord] = useState(null);
+  const [completeForm] = Form.useForm();
+  const [healthCheckModalOpen, setHealthCheckModalOpen] = useState(false);
+  const [selectedRegister, setSelectedRegister] = useState(null);
 
   useEffect(() => {
-    const fetchDonors = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await getAllDonors();
-        setDonors(data.map((d) => ({ ...d, key: d.id })));
-      } catch (error) {
-        console.error("Failed to fetch donors:", error);
-        message.error("Không thể tải danh sách người hiến máu.");
-        setDonors([]);
+        let res = [];
+        if (status === "ALL") {
+          const allStatuses = statusOptions
+            .map((opt) => opt.value)
+            .filter((v) => v !== "ALL");
+          res = await getBloodRegisterByStatus(allStatuses);
+        } else {
+          res = await getBloodRegisterByStatus(status);
+        }
+
+        const dataWithUser = await Promise.all(
+          (res || []).map(async (item) => {
+            let userInfo = {};
+            if (item.user_id) {
+              try {
+                const userRes = await api.get(`/user/${item.user_id}`);
+                userInfo = userRes.data || {};
+              } catch {
+                userInfo = {};
+              }
+            }
+            return {
+              id: item.id,
+              name: userInfo.fullName || item.fullName || item.name || "Chưa có",
+              bloodType: item.bloodType || item.blood?.bloodType || userInfo.bloodType || "Chưa xác định",
+              quantity: item.blood?.unit || item.quantity || item.amount || 1,
+              wantedHour: item.wantedHour || item.blood?.wantedHour || item.hour || "",
+              wantedDate: item.wantedDate || item.blood?.donationDate || item.registerDate || item.created_at || "",
+              status: item.status,
+              address: userInfo.address || item.address || "",
+            };
+          })
+        );
+
+        setData(dataWithUser.slice().sort((a, b) => b.id - a.id));
+      } catch {
+        message.error("Không thể tải danh sách đăng ký!");
       } finally {
         setLoading(false);
       }
     };
-    fetchDonors();
-  }, []);
+    fetchData();
+  }, [status]);
 
-  const handleViewHistory = async (donor) => {
-    setSelectedDonor(donor);
-    setHistoryModalOpen(true);
-    setHistoryLoading(true);
+  const handleIncomplete = async (record) => {
     try {
-      const history = await getDonationHistoryByUserId(donor.id);
-      setDonationHistory(history || []);
-    } catch (error) {
-      console.error("Failed to fetch donation history:", error);
-      message.error(`Không thể tải lịch sử của ${donor.fullName}.`);
-      setDonationHistory([]);
-    } finally {
-      setHistoryLoading(false);
+      await updateBloodRegisterStatus(record.id, "INCOMPLETED");
+      message.success("Đã đánh dấu chưa hoàn thành!");
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === record.id ? { ...item, status: "INCOMPLETED" } : item
+        )
+      );
+      setStatus("ALL");
+    } catch {
+      message.error("Cập nhật trạng thái thất bại!");
     }
   };
 
-  const filteredDonors = useMemo(() => {
-    return donors.filter((donor) => {
-      const nameMatch = donor.fullName
-        ?.toLowerCase()
-        .includes(searchText.toLowerCase());
-      const phoneMatch = donor.phone?.includes(searchText);
-      const emailMatch = donor.email
-        ?.toLowerCase()
-        .includes(searchText.toLowerCase());
-      const bloodTypeMatch =
-        bloodTypeFilter === "all" || donor.bloodType === bloodTypeFilter;
-      return (nameMatch || phoneMatch || emailMatch) && bloodTypeMatch;
+  const handleOpenCompleteModal = (record) => {
+    setCompleteRecord(record);
+    setCompleteModalOpen(true);
+    completeForm.setFieldsValue({
+      implementationDate: dayjs(),
+      unit: record.quantity,
     });
-  }, [donors, searchText, bloodTypeFilter]);
-
-  const bloodTypeMap = {
-    A_POSITIVE: "A+",
-    A_NEGATIVE: "A-",
-    B_POSITIVE: "B+",
-    B_NEGATIVE: "B-",
-    AB_POSITIVE: "AB+",
-    AB_NEGATIVE: "AB-",
-    O_POSITIVE: "O+",
-    O_NEGATIVE: "O-",
   };
 
+  const handleCompleteSubmit = async (values) => {
+    setCompleteLoading(true);
+    try {
+      await completeBloodRegister({
+        bloodId: completeRecord.id,
+        implementationDate: values.implementationDate.format("YYYY-MM-DD"),
+        unit: values.unit,
+      });
+      message.success("Đã đánh dấu hoàn thành!");
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === completeRecord.id ? { ...item, status: "COMPLETED" } : item
+        )
+      );
+      setCompleteModalOpen(false);
+      setCompleteRecord(null);
+      completeForm.resetFields();
+    } catch {
+      message.error("Lỗi khi hoàn thành đăng ký!");
+    } finally {
+      setCompleteLoading(false);
+    }
+  };
+
+  const handleOpenHealthCheckModal = async (record) => {
+    let merged = { ...record };
+    if (record.user_id) {
+      try {
+        const userRes = await api.get(`/user/${record.user_id}`);
+        const userInfo = userRes.data || {};
+        merged = { ...merged, ...userInfo };
+      } catch {
+        // Lỗi thì bỏ qua
+      }
+    }
+    setSelectedRegister(merged);
+    setHealthCheckModalOpen(true);
+  };
+
+  let filteredData =
+    status === "ALL" ? data : data.filter((item) => item.status === status);
+
+  if (searchText) {
+    filteredData = filteredData.filter(
+      (item) =>
+        (item.name && item.name.toLowerCase().includes(searchText.toLowerCase())) ||
+        (item.address && item.address.toLowerCase().includes(searchText.toLowerCase()))
+    );
+  }
+
   const columns = [
+    { title: "ID", dataIndex: "id", key: "id", width: 80 },
     {
-      title: "Thông tin người hiến",
-      dataIndex: "fullName",
-      key: "info",
-      render: (_, record) => (
+      title: "Họ tên",
+      dataIndex: "name",
+      key: "name",
+      render: (name) => (
         <Space>
-          <Avatar
-            style={{
-              backgroundColor: getColorById(record.id),
-              verticalAlign: "middle",
-            }}
-            size="large"
-          >
-            {record.fullName?.charAt(0).toUpperCase()}
-          </Avatar>
-          <div>
-            <Text strong>{record.fullName}</Text>
-            <br />
-            <Text type="secondary">
-              <MailOutlined style={{ marginRight: 6 }} />
-              {record.email}
-            </Text>
-            <br />
-            <Text type="secondary">
-              <PhoneOutlined style={{ marginRight: 6 }} />
-              {record.phone}
-            </Text>
-          </div>
+          <Avatar icon={<UserOutlined />}>{name?.[0]}</Avatar>
+          <Text strong>{name}</Text>
         </Space>
       ),
     },
@@ -152,167 +223,125 @@ const DonorsPage = () => {
       title: "Nhóm máu",
       dataIndex: "bloodType",
       key: "bloodType",
-      align: "center",
-      render: (bloodType) => (
-        <Tag color="red" style={{ fontSize: 14, padding: "4px 8px" }}>
-          {bloodTypeMap[bloodType] || bloodType}
-        </Tag>
+      render: (text) => <Tag color="red">{bloodTypeMap[text] || text}</Tag>,
+    },
+    {
+      title: "Thời gian",
+      dataIndex: "wantedDate",
+      key: "time",
+      render: (date, record) => (
+        <div>
+          <Text>{record.wantedHour ? record.wantedHour.substring(0, 5) : "N/A"}</Text>
+          <br />
+          <Text type="secondary">{date ? dayjs(date).format("DD/MM/YYYY") : "N/A"}</Text>
+        </div>
       ),
     },
     {
-      title: "Số lần hiến",
-      dataIndex: "unitDonation",
-      key: "unitDonation",
-      align: "center",
-      sorter: (a, b) => a.unitDonation - b.unitDonation,
-      render: (count) => <Tag color="blue">{count || 0} lần</Tag>,
-    },
-    {
-      title: "Ngày hiến gần nhất",
-      dataIndex: "lastDonation",
-      key: "lastDonation",
-      sorter: (a, b) =>
-        moment(a.lastDonation).unix() - moment(b.lastDonation).unix(),
-      render: (date) => (date ? moment(date).format("DD/MM/YYYY") : "Chưa có"),
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => (
+        <Tag color={statusColors[status]} icon={statusIcons[status]}>
+          {status}
+        </Tag>
+      ),
     },
     {
       title: "Thao tác",
       key: "action",
       align: "center",
-      render: (_, record) => (
-        <Button
-          type="primary"
-          ghost
-          icon={<HistoryOutlined />}
-          onClick={() => handleViewHistory(record)}
-        >
-          Xem lịch sử
-        </Button>
-      ),
+      render: (_, record) => {
+        if (record.status === "APPROVED") {
+          return (
+            <Space>
+              <Button type="primary" onClick={() => handleOpenCompleteModal(record)}>Hoàn thành</Button>
+              <Button danger onClick={() => handleIncomplete(record)}>Chưa hoàn thành</Button>
+              <Button onClick={() => handleOpenHealthCheckModal(record)}>Khám SK</Button>
+            </Space>
+          );
+        }
+        return <Text type="secondary">N/A</Text>;
+      },
     },
-  ];
-
-  const historyColumns = [
-    {
-      title: "Ngày hiến",
-      dataIndex: "completedDate",
-      key: "completedDate",
-      render: (date) => (date ? moment(date).format("DD/MM/YYYY") : "N/A"),
-    },
-    { title: "Số lượng (ml)", dataIndex: "unit", key: "unit", align: "right" },
-    {
-      title: "Địa điểm",
-      dataIndex: "location",
-      key: "location",
-      render: () => "Bệnh viện Trung ương",
-    }, // Placeholder data
   ];
 
   return (
     <div style={{ padding: "24px", background: "#f0f2f5" }}>
-      <Card
-        style={{
-          marginBottom: 24,
-          borderRadius: "8px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.09)",
-        }}
-      >
-        <Row align="middle" justify="space-between">
-          <Col>
-            <Space align="center" size="middle">
-              <Avatar
-                size={64}
-                icon={<UserOutlined />}
-                style={{ backgroundColor: "#fff1f0", color: "#cf1322" }}
-              />
-              <div>
-                <Title level={2} style={{ margin: 0 }}>
-                  Quản lý người hiến máu
-                </Title>
-                <Text type="secondary">
-                  Danh sách chi tiết những người đã tham gia hiến máu.
-                </Text>
-              </div>
-            </Space>
-          </Col>
+      <Card style={{ marginBottom: 24, borderRadius: "8px" }}>
+        <Row align="middle">
+          <Space align="center" size="large">
+            <Avatar size={64} icon={<MedicineBoxOutlined />} style={{ backgroundColor: "#e6f7ff", color: "#1890ff" }} />
+            <div>
+              <Title level={2} style={{ margin: 0 }}>
+                Danh sách Hiến Máu
+              </Title>
+              <Text type="secondary">
+                Quản lý, duyệt và theo dõi các đơn đăng ký hiến máu từ người dùng.
+              </Text>
+            </div>
+          </Space>
         </Row>
       </Card>
 
-      <Card
-        bordered={false}
-        style={{ borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
-      >
-        <Row gutter={16} style={{ marginBottom: 24 }}>
-          <Col flex="auto">
+      <Card bordered={false} style={{ borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}>
+        <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+          <Col>
+            <Segmented options={statusOptions} value={status} onChange={setStatus} size="large" />
+          </Col>
+          <Col>
             <Input
+              placeholder="Tìm theo tên, địa chỉ..."
               prefix={<SearchOutlined style={{ color: "#aaa" }} />}
-              placeholder="Tìm kiếm theo tên, SĐT, email..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
+              style={{ width: 250 }}
               allowClear
             />
           </Col>
-          <Col>
-            <Select
-              defaultValue="all"
-              style={{ width: 180 }}
-              onChange={(value) => setBloodTypeFilter(value)}
-            >
-              <Option value="all">Tất cả nhóm máu</Option>
-              {Object.entries(bloodTypeMap).map(([key, value]) => (
-                <Option key={key} value={key}>
-                  {value}
-                </Option>
-              ))}
-            </Select>
-          </Col>
         </Row>
-        <Table
-          columns={columns}
-          dataSource={filteredDonors}
-          rowKey="id"
-          loading={loading}
-          pagination={{ pageSize: 8, showSizeChanger: true }}
-        />
+        <Spin spinning={loading} tip="Đang tải dữ liệu...">
+          <Table
+            columns={columns}
+            dataSource={filteredData.slice().sort((a, b) => b.id - a.id)}
+            rowKey="id"
+            pagination={{ pageSize: 8 }}
+            scroll={{ x: "max-content" }}
+          />
+        </Spin>
       </Card>
 
       <Modal
-        open={historyModalOpen}
-        title={
-          <Space>
-            <HistoryOutlined />
-            <Text>Lịch sử hiến máu của</Text>
-            <Text strong>{selectedDonor?.fullName}</Text>
-          </Space>
-        }
-        onCancel={() => setHistoryModalOpen(false)}
-        footer={
-          <Button onClick={() => setHistoryModalOpen(false)}>Đóng</Button>
-        }
-        width={700}
+        open={completeModalOpen}
+        title="Xác nhận hoàn thành đăng ký"
+        onCancel={() => setCompleteModalOpen(false)}
+        footer={null}
+        destroyOnClose
       >
-        <Spin spinning={historyLoading} tip="Đang tải lịch sử...">
-          {donationHistory.length === 0 && !historyLoading ? (
-            <Empty
-              image={
-                <HeartOutlined style={{ fontSize: 60, color: "#f7d9d9" }} />
-              }
-              description={
-                <Text type="secondary">
-                  Người này chưa có lịch sử hiến máu nào.
-                </Text>
-              }
-            />
-          ) : (
-            <Table
-              columns={historyColumns}
-              dataSource={donationHistory}
-              rowKey="id"
-              pagination={false}
-              size="middle"
-            />
-          )}
-        </Spin>
+        <Form form={completeForm} layout="vertical" onFinish={handleCompleteSubmit}>
+          <Form.Item label="Ngày thực hiện" name="implementationDate" rules={[{ required: true, message: "Vui lòng chọn ngày!" }]}>
+            <DatePicker style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item label="Số lượng (đơn vị)" name="unit" rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}>
+            <Input type="number" min={1} />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={completeLoading} block>
+              Xác nhận
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        open={healthCheckModalOpen}
+        title="Phiếu kiểm tra sức khỏe người hiến máu"
+        onCancel={() => setHealthCheckModalOpen(false)}
+        footer={null}
+        width={800}
+        destroyOnClose
+      >
+        {selectedRegister && <HealthCheckForm donorInfo={selectedRegister} onSuccess={() => setHealthCheckModalOpen(false)} />}
       </Modal>
     </div>
   );

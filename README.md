@@ -1,12 +1,44 @@
-# React + Vite
+# Blood Donation Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Mô tả
+Hệ thống quản lý hiến máu với các tính năng quản lý người hiến máu, lịch sử hiến máu, và tạo giấy chứng nhận.
 
-Currently, two official plugins are available:
+## Tính năng chính
+- Quản lý danh sách người hiến máu
+- Xem lịch sử hiến máu chi tiết
+- Tạo giấy chứng nhận hiến máu
+- Thống kê và báo cáo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Xử lý dữ liệu hiến máu
 
-## Expanding the ESLint configuration
+### Vấn đề thường gặp
+Có thể xảy ra sự không nhất quán giữa:
+- **Số lần hiến hiển thị**: Lấy từ API `/blood-register/get-list-donation` (trường `unitDonation`)
+- **Lịch sử hiến máu thực tế**: Lấy từ API `/blood-register/history/${userId}`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Nguyên nhân
+1. **Bản ghi chưa hoàn thành**: Có thể có các bản ghi hiến máu đã được tạo nhưng chưa có ngày hoàn thành (`completedDate` = null)
+2. **Dữ liệu không hợp lệ**: Một số bản ghi có thể có `unit` = 0 hoặc dữ liệu không đầy đủ
+3. **Đồng bộ hóa dữ liệu**: Hai API có thể trả về dữ liệu khác nhau
+
+### Giải pháp đã áp dụng
+1. **Lọc dữ liệu**: Chỉ hiển thị các bản ghi có `completedDate` và `unit > 0`
+2. **Thông báo cảnh báo**: Hiển thị cảnh báo khi có sự khác biệt giữa số lần hiến hiển thị và thực tế
+3. **Thông báo giải thích**: Thêm thông báo trong modal để người dùng hiểu rõ về việc lọc dữ liệu
+
+### Cách sử dụng
+- Khi xem lịch sử hiến máu, hệ thống sẽ tự động lọc và chỉ hiển thị các lần hiến đã hoàn thành
+- Nếu có sự khác biệt, hệ thống sẽ hiển thị cảnh báo để người dùng biết
+- Thông báo trong modal giải thích rằng chỉ hiển thị các lần hiến máu đã hoàn thành với dữ liệu đầy đủ
+
+## Cài đặt và chạy
+
+```bash
+npm install
+npm run dev
+```
+
+## Cấu trúc dự án
+- `src/page/doctorpage/doctor/DonationHistoryPage.jsx`: Trang lịch sử hiến máu (doctor)
+- `src/page/doctorpage/dashboard/DonorsPage.jsx`: Trang quản lý người hiến máu (dashboard)
+- `src/services/donorsService.js`: Service xử lý dữ liệu người hiến máu

@@ -14,7 +14,9 @@ import {
   Spin,
   Empty,
   Select,
-  message, 
+  message,
+  Form,
+  Tooltip,
 } from "antd";
 import {
   UserOutlined,
@@ -23,12 +25,16 @@ import {
   PhoneOutlined,
   MailOutlined,
   HeartOutlined,
+  FileTextOutlined,
+  DownloadOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
 import {
   getAllDonors,
   getDonationHistoryByUserId,
 } from "../../../services/donorsService";
+import { createCertificate } from "../../../services/certificateService";
+import { downloadCertificateFile } from "../../../components/CertificateGenerator";
 import moment from "moment";
 
 const { Title, Text } = Typography;
@@ -48,7 +54,12 @@ const getColorById = (id) => {
   return colors[id % colors.length];
 };
 
-const DonorsPage = () => {
+const bloodTypeMap = {
+    A_POSITIVE: "A+", A_NEGATIVE: "A-", B_POSITIVE: "B+", B_NEGATIVE: "B-",
+    AB_POSITIVE: "AB+", AB_NEGATIVE: "AB-", O_POSITIVE: "O+", O_NEGATIVE: "O-",
+};
+
+const DonationHistoryPage = () => {
   const [donors, setDonors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
@@ -57,6 +68,10 @@ const DonorsPage = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [bloodTypeFilter, setBloodTypeFilter] = useState("all");
+  const [certificateModalOpen, setCertificateModalOpen] = useState(false);
+  const [selectedDonation, setSelectedDonation] = useState(null);
+  const [certificateLoading, setCertificateLoading] = useState(false);
+  const [form] = Form.useForm();
 
   // Hàm tính số lần hiến thực tế từ lịch sử
   const getRealDonationCount = async (donorId) => {
@@ -173,6 +188,53 @@ const DonorsPage = () => {
     }
   };
 
+  const handleCreateCertificate = (donation) => {
+    setSelectedDonation(donation);
+    setCertificateModalOpen(true);
+    form.setFieldsValue({
+      doctorName: "Bác sĩ phụ trách",
+      notes: "Giấy chứng nhận hiến máu hợp lệ",
+    });
+  };
+
+  const handleCertificateSubmit = async (values) => {
+    if (!selectedDonation) return;
+    
+    setCertificateLoading(true);
+    try {
+      // Tạo certificate trong database
+      const certificateData = {
+        donationId: selectedDonation.id,
+        donorId: selectedDonor.id,
+        doctorName: values.doctorName,
+        notes: values.notes,
+        donationDate: selectedDonation.completedDate,
+        bloodType: selectedDonation.bloodType,
+        amount: selectedDonation.unit,
+      };
+
+      await createCertificate(certificateData);
+
+      // Tạo và tải PDF
+      const donationData = {
+        ...selectedDonation,
+        fullName: selectedDonor.fullName,
+        doctorName: values.doctorName,
+      };
+
+      downloadCertificateFile(donationData, values.doctorName);
+      
+      message.success("Đã tạo giấy chứng nhận thành công!");
+      setCertificateModalOpen(false);
+      form.resetFields();
+    } catch (error) {
+      console.error("Lỗi khi tạo certificate:", error);
+      message.error("Không thể tạo giấy chứng nhận. Vui lòng thử lại!");
+    } finally {
+      setCertificateLoading(false);
+    }
+  };
+
   const filteredDonors = useMemo(() => {
     return donors.filter((donor) => {
       const nameMatch = donor.fullName
@@ -187,17 +249,6 @@ const DonorsPage = () => {
       return (nameMatch || phoneMatch || emailMatch) && bloodTypeMatch;
     });
   }, [donors, searchText, bloodTypeFilter]);
-
-  const bloodTypeMap = {
-    A_POSITIVE: "A+",
-    A_NEGATIVE: "A-",
-    B_POSITIVE: "B+",
-    B_NEGATIVE: "B-",
-    AB_POSITIVE: "AB+",
-    AB_NEGATIVE: "AB-",
-    O_POSITIVE: "O+",
-    O_NEGATIVE: "O-",
-  };
 
   const columns = [
     {
@@ -263,14 +314,16 @@ const DonorsPage = () => {
       key: "action",
       align: "center",
       render: (_, record) => (
-        <Button
-          type="primary"
-          ghost
-          icon={<HistoryOutlined />}
-          onClick={() => handleViewHistory(record)}
-        >
-          Xem lịch sử
-        </Button>
+        <Space>
+          <Button
+            type="primary"
+            ghost
+            icon={<HistoryOutlined />}
+            onClick={() => handleViewHistory(record)}
+          >
+            Xem lịch sử
+          </Button>
+        </Space>
       ),
     },
   ];
@@ -288,7 +341,24 @@ const DonorsPage = () => {
       dataIndex: "location",
       key: "location",
       render: () => "Bệnh viện Trung ương",
-    }, // Placeholder data
+    },
+    {
+      title: "Thao tác",
+      key: "action",
+      align: "center",
+      render: (_, record) => (
+        <Tooltip title="Tạo giấy chứng nhận">
+          <Button
+            type="primary"
+            icon={<FileTextOutlined />}
+            onClick={() => handleCreateCertificate(record)}
+            size="small"
+          >
+            Tạo giấy chứng nhận
+          </Button>
+        </Tooltip>
+      ),
+    },
   ];
 
   return (
@@ -305,15 +375,15 @@ const DonorsPage = () => {
             <Space align="center" size="middle">
               <Avatar
                 size={64}
-                icon={<UserOutlined />}
-                style={{ backgroundColor: "#fff1f0", color: "#cf1322" }}
+                icon={<HistoryOutlined />}
+                style={{ backgroundColor: "#e6f7ff", color: "#1890ff" }}
               />
               <div>
                 <Title level={2} style={{ margin: 0 }}>
-                  Quản lý người hiến máu
+                  Lịch sử Người hiến máu
                 </Title>
                 <Text type="secondary">
-                  Danh sách chi tiết những người đã tham gia hiến máu.
+                  Tra cứu thông tin và lịch sử hiến máu của các tình nguyện viên.
                 </Text>
               </div>
             </Space>
@@ -372,7 +442,7 @@ const DonorsPage = () => {
         footer={
           <Button onClick={() => setHistoryModalOpen(false)}>Đóng</Button>
         }
-        width={700}
+        width={800}
       >
         <Spin spinning={historyLoading} tip="Đang tải lịch sử...">
           {donationHistory.length === 0 && !historyLoading ? (
@@ -418,8 +488,74 @@ const DonorsPage = () => {
           )}
         </Spin>
       </Modal>
+
+      {/* Modal tạo giấy chứng nhận */}
+      <Modal
+        title={
+          <Space>
+            <FileTextOutlined />
+            <Text>Tạo giấy chứng nhận hiến máu</Text>
+          </Space>
+        }
+        open={certificateModalOpen}
+        onCancel={() => setCertificateModalOpen(false)}
+        footer={null}
+        width={600}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleCertificateSubmit}
+        >
+          <Form.Item
+            name="doctorName"
+            label="Tên bác sĩ phụ trách"
+            rules={[{ required: true, message: "Vui lòng nhập tên bác sĩ!" }]}
+          >
+            <Input placeholder="Nhập tên bác sĩ phụ trách" />
+          </Form.Item>
+          
+          <Form.Item
+            name="notes"
+            label="Ghi chú"
+          >
+            <Input.TextArea 
+              rows={3}
+              placeholder="Ghi chú bổ sung cho giấy chứng nhận..."
+            />
+          </Form.Item>
+
+          {selectedDonation && (
+            <Card size="small" style={{ marginBottom: 16 }}>
+              <Text strong>Thông tin hiến máu:</Text>
+              <br />
+              <Text>Ngày hiến: {moment(selectedDonation.completedDate).format("DD/MM/YYYY")}</Text>
+              <br />
+              <Text>Lượng máu: {selectedDonation.unit} ml</Text>
+              <br />
+              <Text>Nhóm máu: {bloodTypeMap[selectedDonation.bloodType] || selectedDonation.bloodType}</Text>
+            </Card>
+          )}
+
+          <Form.Item>
+            <Space>
+              <Button
+                type="primary"
+                icon={<DownloadOutlined />}
+                htmlType="submit"
+                loading={certificateLoading}
+              >
+                Tạo và tải giấy chứng nhận
+              </Button>
+              <Button onClick={() => setCertificateModalOpen(false)}>
+                Hủy
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
 
-export default DonorsPage;
+export default DonationHistoryPage; 
