@@ -8,9 +8,10 @@ import api from "../../config/api"; // ← Đảm bảo đúng đường dẫn
 const RemindersComponent = () => {
   const userData = useSelector((state) => state.user) || {};
   const [reminderMessage, setReminderMessage] = useState("");
-
+  
   const getNextDonationDate = (lastDonation) => {
-    if (!lastDonation) return "Chưa có thông tin";
+    if (!lastDonation)
+    return "Chưa có thông tin"; 
     const nextDate = new Date(
       new Date(lastDonation).setMonth(new Date(lastDonation).getMonth() + 3)
     );
