@@ -112,55 +112,21 @@ function AdminUsersPage() {
           phone: values.phone,
           address: values.address,
           bloodType: values.bloodType,
-          status: values.status, // Mặc định là hoạt động
         };
         await api.post('/register', newUser);
         await refreshUsersData();
         toast.success('Thêm người dùng thành công!');
       } else {
-        // Gửi đầy đủ các trường backend yêu cầu khi cập nhật user (không gửi role, id, email)
-        const requestBody = {
-          fullName: values.name,
-          phone: values.phone,
-          address: values.address,
-          gender: values.gender,
-          birthdate: values.birthdate,
-          height: values.height || 0,
-          weight: values.weight || 0,
-          lastDonation: values.lastDonation || null,
-          medicalHistory: values.medicalHistory || null,
-          emergencyName: values.emergencyName,
-          emergencyPhone: values.emergencyPhone,
-          bloodType: values.bloodType,
-        };
-        // Loại bỏ các trường null hoặc undefined
-        Object.keys(requestBody).forEach(key => {
-          if (requestBody[key] === null || requestBody[key] === undefined || requestBody[key] === '') {
-            delete requestBody[key];
-          }
-        });
-        console.log('Payload update user:', requestBody);
-        // Gọi API update user với token
-        const token = localStorage.getItem('userToken') || localStorage.getItem('token');
-        if (!token) {
-          toast.error('Không tìm thấy token xác thực!');
-          return;
-        }
-        const response = await api.put('user/update-user', requestBody, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        console.log('Update user response:', response);
-        // Nếu đổi vai trò, gọi thêm API set-role
+        // Chỉ cập nhật vai trò nếu có thay đổi
         if (values.role && selectedUser?.role !== values.role) {
           // Chuyển đổi role sang đúng giá trị backend
           let backendRole = values.role === 'staff' ? 'STAFF' : values.role === 'donor' ? 'MEMBER' : values.role.toUpperCase();
           await setUserRole(selectedUser.email, backendRole);
+          await refreshUsersData();
+          toast.success('Cập nhật vai trò thành công!');
+        } else {
+          toast.info('Không có thay đổi nào được thực hiện!');
         }
-        await refreshUsersData();
-        toast.success('Cập nhật thông tin thành công!');
       }
       setIsModalVisible(false);
     } catch (error) {
@@ -574,12 +540,6 @@ function AdminUsersPage() {
                     <Option value="staff">Nhân viên</Option>
                   </Select>
                 </Form.Item>
-                <Form.Item name="status" label={<b>Trạng thái</b>} rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}> 
-                  <Select>
-                    <Option value="ACTIVE">Đang hoạt động</Option>
-                    <Option value="INACTIVE">Không hoạt động</Option>
-                  </Select>
-                </Form.Item>
               </div>
             </>
           ) : (
@@ -595,7 +555,7 @@ function AdminUsersPage() {
                     { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' }
                   ]}
                 >
-                  <Input prefix={<UserOutlined />} placeholder="Nhập tên người dùng" size="large" />
+                  <Input prefix={<UserOutlined />} placeholder="Nhập tên người dùng" size="large" disabled />
                 </Form.Item>
                 <Form.Item
                   name="email"
@@ -616,25 +576,25 @@ function AdminUsersPage() {
                     { pattern: /^[0-9+]{10,15}$/, message: 'Số điện thoại phải hợp lệ!' }
                   ]}
                 >
-                  <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" size="large" />
+                  <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" size="large" disabled />
                 </Form.Item>
                 <Form.Item name="address" label={<b>Địa chỉ</b>}>
-                  <Input placeholder="Nhập địa chỉ" size="large" />
+                  <Input placeholder="Nhập địa chỉ" size="large" disabled />
                 </Form.Item>
                 <Form.Item name="gender" label={<b>Giới tính</b>}>
-                  <Select placeholder="Chọn giới tính" size="large">
+                  <Select placeholder="Chọn giới tính" size="large" disabled>
                     {genderOptions.map(option => (
                       <Option key={option.value} value={option.value}>{option.label}</Option>
                     ))}
                   </Select>
                 </Form.Item>
                 <Form.Item name="birthdate" label={<b>Ngày sinh</b>}>
-                  <Input type="date" size="large" />
+                  <Input type="date" size="large" disabled />
                 </Form.Item>
               </div>
               <div style={{ flex: 1, minWidth: 280 }}>
                 <Form.Item name="bloodType" label={<b>Nhóm máu</b>} rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}> 
-                  <Select placeholder="Chọn nhóm máu" size="large">
+                  <Select placeholder="Chọn nhóm máu" size="large" disabled>
                     <Option value="A_POSITIVE">A+</Option>
                     <Option value="A_NEGATIVE">A-</Option>
                     <Option value="B_POSITIVE">B+</Option>
@@ -652,10 +612,10 @@ function AdminUsersPage() {
                   </Select>
                 </Form.Item>
                 <Form.Item name="emergencyName" label={<b>Tên người liên hệ khẩn cấp</b>}>
-                  <Input placeholder="Nhập tên người liên hệ khẩn cấp" size="large" />
+                  <Input placeholder="Nhập tên người liên hệ khẩn cấp" size="large" disabled />
                 </Form.Item>
                 <Form.Item name="emergencyPhone" label={<b>SĐT người liên hệ khẩn cấp</b>}>
-                  <Input placeholder="Nhập SĐT người liên hệ khẩn cấp" size="large" />
+                  <Input placeholder="Nhập SĐT người liên hệ khẩn cấp" size="large" disabled />
                 </Form.Item>
                 {/* ĐÃ ẨN Form.Item name='status' ở đây */}
               </div>
