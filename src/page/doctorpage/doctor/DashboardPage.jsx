@@ -1,139 +1,30 @@
-// import React, { useEffect, useState } from "react";
-// import {
-//   Card,
-//   Row,
-//   Col,
-//   Table,
-//   Statistic,
-//   Tag,
-//   Segmented,
-//   message,
-//   Spin,
-//   Typography,
-//   Space,
-//   Button,
-//   Modal,
-//   Form,
-//   Input,
-//   DatePicker,
-// } from "antd";
-// import {
-//   WarningOutlined,
-//   CheckCircleOutlined,
-//   CloseCircleOutlined,
-//   ClockCircleOutlined,
-// } from "@ant-design/icons";
-// import {
-//   getBloodRegisterByStatus,
-//   updateBloodRegisterStatus,
-//   completeBloodRegister,
-// } from "../../../services/bloodRegisterService";
-// import { getAllBloodInventory } from "../../../services/bloodInventoryService";
-// import api from "../../../config/api";
-// import dayjs from "dayjs";
-// import HealthCheckForm from "../../../components/forms/HealthCheckForm";
-// import "./DoctorDashboard.css";
-
-// const { Title } = Typography;
-
-// const statusColors = {
-//   APPROVED: "blue",
-//   COMPLETED: "green",
-//   REJECTED: "red",
-//   PENDING: "orange",
-//   INCOMPLETED: "gray",
-// };
-// const statusIcons = {
-//   APPROVED: <CheckCircleOutlined />,
-//   COMPLETED: <CheckCircleOutlined />,
-//   REJECTED: <CloseCircleOutlined />,
-//   PENDING: <ClockCircleOutlined />,
-//   INCOMPLETED: <WarningOutlined />,
-// };
-
-// const statusOptions = [
-//   { label: "Tất cả", value: "ALL" },
-//   { label: "Chờ duyệt", value: "PENDING" },
-//   { label: "Đã duyệt", value: "APPROVED" },
-//   { label: "Hoàn thành", value: "COMPLETED" },
-//   { label: "Từ chối", value: "REJECTED" },
-// ];
-
-// const bloodTypeMap = {
-//   A_POSITIVE: "A+",
-//   A_NEGATIVE: "A-",
-//   B_POSITIVE: "B+",
-//   B_NEGATIVE: "B-",
-//   AB_POSITIVE: "AB+",
-//   AB_NEGATIVE: "AB-",
-//   O_POSITIVE: "O+",
-//   O_NEGATIVE: "O-",
-// };
-// --- KẾT THÚC DỮ LIỆU GỐC ---
-
 import React, { useEffect, useState } from "react";
 import {
   Card,
   Row,
   Col,
-  Table,
   Statistic,
-  Tag,
-  Segmented,
-  message,
   Spin,
   Typography,
   Space,
-  Button,
-  Modal,
-  Form,
-  Input,
-  DatePicker,
   Avatar,
+  message,
+  Table,
+  Progress,
 } from "antd";
 import {
-  WarningOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  ClockCircleOutlined,
   UserOutlined,
-  SearchOutlined,
-  MedicineBoxOutlined, // SỬA LẠI: Thay StethoscopeOutlined bằng icon này
+  MedicineBoxOutlined,
+  UsergroupAddOutlined,
+  HeartOutlined,
+  BankOutlined,
 } from "@ant-design/icons";
-import {
-  getBloodRegisterByStatus,
-  updateBloodRegisterStatus,
-  completeBloodRegister,
-} from "../../../services/bloodRegisterService";
+import { getAllDonors } from "../../../services/donorsService";
+import { getBloodReceiveHistory } from "../../../services/bloodReceiveService";
 import { getAllBloodInventory } from "../../../services/bloodInventoryService";
-import api from "../../../config/api";
-import dayjs from "dayjs";
-import HealthCheckForm from "../../../components/forms/HealthCheckForm";
+
 
 const { Title, Text } = Typography;
-
-const statusColors = {
-  APPROVED: "blue",
-  COMPLETED: "green",
-  REJECTED: "red",
-  PENDING: "orange",
-  INCOMPLETED: "gray",
-};
-const statusIcons = {
-  APPROVED: <CheckCircleOutlined />,
-  COMPLETED: <CheckCircleOutlined />,
-  REJECTED: <CloseCircleOutlined />,
-  PENDING: <ClockCircleOutlined />,
-  INCOMPLETED: <WarningOutlined />,
-};
-
-const statusOptions = [
-  { label: "Tất cả", value: "ALL" },
-  { label: "Chờ duyệt", value: "PENDING" },
-  { label: "Đã duyệt", value: "APPROVED" },
-  { label: "Hoàn thành", value: "COMPLETED" },
-  { label: "Từ chối", value: "REJECTED" },
-];
 
 const bloodTypeMap = {
   A_POSITIVE: "A+",
@@ -145,269 +36,103 @@ const bloodTypeMap = {
   O_POSITIVE: "O+",
   O_NEGATIVE: "O-",
 };
-// --- KẾT THÚC DỮ LIỆU GỐC ---
+
 
 const DashboardPage = () => {
-  // --- STATE GỐC CỦA BẠN (GIỮ NGUYÊN) ---
-  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState("ALL");
-  const [searchText, setSearchText] = useState("");
-  const [completeModalOpen, setCompleteModalOpen] = useState(false);
-  const [completeLoading, setCompleteLoading] = useState(false);
-  const [completeRecord, setCompleteRecord] = useState(null);
-  const [completeForm] = Form.useForm();
-  const [_inventory, setInventory] = useState([]);
-  const [healthCheckModalOpen, setHealthCheckModalOpen] = useState(false);
-  const [selectedRegister, setSelectedRegister] = useState(null);
-  // --- KẾT THÚC STATE GỐC ---
+  const [totalDonors, setTotalDonors] = useState(0);
+  const [totalRecipients, setTotalRecipients] = useState(0);
+  const [totalBloodUnits, setTotalBloodUnits] = useState(0);
+  const [latestUsers, setLatestUsers] = useState([]);
+  const [bloodInventory, setBloodInventory] = useState([]);
 
-  // --- LOGIC GỐC CỦA BẠN (GIỮ NGUYÊN 100%) ---
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        let res = [];
+        const [
+          donorsResult,
+          recipientsResult,
+          inventoryResult,
+        ] = await Promise.allSettled([
+          getAllDonors(),
+          getBloodReceiveHistory(),
+          getAllBloodInventory(),
+          // Bỏ lời gọi api.get("/user/get-user-by-role")
+        ]);
 
-        if (status === "ALL") {
-          const allStatuses = statusOptions
-            .map((opt) => opt.value)
-            .filter((v) => v !== "ALL");
-          res = await getBloodRegisterByStatus(allStatuses);
+        if (donorsResult.status === 'fulfilled') {
+          const donors = donorsResult.value || [];
+          setTotalDonors(donors.length);
+          
+          // Lấy 5 người hiến máu mới nhất từ danh sách donor
+          const sortedDonors = donors
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Sắp xếp theo ngày tạo
+            .slice(0, 5);
+          setLatestUsers(sortedDonors);
+
         } else {
-          res = await getBloodRegisterByStatus(status);
+          console.error("Error fetching donors:", donorsResult.reason);
+        }
+        
+        if (recipientsResult.status === 'fulfilled') {
+          const recipients = recipientsResult.value || [];
+          setTotalRecipients(recipients.length);
+        } else {
+          console.error("Error fetching recipients:", recipientsResult.reason);
         }
 
-        // Lấy danh sách donor đầy đủ info
-        const dataWithUser = await Promise.all(
-          (res || []).map(async (item) => {
-            let userInfo = {};
-            if (item.user_id) {
-              try {
-                const userRes = await api.get(`/user/${item.user_id}`);
-                userInfo = userRes.data || {};
-              } catch {
-                userInfo = {};
-              }
-            }
+        if (inventoryResult.status === 'fulfilled') {
+          const inventory = inventoryResult.value || [];
+          setBloodInventory(inventory);
+          const totalUnits = inventory.reduce(
+            (sum, item) => sum + (item.unitsAvailable || 0),
+            0
+          );
+          setTotalBloodUnits(totalUnits);
+        } else {
+          console.error("Error fetching inventory:", inventoryResult.reason);
+        }
 
-            return {
-              id: item.id,
-              name:
-                userInfo.fullName || item.fullName || item.name || "Chưa có",
-              bloodType:
-                item.bloodType ||
-                item.blood?.bloodType ||
-                userInfo.bloodType ||
-                "Chưa xác định",
-              quantity: item.blood?.unit || item.quantity || item.amount || 1,
-              wantedHour:
-                item.wantedHour || item.blood?.wantedHour || item.hour || "",
-              wantedDate:
-                item.wantedDate ||
-                item.blood?.donationDate ||
-                item.registerDate ||
-                item.created_at ||
-                "",
-              status: item.status,
-              address: userInfo.address || item.address || "",
-            };
-          })
-        );
-
-        setData(dataWithUser.slice().sort((a, b) => b.id - a.id));
-      } catch {
-        message.error("Không thể tải danh sách đăng ký!");
+        // Bỏ logic xử lý usersResult
+        
+      } catch (error) {
+        message.error("Đã có lỗi xảy ra khi tải dữ liệu tổng quan!");
+        console.error("Dashboard data fetch error:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [status]);
+  }, []);
 
-  const handleIncomplete = async (record) => {
-    try {
-      await updateBloodRegisterStatus(record.id, "INCOMPLETED");
-      message.success("Đã đánh dấu chưa hoàn thành!");
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === record.id ? { ...item, status: "INCOMPLETED" } : item
-        )
-      );
-      setStatus("ALL");
-    } catch {
-      message.error("Cập nhật trạng thái thất bại!");
-    }
-  };
-
-  const handleOpenCompleteModal = (record) => {
-    setCompleteRecord(record);
-    setCompleteModalOpen(true);
-    completeForm.setFieldsValue({
-      implementationDate: dayjs(),
-      unit: record.quantity,
-    });
-  };
-
-  const handleCompleteSubmit = async (values) => {
-    setCompleteLoading(true);
-    try {
-      await completeBloodRegister({
-        bloodId: completeRecord.id,
-        implementationDate: values.implementationDate.format("YYYY-MM-DD"),
-        unit: values.unit,
-      });
-      message.success("Đã đánh dấu hoàn thành!");
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === completeRecord.id
-            ? { ...item, status: "COMPLETED" }
-            : item
-        )
-      );
-      const inventoryData = await getAllBloodInventory();
-      setInventory(inventoryData);
-      setCompleteModalOpen(false);
-      setCompleteRecord(null);
-      completeForm.resetFields();
-    } catch {
-      message.error("Lỗi khi hoàn thành đăng ký!");
-    } finally {
-      setCompleteLoading(false);
-    }
-  };
-
-  const handleOpenHealthCheckModal = async (record) => {
-    let merged = { ...record };
-    if (record.user_id) {
-      try {
-        const userRes = await api.get(`/user/${record.user_id}`);
-        const userInfo = userRes.data || {};
-        merged = { ...merged, ...userInfo };
-      } catch {
-        // Nếu lỗi thì bỏ qua, dùng record gốc
-      }
-    }
-    setSelectedRegister(merged);
-    setHealthCheckModalOpen(true);
-  };
-  // --- KẾT THÚC LOGIC GỐC ---
-
-  // --- BỘ LỌC VÀ THỐNG KÊ (GIỮ NGUYÊN LOGIC) ---
-  const stats = data.reduce(
-    (acc, cur) => {
-      acc.total++;
-      if (cur.status === "PENDING") acc.pending++;
-      if (cur.status === "COMPLETED") acc.completed++;
-      if (cur.status === "REJECTED") acc.rejected++;
-      if (cur.status === "APPROVED") acc.approved++;
-      return acc;
-    },
-    { total: 0, pending: 0, completed: 0, rejected: 0, approved: 0 }
-  );
-
-  let filteredData =
-    status === "ALL" ? data : data.filter((item) => item.status === status);
-
-  if (searchText) {
-    filteredData = filteredData.filter(
-      (item) =>
-        (item.name &&
-          item.name.toLowerCase().includes(searchText.toLowerCase())) ||
-        (item.address &&
-          item.address.toLowerCase().includes(searchText.toLowerCase()))
-    );
-  }
-  // --- KẾT THÚC BỘ LỌC VÀ THỐNG KÊ ---
-
-  // --- CÁC CỘT CỦA BẢNG (CHỈ CẬP NHẬT GIAO DIỆN) ---
-  const columns = [
+  const userColumns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: 80,
-    },
-    {
-      title: "Họ tên",
-      dataIndex: "name",
+      title: "Tên",
+      dataIndex: "fullName", // Dùng fullName từ dữ liệu donor
       key: "name",
-      render: (name) => (
-        <Space>
-          <Avatar icon={<UserOutlined />}>{name?.[0]}</Avatar>
-          <Text strong>{name}</Text>
-        </Space>
-      ),
+    },
+    {
+      title: "Email",
+      dataIndex: "email", // Dùng email từ dữ liệu donor
+      key: "email",
     },
     {
       title: "Nhóm máu",
       dataIndex: "bloodType",
       key: "bloodType",
-      render: (text) => <Tag color="red">{bloodTypeMap[text] || text}</Tag>,
+      render: (type) => bloodTypeMap[type] || type,
     },
-    {
-      title: "Thời gian",
-      dataIndex: "wantedDate",
-      key: "time",
-      render: (date, record) => (
-        <div>
-          <Text>
-            {record.wantedHour ? record.wantedHour.substring(0, 5) : "N/A"}
-          </Text>
-          <br />
-          <Text type="secondary">
-            {date ? dayjs(date).format("DD/MM/YYYY") : "N/A"}
-          </Text>
-        </div>
-      ),
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Tag color={statusColors[status]} icon={statusIcons[status]}>
-          {status}
-        </Tag>
-      ),
-    },
-    {
-      title: "Thao tác",
-      key: "action",
-      align: "center",
-      render: (_, record) => {
-        if (record.status === "APPROVED") {
-          return (
-            <Space>
-              <Button
-                type="primary"
-                onClick={() => handleOpenCompleteModal(record)}
-              >
-                Hoàn thành
-              </Button>
-              <Button danger onClick={() => handleIncomplete(record)}>
-                chưa hoàn thành
-              </Button>
-              <Button onClick={() => handleOpenHealthCheckModal(record)}>
-                Khám SK
-              </Button>
-            </Space>
-          );
-        }
-        return <Text type="secondary">N/A</Text>;
-      },
-    },
+    // Cột "Vai trò" đã được lược bỏ theo yêu cầu
   ];
-  // --- KẾT THÚC CÁC CỘT ---
 
-  // --- RETURN GIAO DIỆN ĐÃ ĐƯỢC LÀM ĐẸP ---
   return (
     <div style={{ padding: "24px", background: "#f0f2f5" }}>
       <Card style={{ marginBottom: 24, borderRadius: "8px" }}>
         <Row align="middle">
           <Space align="center" size="large">
-            {/* SỬA LẠI: Dùng icon MedicineBoxOutlined */}
             <Avatar
               size={64}
               icon={<MedicineBoxOutlined />}
@@ -415,159 +140,95 @@ const DashboardPage = () => {
             />
             <div>
               <Title level={2} style={{ margin: 0 }}>
-                Tổng quan Đăng ký Hiến máu
+                Tổng quan
               </Title>
               <Text type="secondary">
-                Quản lý, duyệt và theo dõi các đơn đăng ký hiến máu từ người
-                dùng.
+                Thống kê tổng quan về hoạt động hiến và nhận máu.
               </Text>
             </div>
           </Space>
         </Row>
       </Card>
 
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card
-            bordered={false}
-            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
-          >
-            <Statistic title="Tổng Đơn" value={stats.total} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card
-            bordered={false}
-            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
-          >
-            <Statistic
-              title="Hoàn thành"
-              value={stats.completed}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card
-            bordered={false}
-            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
-          >
-            <Statistic
-              title="Đã duyệt"
-              value={stats.approved}
-              valueStyle={{ color: "#1890ff" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card
-            bordered={false}
-            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
-          >
-            <Statistic
-              title="Từ chối"
-              value={stats.rejected}
-              valueStyle={{ color: "#cf1322" }}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      <Card
-        bordered={false}
-        style={{ borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
-      >
-        <Row
-          justify="space-between"
-          align="middle"
-          style={{ marginBottom: 24 }}
-        >
-          <Col>
-            <Segmented
-              options={statusOptions}
-              value={status}
-              onChange={setStatus}
-              size="large"
-            />
+      <Spin spinning={loading} tip="Đang tải dữ liệu...">
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          <Col xs={24} sm={12} lg={6}>
+            <Card
+              bordered={false}
+              style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
+            >
+              <Statistic
+                title="Tổng người hiến máu"
+                value={totalDonors}
+                prefix={<UsergroupAddOutlined />}
+                valueStyle={{ color: "#1890ff" }}
+              />
+            </Card>
           </Col>
-          <Col>
-            <Input
-              placeholder="Tìm theo tên, địa chỉ..."
-              prefix={<SearchOutlined style={{ color: "#aaa" }} />}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: 250 }}
-              allowClear
-            />
+          <Col xs={24} sm={12} lg={6}>
+            <Card
+              bordered={false}
+              style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
+            >
+              <Statistic
+                title="Tổng người nhận máu"
+                value={totalRecipients}
+                prefix={<HeartOutlined />}
+                valueStyle={{ color: "#52c41a" }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={6}>
+            <Card
+              bordered={false}
+              style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
+            >
+              <Statistic
+                title="Kho máu (đơn vị)"
+                value={totalBloodUnits}
+                prefix={<BankOutlined />}
+                valueStyle={{ color: "#ffc107" }}
+              />
+            </Card>
           </Col>
         </Row>
-        <Spin spinning={loading} tip="Đang tải dữ liệu...">
-          <Table
-            columns={columns}
-            dataSource={
-              filteredData.slice().sort((a, b) => b.id - a.id)
-            }
-            rowKey="id"
-            pagination={{ pageSize: 8 }}
-            scroll={{ x: "max-content" }}
-          />
-        </Spin>
-      </Card>
 
-      <Modal
-        open={completeModalOpen}
-        title="Xác nhận hoàn thành đăng ký"
-        onCancel={() => setCompleteModalOpen(false)}
-        footer={null}
-        destroyOnClose
-      >
-        <Form
-          form={completeForm}
-          layout="vertical"
-          onFinish={handleCompleteSubmit}
-        >
-          <Form.Item
-            label="Ngày thực hiện"
-            name="implementationDate"
-            rules={[{ required: true, message: "Vui lòng chọn ngày!" }]}
-          >
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item
-            label="Số lượng (đơn vị)"
-            name="unit"
-            rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
-          >
-            <Input type="number" min={1} />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={completeLoading}
-              block
+        <Row gutter={[16, 16]}>
+          <Col xs={24} lg={12}>
+            <Card
+              title="Người dùng mới nhất"
+              bordered={false}
+              style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
             >
-              Xác nhận
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        open={healthCheckModalOpen}
-        title="Phiếu kiểm tra sức khỏe người hiến máu"
-        onCancel={() => setHealthCheckModalOpen(false)}
-        footer={null}
-        width={800}
-        destroyOnClose
-      >
-        {selectedRegister && (
-          <HealthCheckForm
-            donorInfo={selectedRegister}
-            onSuccess={() => setHealthCheckModalOpen(false)}
-          />
-        )}
-      </Modal>
+              <Table
+                columns={userColumns}
+                dataSource={latestUsers}
+                rowKey="id"
+                pagination={false}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card
+              title="Tình trạng nhóm máu"
+              bordered={false}
+              style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
+            >
+              {bloodInventory.map((item) => (
+                <div key={item.bloodType} style={{ marginBottom: "10px" }}>
+                  <Text strong>{`Nhóm máu ${bloodTypeMap[item.bloodType] || item.bloodType}`}</Text>
+                  <Text style={{ float: 'right' }}>{`${item.unitsAvailable} đơn vị`}</Text>
+                  <Progress
+                    percent={(item.unitsAvailable / 100) * 100} // Assuming max 100 units for visualisation
+                    showInfo={false}
+                    status={item.unitsAvailable < 10 ? "exception" : "success"}
+                  />
+                </div>
+              ))}
+            </Card>
+          </Col>
+        </Row>
+      </Spin>
     </div>
   );
 };

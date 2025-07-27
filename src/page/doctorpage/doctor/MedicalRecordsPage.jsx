@@ -326,7 +326,9 @@ function MedicalRecordsPage() {
     },
   ];
 
-  const sortedMedicalRecords = medicalRecords.slice().sort((a, b) => new Date(b.checkDate) - new Date(a.checkDate));
+  const sortedMedicalRecords = medicalRecords
+    .slice()
+    .sort((a, b) => new Date(b.checkDate) - new Date(a.checkDate));
 
   return (
     <div style={{ padding: "24px", background: "#f0f2f5" }}>
@@ -395,23 +397,19 @@ function MedicalRecordsPage() {
                 style={{ width: 250 }}
                 allowClear
               />
-              <Select
-                defaultValue="all"
-                style={{ width: 150 }}
-              >
+              <Select defaultValue="all" style={{ width: 150 }}>
                 <Option value="all">Tất cả trạng thái</Option>
                 <Option value="passed">Đạt</Option>
                 <Option value="failed">Không đạt</Option>
               </Select>
               <RangePicker
                 onChange={(dates) =>
-                  // setFilters((f) => ({ ...f, dateRange: dates }))
+                  setFilters((f) => ({ ...f, dateRange: dates }))
                 }
               />
             </Space>
           </Col>
-          <Col>
-              
+          {/* <Col>
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -419,7 +417,7 @@ function MedicalRecordsPage() {
             >
               Tạo hồ sơ mới
             </Button>
-          </Col>
+          </Col> */}
         </Row>
 
         <Spin spinning={loading}>
@@ -436,7 +434,7 @@ function MedicalRecordsPage() {
             scroll={{ x: 1200 }}
             onRow={(record) => ({
               onClick: () => handleOpenViewModal(record),
-              style: { cursor: "pointer" }
+              style: { cursor: "pointer" },
             })}
           />
         </Spin>

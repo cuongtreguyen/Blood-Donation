@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaUser,
@@ -7,13 +7,14 @@ import {
   FaClock,
   FaBell,
   FaBlog,
+  FaFileAlt,
 } from "react-icons/fa";
 import ProfileComponent from "./ProfileComponent";
 import HistoryComponent from "./HistoryComponent";
 import AppointmentsComponent from "./AppointmentsComponent";
 import InvitationsComponent from "./InvitationsComponent";
 import RemindersComponent from "./RemindersComponent";
-import api from "../../config/api";
+import CertificatesComponent from "./CertificatesComponent";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/features/userSlice";
 import BlogComponent from "./BlogComponent";
@@ -112,6 +113,7 @@ const DonateUser = () => {
             "invitations",
             "reminders",
             "blog",
+            "certificates",
           ].map((tab) => (
             <button
               key={tab}
@@ -128,6 +130,7 @@ const DonateUser = () => {
               {tab === "invitations" && <FaBell />}
               {tab === "reminders" && <FaClock />}
               {tab === "blog" && <FaBlog />}
+              {tab === "certificates" && <FaFileAlt />}
               <span className="capitalize">
                 {tab === "profile"
                   ? "Hồ sơ"
@@ -139,18 +142,22 @@ const DonateUser = () => {
                   ? "Lời mời"
                   : tab === "reminders"
                   ? "Nhắc nhở"
+                  : tab === "certificates"
+                  ? "Giấy chứng nhận"
                   : "Blog"}
               </span>
             </button>
           ))}
         </div>
-        <div className="transition-all duration-300">
+        
+        <div>
           {activeTab === "profile" && <ProfileComponent />}
           {activeTab === "history" && <HistoryComponent />}
           {activeTab === "appointments" && <AppointmentsComponent />}
           {activeTab === "invitations" && <InvitationsComponent />}
           {activeTab === "reminders" && <RemindersComponent />}
           {activeTab === "blog" && <BlogComponent />}
+          {activeTab === "certificates" && <CertificatesComponent />}
         </div>
       </div>
     </div>
