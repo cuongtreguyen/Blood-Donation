@@ -48,7 +48,7 @@ function DoctorDashboardLayout() {
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <div className="w-64 bg-red-600 text-white p-6">
+      <div className="w-80 bg-red-600 text-white p-6">
         {/* <h1 className="text-2xl font-bold mb-8">{user?.role === "DOCTOR" ? "Bác Sĩ" : "Nhân Viên"} Dashboard</h1> */}
         <Link
           to="/"
@@ -86,9 +86,17 @@ function DoctorDashboardLayout() {
                   ? "bg-red-500"
                   : "hover:bg-red-700"
               }`}
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                minWidth: 0,
+                display: "flex",
+                alignItems: "center"
+              }}
             >
               <span className="text-lg">{item.icon}</span>
-              <span>{item.label}</span>
+              <span style={{whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0}}>{item.label}</span>
             </Link>
           ))}
         </nav>
