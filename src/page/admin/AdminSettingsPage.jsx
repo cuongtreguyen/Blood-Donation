@@ -9,7 +9,7 @@ const { Title } = Typography;
 
 const AdminSettingsPage = () => {
   const [passwordForm] = Form.useForm();
-  const [systemConfigForm] = Form.useForm();
+  // const [systemConfigForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
   // Xử lý khi submit form đổi mật khẩu
@@ -37,26 +37,27 @@ const AdminSettingsPage = () => {
   };
 
   // Xử lý khi submit form cấu hình hệ thống
-  const handleSystemConfigSubmit = async (values) => {
-    try {
-      setLoading(true);
-      // Gọi API lưu cài đặt hệ thống (ví dụ: api.put('/settings/system', values);)
-      console.log('Lưu cấu hình hệ thống:', values); // Dùng console log tạm thời
-      toast.success('Lưu cấu hình hệ thống thành công!');
-    } catch (error) {
-      console.error('Lỗi khi lưu cấu hình hệ thống:', error);
-      const errorMessage = error.response?.data?.message || 'Lưu cấu hình hệ thống thất bại. Vui lòng thử lại!';
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleSystemConfigSubmit = async (values) => {
+  //   try {
+  //     setLoading(true);
+  //     // Gọi API lưu cài đặt hệ thống (ví dụ: api.put('/settings/system', values);)
+  //     console.log('Lưu cấu hình hệ thống:', values); // Dùng console log tạm thời
+  //     toast.success('Lưu cấu hình hệ thống thành công!');
+  //   } catch (error) {
+  //     console.error('Lỗi khi lưu cấu hình hệ thống:', error);
+  //     const errorMessage = error.response?.data?.message || 'Lưu cấu hình hệ thống thất bại. Vui lòng thử lại!';
+  //     toast.error(errorMessage);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <div className="p-6">
       <Title level={2}>Cài đặt</Title>
 
       {/* Cài đặt hệ thống */}
+      {/**
       <Card title="Cấu hình hệ thống" className="mb-6">
         <Form
           form={systemConfigForm}
@@ -133,6 +134,7 @@ const AdminSettingsPage = () => {
           </Form.Item>
         </Form>
       </Card>
+      **/}
 
       {/* Cài đặt mật khẩu */}
       <Card title="Cài đặt mật khẩu" className="mb-6">

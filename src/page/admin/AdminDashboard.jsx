@@ -58,6 +58,7 @@
 //         }));
 //         setUsers(usersFromApi);
 //       } catch (e) {
+//         console.log(e);
 //         setUsers([]);
 //       }
 //       setLoading(false);
@@ -73,6 +74,7 @@
 //         console.log('Blood inventory API response:', res.data);
 //         setBloodInventory(Array.isArray(res.data) ? res.data : []);
 //       } catch (e) {
+//         console.log(e);
 //         setBloodInventory([]);
 //       }
 //     };
@@ -85,6 +87,18 @@
 //     acc[role] = users.filter(u => (u.role === role || u.role?.toLowerCase() === role)).length;
 //     return acc;
 //   }, {});
+
+//   // Gộp các nhóm máu trùng nhau và cộng tổng số lượng
+//   const mergedBloodInventory = Object.values(
+//     bloodInventory.reduce((acc, item) => {
+//       if (!acc[item.bloodType]) {
+//         acc[item.bloodType] = { ...item };
+//       } else {
+//         acc[item.bloodType].unitsAvailable += item.unitsAvailable || 0;
+//       }
+//       return acc;
+//     }, {})
+//   );
 
 //   // Top 5 người dùng mới nhất (ưu tiên sort theo joinDate, nếu không có thì lấy đầu mảng)
 //   const sortedUsers = users.slice().sort((a, b) => {
@@ -179,7 +193,7 @@
 //       {/* Main content */}
 //       <Row gutter={16}>
 //         <Col xs={24} lg={16}>
-//           <Card title="Top 5 người dùng mới nhất" style={{ marginBottom: 24 }}>
+//           <Card title="Người dùng mới nhất" style={{ marginBottom: 24 }}>
 //             <Table
 //               dataSource={top5Users}
 //               columns={topUserColumns}
@@ -192,10 +206,10 @@
 //         </Col>
 //         <Col xs={24} lg={8}>
 //           <Card title="Tình trạng nhóm máu">
-//             {!Array.isArray(bloodInventory) || bloodInventory.length === 0 ? (
+//             {!Array.isArray(mergedBloodInventory) || mergedBloodInventory.length === 0 ? (
 //               <div>Không có dữ liệu tồn kho máu.</div>
 //             ) : (
-//               bloodInventory.map(item => (
+//               mergedBloodInventory.map(item => (
 //                 <div key={item.bloodType} style={{ marginBottom: 12 }}>
 //                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
 //                     <span>Nhóm máu {(() => {
@@ -319,6 +333,18 @@ function AdminDashboard() {
     return acc;
   }, {});
 
+  // Gộp các nhóm máu trùng nhau và cộng tổng số lượng
+  // const mergedBloodInventory = Object.values(
+  //   bloodInventory.reduce((acc, item) => {
+  //     if (!acc[item.bloodType]) {
+  //       acc[item.bloodType] = { ...item };
+  //     } else {
+  //       acc[item.bloodType].unitsAvailable += item.unitsAvailable || 0;
+  //     }
+  //     return acc;
+  //   }, {})
+  // );
+
   // Top 5 người dùng mới nhất (ưu tiên sort theo joinDate, nếu không có thì lấy đầu mảng)
   const sortedUsers = users.slice().sort((a, b) => {
     if (a.joinDate && b.joinDate) {
@@ -412,7 +438,7 @@ function AdminDashboard() {
       {/* Main content */}
       <Row gutter={16}>
         <Col xs={24} lg={16}>
-          <Card title="Top 5 người dùng mới nhất" style={{ marginBottom: 24 }}>
+          <Card title="Người dùng mới nhất" style={{ marginBottom: 24 }}>
             <Table
               dataSource={top5Users}
               columns={topUserColumns}
@@ -440,14 +466,14 @@ function AdminDashboard() {
                       };
                       return bloodMap[item.bloodType] || item.bloodType;
                     })()}</span>
-                    <span>{item.unitsAvailable} đơn vị</span>
+                    <span>{item.total} đơn vị</span>
                   </div>
                   <Progress
-                    percent={Math.min(item.unitsAvailable * 10, 100)}
+                    percent={Math.min((item.total || 0) * 10, 100)}
                     showInfo={false}
                     status={
-                      item.unitsAvailable < 4 ? "exception" :
-                      item.unitsAvailable > 8 ? "success" : "active"
+                      (item.total || 0) < 4 ? "exception" :
+                      (item.total || 0) > 8 ? "success" : "active"
                     }
                   />
                 </div>
