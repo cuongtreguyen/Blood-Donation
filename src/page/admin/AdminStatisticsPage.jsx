@@ -149,22 +149,23 @@ const AdminStatisticsPage = () => {
     totalDonations: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [monthlyDonations, setMonthlyDonations] = useState([
-    { month: 'Tháng 1', donations: 0 },
-    { month: 'Tháng 2', donations: 0 },
-    { month: 'Tháng 3', donations: 0 },
-    { month: 'Tháng 4', donations: 0 },
-    { month: 'Tháng 5', donations: 0 },
-    { month: 'Tháng 6', donations: 0 },
-    { month: 'Tháng 7', donations: 0 },
-    { month: 'Tháng 8', donations: 0 },
-    { month: 'Tháng 9', donations: 0 },
-    { month: 'Tháng 10', donations: 0 },
-    { month: 'Tháng 11', donations: 0 },
-    { month: 'Tháng 12', donations: 0 },
+  const [monthlyData, setMonthlyData] = useState([
+    { month: 'Tháng 1', donations: 0, receives: 0 },
+    { month: 'Tháng 2', donations: 0, receives: 0 },
+    { month: 'Tháng 3', donations: 0, receives: 0 },
+    { month: 'Tháng 4', donations: 0, receives: 0 },
+    { month: 'Tháng 5', donations: 0, receives: 0 },
+    { month: 'Tháng 6', donations: 0, receives: 0 },
+    { month: 'Tháng 7', donations: 0, receives: 0 },
+    { month: 'Tháng 8', donations: 0, receives: 0 },
+    { month: 'Tháng 9', donations: 0, receives: 0 },
+    { month: 'Tháng 10', donations: 0, receives: 0 },
+    { month: 'Tháng 11', donations: 0, receives: 0 },
+    { month: 'Tháng 12', donations: 0, receives: 0 },
   ]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const totalYearlyDonations = monthlyDonations.reduce((sum, m) => sum + (m.donations || 0), 0);
+  const totalYearlyDonations = monthlyData.reduce((sum, m) => sum + (m.donations || 0), 0);
+  const totalYearlyReceives = monthlyData.reduce((sum, m) => sum + (m.receives || 0), 0);
 
   useEffect(() => {
     // Hàm lấy dữ liệu thống kê người dùng từ API khi trang được tải
@@ -178,11 +179,14 @@ const AdminStatisticsPage = () => {
         } else if (typeof res.data === 'object') {
           allUsers = Object.values(res.data).flat();
         }
+        // Lọc chỉ những người dùng đang hoạt động
+        const activeUsers = allUsers.filter(user => user.status === 'active' || user.status === 'ACTIVE');
+        
         setStats({
-          totalUsers: allUsers.length,
-          totalDonors: allUsers.filter(u => u.role === 'donor' || u.role === 'MEMBER').length,
-          totalBloodBanks: allUsers.filter(u => u.role === 'bloodbank').length, // nếu có role này
-          totalDonations: allUsers.reduce((sum, u) => sum + (u.donationsCount || 0), 0), // nếu có trường này
+          totalUsers: activeUsers.length,
+          totalDonors: activeUsers.filter(u => u.role === 'donor' || u.role === 'MEMBER').length,
+          totalBloodBanks: activeUsers.filter(u => u.role === 'bloodbank').length, // nếu có role này
+          totalDonations: activeUsers.reduce((sum, u) => sum + (u.donationsCount || 0), 0), // nếu có trường này
         });
       } catch {
         setStats({ totalUsers: 0, totalDonors: 0, totalBloodBanks: 0, totalDonations: 0 });
@@ -195,24 +199,36 @@ const AdminStatisticsPage = () => {
 
   // Gọi lại API khi selectedYear thay đổi
   useEffect(() => {
-    const fetchMonthlyDonations = async (year) => {
+    const fetchMonthlyData = async (year) => {
       try {
-        const res = await api.get(`/blood-register/completed-monthly/${year}`);
-        const data = Array.isArray(res.data) ? res.data : [];
+        // Gọi API cho đơn hiến máu đã duyệt
+        const donationsRes = await api.get(`/blood-register/completed-monthly/${year}`);
+        const donationsData = Array.isArray(donationsRes.data) ? donationsRes.data : [];
+        
+        // Gọi API cho đơn nhận máu đã duyệt và hoàn thành
+        const receivesRes = await api.get(`/blood-receive/monthly-completed?year=${year}`);
+        const receivesData = Array.isArray(receivesRes.data) ? receivesRes.data : [];
+        
         const months = Array.from({ length: 12 }, (_, i) => {
-          const found = data.find(item => item.month === i + 1);
+          const foundDonation = donationsData.find(item => item.month === i + 1);
+          const foundReceive = receivesData.find(item => item.month === i + 1);
           return {
             month: `Tháng ${i + 1}`,
-            donations: found ? found.totalCompletedRequests : 0
+            donations: foundDonation ? foundDonation.totalCompletedRequests : 0,
+            receives: foundReceive ? foundReceive.totalCompletedReceives : 0
           };
         });
-        setMonthlyDonations(months);
+        setMonthlyData(months);
       } catch (e) {
         console.log(e);
-        setMonthlyDonations(Array.from({ length: 12 }, (_, i) => ({ month: `Tháng ${i + 1}`, donations: 0 })));
+        setMonthlyData(Array.from({ length: 12 }, (_, i) => ({ 
+          month: `Tháng ${i + 1}`, 
+          donations: 0,
+          receives: 0
+        })));
       }
     };
-    fetchMonthlyDonations(selectedYear);
+    fetchMonthlyData(selectedYear);
   }, [selectedYear]);
 
   // Dữ liệu mẫu cho hoạt động gần đây
@@ -230,35 +246,46 @@ const AdminStatisticsPage = () => {
 
       {/* Thẻ tổng hợp số liệu nhanh */}
       <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Space direction="horizontal" size="large" align="start">
+        <Col xs={24} sm={12} lg={6}>
+          <Card style={{ height: '100%' }}>
+            <Space direction="horizontal" size="large" align="start" style={{ width: '100%' }}>
               <UserOutlined style={{ fontSize: '30px', color: '#1890ff' }} />
-              <div>
+              <div style={{ flex: 1 }}>
                 <Text type="secondary">Tổng số người dùng</Text>
                 <Title level={4} style={{ margin: 0 }}>{loading ? '...' : stats.totalUsers}</Title>
               </div>
             </Space>
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Space direction="horizontal" size="large" align="start">
+        <Col xs={24} sm={12} lg={6}>
+          <Card style={{ height: '100%' }}>
+            <Space direction="horizontal" size="large" align="start" style={{ width: '100%' }}>
               <HeartOutlined style={{ fontSize: '30px', color: '#f5222d' }} />
-              <div>
-                <Text type="secondary">Tổng số người hiến máu</Text>
+              <div style={{ flex: 1 }}>
+                <Text type="secondary">Tổng người hiến máu</Text>
                 <Title level={4} style={{ margin: 0 }}>{loading ? '...' : stats.totalDonors}</Title>
               </div>
             </Space>
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Space direction="horizontal" size="large" align="start">
+        <Col xs={24} sm={12} lg={6}>
+          <Card style={{ height: '100%' }}>
+            <Space direction="horizontal" size="large" align="start" style={{ width: '100%' }}>
               <BarChartOutlined style={{ fontSize: '30px', color: '#fa8c16' }} />
-              <div>
-                <Text type="secondary">Tổng số lượt hiến máu</Text>
+              <div style={{ flex: 1 }}>
+                <Text type="secondary">Tổng đơn hiến máu</Text>
                 <Title level={4} style={{ margin: 0 }}>{loading ? '...' : totalYearlyDonations}</Title>
+              </div>
+            </Space>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card style={{ height: '100%' }}>
+            <Space direction="horizontal" size="large" align="start" style={{ width: '100%' }}>
+              <BarChartOutlined style={{ fontSize: '30px', color: '#52c41a' }} />
+              <div style={{ flex: 1 }}>
+                <Text type="secondary">Tổng đơn nhận máu</Text>
+                <Title level={4} style={{ margin: 0 }}>{loading ? '...' : totalYearlyReceives}</Title>
               </div>
             </Space>
           </Card>
@@ -268,7 +295,7 @@ const AdminStatisticsPage = () => {
       {/* Biểu đồ và hoạt động gần đây */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={24}>
-          <Card title="Thống kê lượt hiến máu theo tháng">
+          <Card title="Thống kê đơn hiến máu và nhận máu theo tháng">
             <div style={{ marginBottom: 16 }}>
               <span>Chọn năm: </span>
               <Select
@@ -282,15 +309,24 @@ const AdminStatisticsPage = () => {
                 })}
               </Select>
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlyDonations}>
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={monthlyData} margin={{ bottom: 80, left: 20, right: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" interval={0} />
-                <YAxis />
-                <Tooltip />
+                <XAxis 
+                  dataKey="month" 
+                  interval={0}
+                  height={80}
+                  tick={{ fontSize: 10 }}
+                />
+                <YAxis 
+                  tickFormatter={(value) => Math.round(value)}
+                  domain={[0, 'dataMax + 1']}
+                />
+                <Tooltip formatter={(value) => [Math.round(value), '']} />
                 <Legend />
-                <Bar dataKey="donations" fill="#8884d8" name="Lượt hiến máu" />
-              </BarChart>
+                <Line type="monotone" dataKey="donations" stroke="#fa8c16" strokeWidth={3} name="Đơn hiến máu" />
+                <Line type="monotone" dataKey="receives" stroke="#52c41a" strokeWidth={3} name="Đơn nhận máu" />
+              </LineChart>
             </ResponsiveContainer>
           </Card>
         </Col>
