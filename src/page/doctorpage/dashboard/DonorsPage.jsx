@@ -1,3 +1,21 @@
+/**
+ * Trang Quản Lý Người Hiến Máu
+ * 
+ * Chức năng:
+ * - Hiển thị danh sách tất cả người hiến máu trong hệ thống
+ * - Xem thông tin chi tiết của người hiến máu (tên, email, số điện thoại, nhóm máu)
+ * - Xem lịch sử hiến máu của từng người hiến
+ * - Tìm kiếm người hiến máu theo tên, số điện thoại, email
+ * - Lọc người hiến máu theo nhóm máu
+ * - Hiển thị số lần hiến máu thực tế của mỗi người hiến
+ * 
+ * Giúp bác sĩ/nhân viên y tế:
+ * - Quản lý thông tin của tất cả người hiến máu
+ * - Theo dõi lịch sử hiến máu của từng người hiến
+ * - Tìm kiếm nhanh người hiến máu khi cần
+ * - Đánh giá mức độ tham gia hiến máu của người hiến
+ */
+
 import React, { useEffect, useState, useMemo } from "react";
 import {
   Table,
@@ -14,7 +32,7 @@ import {
   Spin,
   Empty,
   Select,
-  message, 
+  message,
 } from "antd";
 import {
   UserOutlined,
@@ -62,18 +80,20 @@ const DonorsPage = () => {
   const getRealDonationCount = async (donorId) => {
     try {
       const history = await getDonationHistoryByUserId(donorId);
-      const validHistory = (history || []).filter(item => {
-        const hasValidDate = item.completedDate && 
-                           item.completedDate !== 'N/A' && 
-                           item.completedDate !== null && 
-                           item.completedDate !== undefined;
-        
-        const hasValidUnit = item.unit && 
-                           item.unit > 0 && 
-                           item.unit !== 'N/A' && 
-                           item.unit !== null && 
-                           item.unit !== undefined;
-        
+      const validHistory = (history || []).filter((item) => {
+        const hasValidDate =
+          item.completedDate &&
+          item.completedDate !== "N/A" &&
+          item.completedDate !== null &&
+          item.completedDate !== undefined;
+
+        const hasValidUnit =
+          item.unit &&
+          item.unit > 0 &&
+          item.unit !== "N/A" &&
+          item.unit !== null &&
+          item.unit !== undefined;
+
         return hasValidDate && hasValidUnit;
       });
       return validHistory.length;
@@ -88,7 +108,7 @@ const DonorsPage = () => {
       setLoading(true);
       try {
         const data = await getAllDonors();
-        
+
         // Tính toán số lần hiến thực tế cho mỗi donor
         const donorsWithRealCount = await Promise.all(
           data.map(async (donor, index) => {
@@ -96,16 +116,17 @@ const DonorsPage = () => {
             return {
               ...donor,
               key: `${donor.id}_${index}`, // Tạo key unique
-              realDonationCount: realCount
+              realDonationCount: realCount,
             };
           })
         );
-        
+
         // Loại bỏ dữ liệu trùng lặp dựa trên ID
-        const uniqueDonors = donorsWithRealCount.filter((donor, index, self) => 
-          index === self.findIndex(d => d.id === donor.id)
+        const uniqueDonors = donorsWithRealCount.filter(
+          (donor, index, self) =>
+            index === self.findIndex((d) => d.id === donor.id)
         );
-        
+
         setDonors(uniqueDonors);
       } catch (error) {
         console.error("Failed to fetch donors:", error);
@@ -124,44 +145,55 @@ const DonorsPage = () => {
     setHistoryLoading(true);
     try {
       const history = await getDonationHistoryByUserId(donor.id);
-      console.log('Raw history data for', donor.fullName, ':', history); // Debug log
-      
+      console.log("Raw history data for", donor.fullName, ":", history); // Debug log
+
       // Lọc và xử lý dữ liệu để đảm bảo tính nhất quán
-      const validHistory = (history || []).filter(item => {
-        console.log('Checking item:', item); // Debug log cho từng item
-        
+      const validHistory = (history || []).filter((item) => {
+        console.log("Checking item:", item); // Debug log cho từng item
+
         // Kiểm tra ngày hoàn thành
-        const hasValidDate = item.completedDate && 
-                           item.completedDate !== 'N/A' && 
-                           item.completedDate !== null && 
-                           item.completedDate !== undefined;
-        
+        const hasValidDate =
+          item.completedDate &&
+          item.completedDate !== "N/A" &&
+          item.completedDate !== null &&
+          item.completedDate !== undefined;
+
         // Kiểm tra số lượng
-        const hasValidUnit = item.unit && 
-                           item.unit > 0 && 
-                           item.unit !== 'N/A' && 
-                           item.unit !== null && 
-                           item.unit !== undefined;
-        
+        const hasValidUnit =
+          item.unit &&
+          item.unit > 0 &&
+          item.unit !== "N/A" &&
+          item.unit !== null &&
+          item.unit !== undefined;
+
         const isValid = hasValidDate && hasValidUnit;
-        console.log('Item validation:', { hasValidDate, hasValidUnit, isValid }); // Debug log
-        
+        console.log("Item validation:", {
+          hasValidDate,
+          hasValidUnit,
+          isValid,
+        }); // Debug log
+
         return isValid;
       });
-      
-      console.log('Filtered history data for', donor.fullName, ':', validHistory); // Debug log
+
+      console.log(
+        "Filtered history data for",
+        donor.fullName,
+        ":",
+        validHistory
+      ); // Debug log
       setDonationHistory(validHistory);
-      
+
       // Kiểm tra sự khác biệt giữa số lần hiến hiển thị và thực tế
       const displayedCount = donor.realDonationCount || 0;
       const actualCount = validHistory.length;
-      
-      console.log('Count comparison:', { displayedCount, actualCount }); // Debug log
-      
+
+      console.log("Count comparison:", { displayedCount, actualCount }); // Debug log
+
       if (displayedCount !== actualCount) {
         message.warning(
           `Số lần hiến hiển thị (${displayedCount}) khác với số lần hiến thực tế (${actualCount}). ` +
-          `Có thể có các bản ghi chưa hoàn thành hoặc dữ liệu không hợp lệ.`
+            `Có thể có các bản ghi chưa hoàn thành hoặc dữ liệu không hợp lệ.`
         );
       }
     } catch (error) {
@@ -248,7 +280,9 @@ const DonorsPage = () => {
       key: "realDonationCount",
       align: "center",
       sorter: (a, b) => (a.realDonationCount || 0) - (b.realDonationCount || 0),
-      render: (_, record) => <Tag color="blue">{record.realDonationCount || 0} lần</Tag>,
+      render: (_, record) => (
+        <Tag color="blue">{record.realDonationCount || 0} lần</Tag>
+      ),
     },
     {
       title: "Ngày hiến gần nhất",
@@ -389,31 +423,49 @@ const DonorsPage = () => {
           ) : (
             <>
               {donationHistory.length > 0 && (
-                <div style={{ marginBottom: 16, padding: "8px 12px", backgroundColor: "#f6ffed", border: "1px solid #b7eb8f", borderRadius: "6px" }}>
+                <div
+                  style={{
+                    marginBottom: 16,
+                    padding: "8px 12px",
+                    backgroundColor: "#f6ffed",
+                    border: "1px solid #b7eb8f",
+                    borderRadius: "6px",
+                  }}
+                >
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     <InfoCircleOutlined style={{ marginRight: 4 }} />
-                    Chỉ hiển thị các lần hiến máu đã hoàn thành với dữ liệu đầy đủ.
+                    Chỉ hiển thị các lần hiến máu đã hoàn thành với dữ liệu đầy
+                    đủ.
                   </Text>
                 </div>
               )}
               {donationHistory.length === 0 && !historyLoading && (
-                <div style={{ marginBottom: 16, padding: "8px 12px", backgroundColor: "#fff2e8", border: "1px solid #ffbb96", borderRadius: "6px" }}>
+                <div
+                  style={{
+                    marginBottom: 16,
+                    padding: "8px 12px",
+                    backgroundColor: "#fff2e8",
+                    border: "1px solid #ffbb96",
+                    borderRadius: "6px",
+                  }}
+                >
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     <InfoCircleOutlined style={{ marginRight: 4 }} />
-                    Không tìm thấy lịch sử hiến máu hợp lệ. Có thể có các bản ghi chưa hoàn thành hoặc dữ liệu không đầy đủ.
+                    Không tìm thấy lịch sử hiến máu hợp lệ. Có thể có các bản
+                    ghi chưa hoàn thành hoặc dữ liệu không đầy đủ.
                   </Text>
                 </div>
               )}
-                          <Table
-              columns={historyColumns}
-              dataSource={donationHistory.map((item, index) => ({
-                ...item,
-                key: `${item.id}_${index}`
-              }))}
-              rowKey="key"
-              pagination={false}
-              size="middle"
-            />
+              <Table
+                columns={historyColumns}
+                dataSource={donationHistory.map((item, index) => ({
+                  ...item,
+                  key: `${item.id}_${index}`,
+                }))}
+                rowKey="key"
+                pagination={false}
+                size="middle"
+              />
             </>
           )}
         </Spin>

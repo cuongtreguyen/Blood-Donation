@@ -1,3 +1,18 @@
+/**
+ * Trang Tổng Quan (Dashboard) cho bác sĩ/nhân viên y tế
+ * 
+ * Chức năng:
+ * - Hiển thị thông tin tổng quan về hệ thống hiến máu
+ * - Thống kê số lượng người hiến máu, người nhận máu, đơn vị máu có sẵn
+ * - Hiển thị danh sách người hiến máu mới nhất
+ * - Hiển thị biểu đồ tồn kho máu theo nhóm máu
+ * 
+ * Giúp bác sĩ/nhân viên y tế:
+ * - Nắm bắt nhanh tình hình hoạt động của hệ thống
+ * - Theo dõi số lượng người hiến máu và người nhận máu
+ * - Kiểm tra tình trạng kho máu và các nhóm máu đang thiếu
+ */
+
 import React, { useEffect, useState } from "react";
 import {
   Card,
@@ -80,7 +95,7 @@ const DashboardPage = () => {
           const inventory = inventoryResult.value || [];
           setBloodInventory(inventory);
           const totalUnits = inventory.reduce(
-            (sum, item) => sum + (item.unitsAvailable || 0),
+            (sum, item) => sum + (item.total || 0),
             0
           );
           setTotalBloodUnits(totalUnits);

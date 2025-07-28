@@ -1,3 +1,19 @@
+/**
+ * Trang Cài Đặt Hệ Thống
+ * 
+ * Chức năng:
+ * - Cấu hình thông tin bệnh viện/trung tâm hiến máu
+ * - Thiết lập các thông số cho quy trình hiến máu (tuổi tối thiểu/tối đa, cân nặng tối thiểu, v.v.)
+ * - Cấu hình thông báo (email, SMS, cảnh báo kho máu thấp)
+ * - Lưu các cài đặt vào hệ thống
+ * 
+ * Giúp bác sĩ/nhân viên y tế:
+ * - Tùy chỉnh hệ thống theo nhu cầu cụ thể của trung tâm
+ * - Thiết lập các ngưỡng an toàn cho việc hiến máu
+ * - Quản lý thông báo tự động
+ * - Đảm bảo hệ thống hoạt động hiệu quả theo quy định của trung tâm
+ */
+
 import React, { useState } from 'react';
 import { Card, Form, Input, Button, Switch, Select, message, Tabs, TimePicker, InputNumber } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
@@ -237,4 +253,4 @@ const SettingsPage = () => {
   );
 };
 
-export default SettingsPage; 
+export default SettingsPage;
