@@ -328,6 +328,11 @@ function AdminUsersPage() {
       key: 'status',
       width: 120,
       align: 'center',
+      filters: [
+        { text: 'Đang hoạt động', value: 'ACTIVE' },
+        { text: 'Không hoạt động', value: 'INACTIVE' },
+      ],
+      onFilter: (value, record) => record.status === value,
       render: (status) => {
         let color = 'green', text = 'Đang hoạt động';
         if (status === 'INACTIVE') {
