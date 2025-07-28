@@ -104,10 +104,10 @@ const createCertificateHTML = (certificateData, donationData) => {
         }
         
         .header-logo {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             margin: 0 auto 15px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a41e21'%3E%3Cpath d='M12 2C7.58 2 4 5.58 4 10c0 4.42 8 12 8 12s8-7.58 8-12c0-4.42-3.58-8-8-8zm-1.5 10.5H9v-3h1.5v3zm3 0h-1.5v-3H15v3z'/%3E%3C/svg%3E");
+            background-image: url("https://th.bing.com/th/id/OIP.77dgISHWSmlAGTmDFcrp3QAAAA?cb=iwc2&rs=1&pid=ImgDetMain");
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -248,10 +248,6 @@ const createCertificateHTML = (certificateData, donationData) => {
             
             <table class="donation-details">
                 <tbody>
-                    <tr>
-                        <td class="detail-label">Mã chứng nhận:</td>
-                        <td class="detail-value">#${certificateData.id}</td>
-                    </tr>
                     <tr>
                         <td class="detail-label">Ngày hiến máu:</td>
                         <td class="detail-value">${formatDate(donationData.completedDate)}</td>
