@@ -327,9 +327,10 @@ function AdminDashboard() {
   }, []);
 
   // Thống kê
-  const totalUsers = users.length;
+  const activeUsers = users.filter(user => user.status === 'active' || user.status === 'ACTIVE');
+  const totalUsers = activeUsers.length;
   const usersByRole = roles.reduce((acc, role) => {
-    acc[role] = users.filter(u => (u.role === role || u.role?.toLowerCase() === role)).length;
+    acc[role] = activeUsers.filter(u => (u.role === role || u.role?.toLowerCase() === role)).length;
     return acc;
   }, {});
 
@@ -345,8 +346,8 @@ function AdminDashboard() {
   //   }, {})
   // );
 
-  // Top 5 người dùng mới nhất (ưu tiên sort theo joinDate, nếu không có thì lấy đầu mảng)
-  const sortedUsers = users.slice().sort((a, b) => {
+  // Top 5 người dùng mới nhất (ưu tiên sort theo joinDate, nếu không có thì lấy đầu mảng) - chỉ lấy active users
+  const sortedUsers = activeUsers.slice().sort((a, b) => {
     if (a.joinDate && b.joinDate) {
       return new Date(b.joinDate) - new Date(a.joinDate);
     }

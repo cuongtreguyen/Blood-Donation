@@ -178,11 +178,14 @@ const AdminStatisticsPage = () => {
         } else if (typeof res.data === 'object') {
           allUsers = Object.values(res.data).flat();
         }
+        // Lọc chỉ những người dùng đang hoạt động
+        const activeUsers = allUsers.filter(user => user.status === 'active' || user.status === 'ACTIVE');
+        
         setStats({
-          totalUsers: allUsers.length,
-          totalDonors: allUsers.filter(u => u.role === 'donor' || u.role === 'MEMBER').length,
-          totalBloodBanks: allUsers.filter(u => u.role === 'bloodbank').length, // nếu có role này
-          totalDonations: allUsers.reduce((sum, u) => sum + (u.donationsCount || 0), 0), // nếu có trường này
+          totalUsers: activeUsers.length,
+          totalDonors: activeUsers.filter(u => u.role === 'donor' || u.role === 'MEMBER').length,
+          totalBloodBanks: activeUsers.filter(u => u.role === 'bloodbank').length, // nếu có role này
+          totalDonations: activeUsers.reduce((sum, u) => sum + (u.donationsCount || 0), 0), // nếu có trường này
         });
       } catch {
         setStats({ totalUsers: 0, totalDonors: 0, totalBloodBanks: 0, totalDonations: 0 });
@@ -257,7 +260,7 @@ const AdminStatisticsPage = () => {
             <Space direction="horizontal" size="large" align="start">
               <BarChartOutlined style={{ fontSize: '30px', color: '#fa8c16' }} />
               <div>
-                <Text type="secondary">Tổng số lượt hiến máu</Text>
+                <Text type="secondary">Tổng số đơn hiến máu</Text>
                 <Title level={4} style={{ margin: 0 }}>{loading ? '...' : totalYearlyDonations}</Title>
               </div>
             </Space>
