@@ -185,19 +185,13 @@ const BloodDonationApprovalPage = () => {
         if (record.status === 'PENDING') {
           return (
             <Space>
-              <Popconfirm
-                title="Bạn có chắc chắn muốn duyệt yêu cầu này?"
-                onConfirm={() => handleUpdateStatus(record.id, 'APPROVED')}
-                okText="Duyệt"
-                cancelText="Hủy"
+              <Button
+                type="primary"
+                style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}
+                onClick={() => handleUpdateStatus(record.id, 'APPROVED')}
               >
-                <Button
-                  type="primary"
-                  style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}
-                >
-                  Duyệt
-                </Button>
-              </Popconfirm>
+                Duyệt
+              </Button>
               <Popconfirm
                 title="Bạn có chắc chắn muốn từ chối yêu cầu này?"
                 onConfirm={() => handleUpdateStatus(record.id, 'REJECTED')}
