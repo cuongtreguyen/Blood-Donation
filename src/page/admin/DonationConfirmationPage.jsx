@@ -242,20 +242,13 @@ const DonationConfirmationPage = () => {
         if (record.status === 'PENDING') {
           return (
             <Space>
-              <Popconfirm
-                title="Bạn có chắc chắn muốn duyệt yêu cầu này?"
-                onConfirm={() => handleApprove(record.id)}
-                okText="Duyệt"
-                cancelText="Hủy"
-                okButtonProps={{ type: 'primary', style: { background: '#4CAF50', borderColor: '#4CAF50' } }}
+              <Button
+                type="primary"
+                style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', boxShadow: '0 2px 8px #b2f2bb' }}
+                onClick={() => handleApprove(record.id)}
               >
-                <Button
-                  type="primary"
-                  style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', boxShadow: '0 2px 8px #b2f2bb' }}
-                >
-                  Duyệt
-                </Button>
-              </Popconfirm>
+                Duyệt
+              </Button>
               <Popconfirm
                 title="Bạn có chắc chắn muốn từ chối yêu cầu này?"
                 onConfirm={() => handleReject(record.id)}
