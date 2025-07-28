@@ -149,22 +149,23 @@ const AdminStatisticsPage = () => {
     totalDonations: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [monthlyDonations, setMonthlyDonations] = useState([
-    { month: 'Tháng 1', donations: 0 },
-    { month: 'Tháng 2', donations: 0 },
-    { month: 'Tháng 3', donations: 0 },
-    { month: 'Tháng 4', donations: 0 },
-    { month: 'Tháng 5', donations: 0 },
-    { month: 'Tháng 6', donations: 0 },
-    { month: 'Tháng 7', donations: 0 },
-    { month: 'Tháng 8', donations: 0 },
-    { month: 'Tháng 9', donations: 0 },
-    { month: 'Tháng 10', donations: 0 },
-    { month: 'Tháng 11', donations: 0 },
-    { month: 'Tháng 12', donations: 0 },
+  const [monthlyData, setMonthlyData] = useState([
+    { month: 'Tháng 1', donations: 0, receives: 0 },
+    { month: 'Tháng 2', donations: 0, receives: 0 },
+    { month: 'Tháng 3', donations: 0, receives: 0 },
+    { month: 'Tháng 4', donations: 0, receives: 0 },
+    { month: 'Tháng 5', donations: 0, receives: 0 },
+    { month: 'Tháng 6', donations: 0, receives: 0 },
+    { month: 'Tháng 7', donations: 0, receives: 0 },
+    { month: 'Tháng 8', donations: 0, receives: 0 },
+    { month: 'Tháng 9', donations: 0, receives: 0 },
+    { month: 'Tháng 10', donations: 0, receives: 0 },
+    { month: 'Tháng 11', donations: 0, receives: 0 },
+    { month: 'Tháng 12', donations: 0, receives: 0 },
   ]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const totalYearlyDonations = monthlyDonations.reduce((sum, m) => sum + (m.donations || 0), 0);
+  const totalYearlyDonations = monthlyData.reduce((sum, m) => sum + (m.donations || 0), 0);
+  const totalYearlyReceives = monthlyData.reduce((sum, m) => sum + (m.receives || 0), 0);
 
   useEffect(() => {
     // Hàm lấy dữ liệu thống kê người dùng từ API khi trang được tải
@@ -198,24 +199,36 @@ const AdminStatisticsPage = () => {
 
   // Gọi lại API khi selectedYear thay đổi
   useEffect(() => {
-    const fetchMonthlyDonations = async (year) => {
+    const fetchMonthlyData = async (year) => {
       try {
-        const res = await api.get(`/blood-register/completed-monthly/${year}`);
-        const data = Array.isArray(res.data) ? res.data : [];
+        // Gọi API cho đơn hiến máu đã duyệt
+        const donationsRes = await api.get(`/blood-register/completed-monthly/${year}`);
+        const donationsData = Array.isArray(donationsRes.data) ? donationsRes.data : [];
+        
+        // Gọi API cho đơn nhận máu đã duyệt và hoàn thành
+        const receivesRes = await api.get(`/blood-receive/monthly-completed?year=${year}`);
+        const receivesData = Array.isArray(receivesRes.data) ? receivesRes.data : [];
+        
         const months = Array.from({ length: 12 }, (_, i) => {
-          const found = data.find(item => item.month === i + 1);
+          const foundDonation = donationsData.find(item => item.month === i + 1);
+          const foundReceive = receivesData.find(item => item.month === i + 1);
           return {
             month: `Tháng ${i + 1}`,
-            donations: found ? found.totalCompletedRequests : 0
+            donations: foundDonation ? foundDonation.totalCompletedRequests : 0,
+            receives: foundReceive ? foundReceive.totalCompletedReceives : 0
           };
         });
-        setMonthlyDonations(months);
+        setMonthlyData(months);
       } catch (e) {
         console.log(e);
-        setMonthlyDonations(Array.from({ length: 12 }, (_, i) => ({ month: `Tháng ${i + 1}`, donations: 0 })));
+        setMonthlyData(Array.from({ length: 12 }, (_, i) => ({ 
+          month: `Tháng ${i + 1}`, 
+          donations: 0,
+          receives: 0
+        })));
       }
     };
-    fetchMonthlyDonations(selectedYear);
+    fetchMonthlyData(selectedYear);
   }, [selectedYear]);
 
   // Dữ liệu mẫu cho hoạt động gần đây
@@ -233,7 +246,7 @@ const AdminStatisticsPage = () => {
 
       {/* Thẻ tổng hợp số liệu nhanh */}
       <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} sm={12} lg={8}>
+        <Col xs={24} sm={12} lg={6}>
           <Card>
             <Space direction="horizontal" size="large" align="start">
               <UserOutlined style={{ fontSize: '30px', color: '#1890ff' }} />
@@ -244,7 +257,7 @@ const AdminStatisticsPage = () => {
             </Space>
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={8}>
+        <Col xs={24} sm={12} lg={6}>
           <Card>
             <Space direction="horizontal" size="large" align="start">
               <HeartOutlined style={{ fontSize: '30px', color: '#f5222d' }} />
@@ -255,7 +268,7 @@ const AdminStatisticsPage = () => {
             </Space>
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={8}>
+        <Col xs={24} sm={12} lg={6}>
           <Card>
             <Space direction="horizontal" size="large" align="start">
               <BarChartOutlined style={{ fontSize: '30px', color: '#fa8c16' }} />
@@ -266,12 +279,23 @@ const AdminStatisticsPage = () => {
             </Space>
           </Card>
         </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Space direction="horizontal" size="large" align="start">
+              <BarChartOutlined style={{ fontSize: '30px', color: '#52c41a' }} />
+              <div>
+                <Text type="secondary">Tổng số đơn nhận máu</Text>
+                <Title level={4} style={{ margin: 0 }}>{loading ? '...' : totalYearlyReceives}</Title>
+              </div>
+            </Space>
+          </Card>
+        </Col>
       </Row>
 
       {/* Biểu đồ và hoạt động gần đây */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={24}>
-          <Card title="Thống kê lượt hiến máu theo tháng">
+          <Card title="Thống kê đơn hiến máu và nhận máu theo tháng">
             <div style={{ marginBottom: 16 }}>
               <span>Chọn năm: </span>
               <Select
@@ -286,14 +310,15 @@ const AdminStatisticsPage = () => {
               </Select>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlyDonations}>
+              <LineChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" interval={0} />
-                <YAxis />
-                <Tooltip />
+                <YAxis tickFormatter={(value) => Math.round(value)} />
+                <Tooltip formatter={(value) => [Math.round(value), '']} />
                 <Legend />
-                <Bar dataKey="donations" fill="#8884d8" name="Lượt hiến máu" />
-              </BarChart>
+                <Line type="monotone" dataKey="donations" stroke="#fa8c16" strokeWidth={3} name="Đơn hiến máu" />
+                <Line type="monotone" dataKey="receives" stroke="#52c41a" strokeWidth={3} name="Đơn nhận máu" />
+              </LineChart>
             </ResponsiveContainer>
           </Card>
         </Col>
