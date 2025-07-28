@@ -21,10 +21,9 @@ const BlogComponent = () => {
         </button>
       </div>
 
-      <p className="text-gray-500 italic">
-        Bạn chưa có blog nào (chức năng xem blog sẽ hiển thị khi có API).
-      </p>
-
+      <div className="bg-white p-4 rounded-lg shadow-md">
+        <p className="text-gray-600">Hãy chia sẻ những trải nghiệm của bạn về việc hiến máu.</p>
+      </div>
       <WriteBlogModal
         open={showBlogModal}
         onClose={() => setShowBlogModal(false)}
