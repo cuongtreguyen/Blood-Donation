@@ -1,19 +1,34 @@
+/**
+ * Service xử lý các chức năng liên quan đến quản lý nhân viên
+ * Sử dụng localStorage để lưu trữ dữ liệu nhân viên
+ */
+
 // Khóa lưu trữ trong localStorage
 const STAFF_STORAGE_KEY = 'staffList';
 const CURRENT_USER_KEY = 'currentUser';
 
-// Lấy danh sách nhân viên từ localStorage
+/**
+ * Lấy danh sách nhân viên từ localStorage
+ * @returns {Array} Danh sách nhân viên
+ */
 export const getStaffList = () => {
   const staffList = localStorage.getItem(STAFF_STORAGE_KEY);
   return staffList ? JSON.parse(staffList) : [];
 };
 
-// Lưu danh sách nhân viên vào localStorage
+/**
+ * Lưu danh sách nhân viên vào localStorage
+ * @param {Array} staffList - Danh sách nhân viên cần lưu
+ */
 export const saveStaffList = (staffList) => {
   localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(staffList));
 };
 
-// Khởi tạo dữ liệu người dùng
+/**
+ * Khởi tạo dữ liệu người dùng và thêm vào danh sách nhân viên nếu chưa có
+ * @param {Object} userData - Thông tin người dùng cần khởi tạo
+ * @returns {Object} Thông tin người dùng đã khởi tạo
+ */
 export const initializeUserData = (userData) => {
   // Thêm vào danh sách nhân viên nếu chưa có
   const staffList = getStaffList();
@@ -117,4 +132,4 @@ export const updatePassword = (email, oldPassword, newPassword) => {
   }
   
   return true;
-}; 
+};

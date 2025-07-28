@@ -1,3 +1,21 @@
+/**
+ * Trang Danh Sách Nhận Máu (Quản lý yêu cầu nhận máu)
+ * 
+ * Chức năng:
+ * - Hiển thị danh sách yêu cầu nhận máu
+ * - Tạo mới yêu cầu nhận máu
+ * - Duyệt/từ chối yêu cầu nhận máu
+ * - Hoàn thành quy trình nhận máu (xác nhận đã cấp máu)
+ * - Xem lịch sử nhận máu
+ * - Lọc danh sách theo trạng thái và tìm kiếm
+ * 
+ * Giúp bác sĩ/nhân viên y tế:
+ * - Quản lý quy trình cấp máu cho bệnh nhân
+ * - Theo dõi trạng thái của các yêu cầu nhận máu
+ * - Xác nhận việc cấp máu và cập nhật thông tin
+ * - Xem lịch sử nhận máu để theo dõi và báo cáo
+ */
+
 import React, { useEffect, useState } from "react";
 import {
   Table,

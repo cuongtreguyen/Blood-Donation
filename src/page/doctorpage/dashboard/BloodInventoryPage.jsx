@@ -1,3 +1,22 @@
+/**
+ * Trang Kho Máu (Quản lý tồn kho máu)
+ *
+ * Chức năng:
+ * - Hiển thị danh sách các đơn vị máu trong kho
+ * - Thêm mới đơn vị máu vào kho
+ * - Cập nhật thông tin đơn vị máu
+ * - Xóa đơn vị máu khỏi kho
+ * - Theo dõi tình trạng tồn kho của từng nhóm máu
+ * - Hiển thị cảnh báo khi lượng máu thấp
+ * - Tìm kiếm và lọc đơn vị máu
+ *
+ * Giúp bác sĩ/nhân viên y tế:
+ * - Quản lý tồn kho máu một cách hiệu quả
+ * - Theo dõi số lượng máu theo từng nhóm máu
+ * - Kiểm soát ngày hết hạn của các đơn vị máu
+ * - Đảm bảo luôn có đủ máu cho các ca cấp cứu và phẫu thuật
+ */
+
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -380,14 +399,14 @@ const BloodInventoryPage = () => {
                 </Space>
               </Col>
               <Col>
-                <Button
+                {/* <Button
                   type="primary"
                   icon={<PlusOutlined />}
                   onClick={handleAdd}
                   size="large"
                 >
                   Thêm mới
-                </Button>
+                </Button> */}
               </Col>
             </Row>
           </Card>

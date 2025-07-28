@@ -1,13 +1,22 @@
 import axios from "axios";
 
+/**
+ * Cấu hình API client sử dụng axios
+ * Thiết lập baseURL và các interceptor để xử lý request/response
+ */
+
 const api = axios.create({
   // baseURL: "http://103.200.20.149/:8080/api/",
   baseURL: "http://14.225.205.143:8080/api/",
 });
 
+/**
+ * Interceptor xử lý request
+ * Tự động thêm token vào header Authorization nếu có
+ */
 api.interceptors.request.use(
   function (config) {
-    // Do something before request is sent
+    // Thêm token vào header trước khi gửi request
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

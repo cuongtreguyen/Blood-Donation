@@ -1,3 +1,20 @@
+/**
+ * Trang Lịch Sử Hiến Máu
+ * 
+ * Chức năng:
+ * - Hiển thị danh sách người hiến máu và lịch sử hiến máu của họ
+ * - Xem chi tiết lịch sử hiến máu của từng người hiến
+ * - Tạo giấy chứng nhận hiến máu
+ * - Tìm kiếm người hiến máu theo tên, số điện thoại, email
+ * - Lọc người hiến máu theo nhóm máu
+ * 
+ * Giúp bác sĩ/nhân viên y tế:
+ * - Theo dõi lịch sử hiến máu của từng người hiến
+ * - Kiểm tra số lần hiến máu thực tế của người hiến
+ * - Tạo và cấp giấy chứng nhận hiến máu
+ * - Quản lý thông tin hiến máu để báo cáo và thống kê
+ */
+
 import React, { useEffect, useState, useMemo } from "react";
 import {
   Table,
@@ -34,8 +51,9 @@ import {
   getDonationHistoryByUserId,
 } from "../../../services/donorsService";
 import { createCertificate } from "../../../services/certificateService";
-import { downloadCertificateFile } from "../../../components/CertificateGenerator";
+import { createCertificateOnly } from "../../../components/CertificateGenerator";
 import moment from "moment";
+import { useSelector } from "react-redux";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -55,8 +73,14 @@ const getColorById = (id) => {
 };
 
 const bloodTypeMap = {
-    A_POSITIVE: "A+", A_NEGATIVE: "A-", B_POSITIVE: "B+", B_NEGATIVE: "B-",
-    AB_POSITIVE: "AB+", AB_NEGATIVE: "AB-", O_POSITIVE: "O+", O_NEGATIVE: "O-",
+  A_POSITIVE: "A+",
+  A_NEGATIVE: "A-",
+  B_POSITIVE: "B+",
+  B_NEGATIVE: "B-",
+  AB_POSITIVE: "AB+",
+  AB_NEGATIVE: "AB-",
+  O_POSITIVE: "O+",
+  O_NEGATIVE: "O-",
 };
 
 const DonationHistoryPage = () => {
@@ -72,23 +96,25 @@ const DonationHistoryPage = () => {
   const [selectedDonation, setSelectedDonation] = useState(null);
   const [certificateLoading, setCertificateLoading] = useState(false);
   const [form] = Form.useForm();
-
+  const currentUser = useSelector((state) => state.user);
   // Hàm tính số lần hiến thực tế từ lịch sử
   const getRealDonationCount = async (donorId) => {
     try {
       const history = await getDonationHistoryByUserId(donorId);
-      const validHistory = (history || []).filter(item => {
-        const hasValidDate = item.completedDate && 
-                           item.completedDate !== 'N/A' && 
-                           item.completedDate !== null && 
-                           item.completedDate !== undefined;
-        
-        const hasValidUnit = item.unit && 
-                           item.unit > 0 && 
-                           item.unit !== 'N/A' && 
-                           item.unit !== null && 
-                           item.unit !== undefined;
-        
+      const validHistory = (history || []).filter((item) => {
+        const hasValidDate =
+          item.completedDate &&
+          item.completedDate !== "N/A" &&
+          item.completedDate !== null &&
+          item.completedDate !== undefined;
+
+        const hasValidUnit =
+          item.unit &&
+          item.unit > 0 &&
+          item.unit !== "N/A" &&
+          item.unit !== null &&
+          item.unit !== undefined;
+
         return hasValidDate && hasValidUnit;
       });
       return validHistory.length;
@@ -103,7 +129,7 @@ const DonationHistoryPage = () => {
       setLoading(true);
       try {
         const data = await getAllDonors();
-        
+
         // Tính toán số lần hiến thực tế cho mỗi donor
         const donorsWithRealCount = await Promise.all(
           data.map(async (donor, index) => {
@@ -111,16 +137,17 @@ const DonationHistoryPage = () => {
             return {
               ...donor,
               key: `${donor.id}_${index}`, // Tạo key unique
-              realDonationCount: realCount
+              realDonationCount: realCount,
             };
           })
         );
-        
+
         // Loại bỏ dữ liệu trùng lặp dựa trên ID
-        const uniqueDonors = donorsWithRealCount.filter((donor, index, self) => 
-          index === self.findIndex(d => d.id === donor.id)
+        const uniqueDonors = donorsWithRealCount.filter(
+          (donor, index, self) =>
+            index === self.findIndex((d) => d.id === donor.id)
         );
-        
+
         setDonors(uniqueDonors);
       } catch (error) {
         console.error("Failed to fetch donors:", error);
@@ -139,44 +166,55 @@ const DonationHistoryPage = () => {
     setHistoryLoading(true);
     try {
       const history = await getDonationHistoryByUserId(donor.id);
-      console.log('Raw history data for', donor.fullName, ':', history); // Debug log
-      
+      console.log("Raw history data for", donor.fullName, ":", history);
+
       // Lọc và xử lý dữ liệu để đảm bảo tính nhất quán
-      const validHistory = (history || []).filter(item => {
-        console.log('Checking item:', item); // Debug log cho từng item
-        
+      const validHistory = (history || []).filter((item) => {
+        console.log("Checking item:", item); // Debug log cho từng item
+
         // Kiểm tra ngày hoàn thành
-        const hasValidDate = item.completedDate && 
-                           item.completedDate !== 'N/A' && 
-                           item.completedDate !== null && 
-                           item.completedDate !== undefined;
-        
+        const hasValidDate =
+          item.completedDate &&
+          item.completedDate !== "N/A" &&
+          item.completedDate !== null &&
+          item.completedDate !== undefined;
+
         // Kiểm tra số lượng
-        const hasValidUnit = item.unit && 
-                           item.unit > 0 && 
-                           item.unit !== 'N/A' && 
-                           item.unit !== null && 
-                           item.unit !== undefined;
-        
+        const hasValidUnit =
+          item.unit &&
+          item.unit > 0 &&
+          item.unit !== "N/A" &&
+          item.unit !== null &&
+          item.unit !== undefined;
+
         const isValid = hasValidDate && hasValidUnit;
-        console.log('Item validation:', { hasValidDate, hasValidUnit, isValid }); // Debug log
-        
+        console.log("Item validation:", {
+          hasValidDate,
+          hasValidUnit,
+          isValid,
+        }); // Debug log
+
         return isValid;
       });
-      
-      console.log('Filtered history data for', donor.fullName, ':', validHistory); // Debug log
+
+      console.log(
+        "Filtered history data for",
+        donor.fullName,
+        ":",
+        validHistory
+      ); // Debug log
       setDonationHistory(validHistory);
-      
+
       // Kiểm tra sự khác biệt giữa số lần hiến hiển thị và thực tế
       const displayedCount = donor.realDonationCount || 0;
       const actualCount = validHistory.length;
-      
-      console.log('Count comparison:', { displayedCount, actualCount }); // Debug log
-      
+
+      console.log("Count comparison:", { displayedCount, actualCount }); // Debug log
+
       if (displayedCount !== actualCount) {
         message.warning(
           `Số lần hiến hiển thị (${displayedCount}) khác với số lần hiến thực tế (${actualCount}). ` +
-          `Có thể có các bản ghi chưa hoàn thành hoặc dữ liệu không hợp lệ.`
+            `Có thể có các bản ghi chưa hoàn thành hoặc dữ liệu không hợp lệ.`
         );
       }
     } catch (error) {
@@ -196,34 +234,31 @@ const DonationHistoryPage = () => {
       notes: "Giấy chứng nhận hiến máu hợp lệ",
     });
   };
-
+  const today = new Date();
+  const issueDate = today.toISOString().split("T")[0];
   const handleCertificateSubmit = async (values) => {
     if (!selectedDonation) return;
-    
     setCertificateLoading(true);
+    console.log("selectedDonor:", selectedDonation);
     try {
-      // Tạo certificate trong database
+      // Tạo certificate
       const certificateData = {
-        donationId: selectedDonation.id,
-        donorId: selectedDonor.id,
-        doctorName: values.doctorName,
-        notes: values.notes,
-        donationDate: selectedDonation.completedDate,
-        bloodType: selectedDonation.bloodType,
-        amount: selectedDonation.unit,
+        issueDate: issueDate,
+        bloodRegisterId: selectedDonation.bloodRegisterId,
+        staffId: currentUser.id,
       };
 
       await createCertificate(certificateData);
 
-      // Tạo và tải PDF
+      // Chỉ tạo chứng nhận mà không tải xuống
       const donationData = {
         ...selectedDonation,
         fullName: selectedDonor.fullName,
         doctorName: values.doctorName,
       };
 
-      downloadCertificateFile(donationData, values.doctorName);
-      
+      await createCertificateOnly(donationData, values.doctorName);
+
       message.success("Đã tạo giấy chứng nhận thành công!");
       setCertificateModalOpen(false);
       form.resetFields();
@@ -299,7 +334,9 @@ const DonationHistoryPage = () => {
       key: "realDonationCount",
       align: "center",
       sorter: (a, b) => (a.realDonationCount || 0) - (b.realDonationCount || 0),
-      render: (_, record) => <Tag color="blue">{record.realDonationCount || 0} lần</Tag>,
+      render: (_, record) => (
+        <Tag color="blue">{record.realDonationCount || 0} lần</Tag>
+      ),
     },
     {
       title: "Ngày hiến gần nhất",
@@ -346,18 +383,23 @@ const DonationHistoryPage = () => {
       title: "Thao tác",
       key: "action",
       align: "center",
-      render: (_, record) => (
-        <Tooltip title="Tạo giấy chứng nhận">
-          <Button
-            type="primary"
-            icon={<FileTextOutlined />}
-            onClick={() => handleCreateCertificate(record)}
-            size="small"
-          >
-            Tạo giấy chứng nhận
-          </Button>
-        </Tooltip>
-      ),
+      render: (_, record) =>
+        !record.certificateId ? (
+          <Tooltip title="Tạo giấy chứng nhận">
+            <Button
+              type="primary"
+              icon={<FileTextOutlined />}
+              onClick={() => handleCreateCertificate(record)}
+              size="small"
+            >
+              Tạo giấy chứng nhận
+            </Button>
+          </Tooltip>
+        ) : (
+          <Tag color="green" style={{ fontSize: 14 }}>
+            Đã tạo giấy chứng nhận
+          </Tag>
+        ),
     },
   ];
 
@@ -383,7 +425,8 @@ const DonationHistoryPage = () => {
                   Lịch sử Người hiến máu
                 </Title>
                 <Text type="secondary">
-                  Tra cứu thông tin và lịch sử hiến máu của các tình nguyện viên.
+                  Tra cứu thông tin và lịch sử hiến máu của các tình nguyện
+                  viên.
                 </Text>
               </div>
             </Space>
@@ -459,31 +502,49 @@ const DonationHistoryPage = () => {
           ) : (
             <>
               {donationHistory.length > 0 && (
-                <div style={{ marginBottom: 16, padding: "8px 12px", backgroundColor: "#f6ffed", border: "1px solid #b7eb8f", borderRadius: "6px" }}>
+                <div
+                  style={{
+                    marginBottom: 16,
+                    padding: "8px 12px",
+                    backgroundColor: "#f6ffed",
+                    border: "1px solid #b7eb8f",
+                    borderRadius: "6px",
+                  }}
+                >
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     <InfoCircleOutlined style={{ marginRight: 4 }} />
-                    Chỉ hiển thị các lần hiến máu đã hoàn thành với dữ liệu đầy đủ.
+                    Chỉ hiển thị các lần hiến máu đã hoàn thành với dữ liệu đầy
+                    đủ.
                   </Text>
                 </div>
               )}
               {donationHistory.length === 0 && !historyLoading && (
-                <div style={{ marginBottom: 16, padding: "8px 12px", backgroundColor: "#fff2e8", border: "1px solid #ffbb96", borderRadius: "6px" }}>
+                <div
+                  style={{
+                    marginBottom: 16,
+                    padding: "8px 12px",
+                    backgroundColor: "#fff2e8",
+                    border: "1px solid #ffbb96",
+                    borderRadius: "6px",
+                  }}
+                >
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     <InfoCircleOutlined style={{ marginRight: 4 }} />
-                    Không tìm thấy lịch sử hiến máu hợp lệ. Có thể có các bản ghi chưa hoàn thành hoặc dữ liệu không đầy đủ.
+                    Không tìm thấy lịch sử hiến máu hợp lệ. Có thể có các bản
+                    ghi chưa hoàn thành hoặc dữ liệu không đầy đủ.
                   </Text>
                 </div>
               )}
-                          <Table
-              columns={historyColumns}
-              dataSource={donationHistory.map((item, index) => ({
-                ...item,
-                key: `${item.id}_${index}`
-              }))}
-              rowKey="key"
-              pagination={false}
-              size="middle"
-            />
+              <Table
+                columns={historyColumns}
+                dataSource={donationHistory.map((item, index) => ({
+                  ...item,
+                  key: `${item.id}_${index}`,
+                }))}
+                rowKey="key"
+                pagination={false}
+                size="middle"
+              />
             </>
           )}
         </Spin>
@@ -502,11 +563,7 @@ const DonationHistoryPage = () => {
         footer={null}
         width={600}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleCertificateSubmit}
-        >
+        <Form form={form} layout="vertical" onFinish={handleCertificateSubmit}>
           <Form.Item
             name="doctorName"
             label="Tên bác sĩ phụ trách"
@@ -514,12 +571,9 @@ const DonationHistoryPage = () => {
           >
             <Input placeholder="Nhập tên bác sĩ phụ trách" />
           </Form.Item>
-          
-          <Form.Item
-            name="notes"
-            label="Ghi chú"
-          >
-            <Input.TextArea 
+
+          <Form.Item name="notes" label="Ghi chú">
+            <Input.TextArea
               rows={3}
               placeholder="Ghi chú bổ sung cho giấy chứng nhận..."
             />
@@ -529,11 +583,18 @@ const DonationHistoryPage = () => {
             <Card size="small" style={{ marginBottom: 16 }}>
               <Text strong>Thông tin hiến máu:</Text>
               <br />
-              <Text>Ngày hiến: {moment(selectedDonation.completedDate).format("DD/MM/YYYY")}</Text>
+              <Text>
+                Ngày hiến:{" "}
+                {moment(selectedDonation.completedDate).format("DD/MM/YYYY")}
+              </Text>
               <br />
               <Text>Lượng máu: {selectedDonation.unit} ml</Text>
               <br />
-              <Text>Nhóm máu: {bloodTypeMap[selectedDonation.bloodType] || selectedDonation.bloodType}</Text>
+              <Text>
+                Nhóm máu:{" "}
+                {bloodTypeMap[selectedDonation.bloodType] ||
+                  selectedDonation.bloodType}
+              </Text>
             </Card>
           )}
 
@@ -558,4 +619,4 @@ const DonationHistoryPage = () => {
   );
 };
 
-export default DonationHistoryPage; 
+export default DonationHistoryPage;

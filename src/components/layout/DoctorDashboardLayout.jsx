@@ -27,9 +27,17 @@ function DoctorDashboardLayout() {
       icon: <FaNotesMedical />,
     },
     { to: "/doctor/blood-inventory", label: "Kho Máu", icon: <FaTint /> },
-    { to: "/doctor/blood-receive", label: "Danh Sách Nhận Máu", icon: <FaTint /> },
-    { to: "/doctor/donation-history", label: "Lịch sử hiến máu", icon: <FaHistory /> },
-    { to: "/doctor/reports", label: "Báo Cáo", icon: <FaFileAlt /> },
+    {
+      to: "/doctor/blood-receive",
+      label: "Danh Sách Nhận Máu",
+      icon: <FaTint />,
+    },
+    {
+      to: "/doctor/donation-history",
+      label: "Lịch sử hiến máu",
+      icon: <FaHistory />,
+    },
+    // { to: "/doctor/reports", label: "Báo Cáo", icon: <FaFileAlt /> },
     { to: "/doctor/profile", label: "Hồ Sơ Cá Nhân", icon: <FaUserCircle /> },
   ];
 
@@ -92,11 +100,20 @@ function DoctorDashboardLayout() {
                 textOverflow: "ellipsis",
                 minWidth: 0,
                 display: "flex",
-                alignItems: "center"
+                alignItems: "center",
               }}
             >
               <span className="text-lg">{item.icon}</span>
-              <span style={{whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0}}>{item.label}</span>
+              <span
+                style={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  minWidth: 0,
+                }}
+              >
+                {item.label}
+              </span>
             </Link>
           ))}
         </nav>
@@ -105,7 +122,7 @@ function DoctorDashboardLayout() {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <header className="bg-white shadow p-4">
-<div className="flex justify-between items-center">
+          <div className="flex justify-between items-center">
             <div>
               <h2 className="text-xl font-semibold mb-1">
                 Xin chào, {user?.role === "DOCTOR" ? "BS." : ""}{" "}

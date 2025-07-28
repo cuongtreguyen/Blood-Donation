@@ -1,3 +1,20 @@
+/**
+ * Trang Hồ Sơ Cá Nhân (Quản lý thông tin cá nhân của bác sĩ/nhân viên y tế)
+ * 
+ * Chức năng:
+ * - Hiển thị thông tin cá nhân của bác sĩ/nhân viên y tế
+ * - Cập nhật thông tin cá nhân (họ tên, số điện thoại, địa chỉ, v.v.)
+ * - Thay đổi mật khẩu
+ * - Tải lên ảnh đại diện
+ * - Xem thông tin chi tiết về tài khoản
+ * 
+ * Giúp bác sĩ/nhân viên y tế:
+ * - Quản lý thông tin cá nhân
+ * - Cập nhật thông tin liên lạc
+ * - Bảo mật tài khoản bằng cách thay đổi mật khẩu
+ * - Cá nhân hóa tài khoản với ảnh đại diện
+ */
+
 import React, { useState, useEffect } from "react";
 import {
   Card,

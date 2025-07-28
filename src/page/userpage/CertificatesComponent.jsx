@@ -106,9 +106,7 @@ const CertificatesComponent = () => {
       title: "Mã chứng nhận",
       dataIndex: "id",
       key: "id",
-      render: (id) => (
-        <Text code>#{id}</Text>
-      ),
+      render: (id) => <Text code>#{id}</Text>,
     },
     {
       title: "Ngày hiến máu",
@@ -178,14 +176,19 @@ const CertificatesComponent = () => {
 
   const getStatistics = () => {
     if (!certificates.length) return { total: 0, totalAmount: 0, latest: null };
-    
-    const totalAmount = certificates.reduce((sum, cert) => sum + (cert.amount || 0), 0);
-    const latest = certificates.sort((a, b) => new Date(b.donationDate) - new Date(a.donationDate))[0];
-    
+
+    const totalAmount = certificates.reduce(
+      (sum, cert) => sum + (cert.amount || 0),
+      0
+    );
+    const latest = certificates.sort(
+      (a, b) => new Date(b.donationDate) - new Date(a.donationDate)
+    )[0];
+
     return {
       total: certificates.length,
       totalAmount,
-      latest: latest?.donationDate
+      latest: latest?.donationDate,
     };
   };
 
@@ -230,7 +233,11 @@ const CertificatesComponent = () => {
           <Card>
             <Statistic
               title="Lần hiến gần nhất"
-              value={stats.latest ? moment(stats.latest).format("DD/MM/YYYY") : "Chưa có"}
+              value={
+                stats.latest
+                  ? moment(stats.latest).format("DD/MM/YYYY")
+                  : "Chưa có"
+              }
               prefix={<TrophyOutlined />}
               valueStyle={{ color: "#52c41a" }}
             />
@@ -243,12 +250,18 @@ const CertificatesComponent = () => {
         <Spin spinning={loading}>
           {certificates.length === 0 ? (
             <Empty
-              image={<FileTextOutlined style={{ fontSize: 60, color: "#d9d9d9" }} />}
+              image={
+                <FileTextOutlined style={{ fontSize: 60, color: "#d9d9d9" }} />
+              }
               description={
                 <div>
-                  <Text type="secondary">Bạn chưa có giấy chứng nhận hiến máu nào.</Text>
+                  <Text type="secondary">
+                    Bạn chưa có giấy chứng nhận hiến máu nào.
+                  </Text>
                   <br />
-                  <Text type="secondary">Giấy chứng nhận sẽ được tạo sau khi hoàn thành hiến máu.</Text>
+                  <Text type="secondary">
+                    Giấy chứng nhận sẽ được tạo sau khi hoàn thành hiến máu.
+                  </Text>
                 </div>
               }
             />
@@ -280,12 +293,17 @@ const CertificatesComponent = () => {
         open={viewModalOpen}
         onCancel={() => setViewModalOpen(false)}
         footer={[
-          <Button key="download" type="primary" icon={<DownloadOutlined />} onClick={() => handleDownloadCertificate(selectedCertificate)}>
+          <Button
+            key="download"
+            type="primary"
+            icon={<DownloadOutlined />}
+            onClick={() => handleDownloadCertificate(selectedCertificate)}
+          >
             Tải xuống
           </Button>,
           <Button key="close" onClick={() => setViewModalOpen(false)}>
             Đóng
-          </Button>
+          </Button>,
         ]}
         width={700}
       >
@@ -298,7 +316,10 @@ const CertificatesComponent = () => {
               {moment(selectedCertificate.donationDate).format("DD/MM/YYYY")}
             </Descriptions.Item>
             <Descriptions.Item label="Nhóm máu">
-              <Tag color="red">{bloodTypeMap[selectedCertificate.bloodType] || selectedCertificate.bloodType}</Tag>
+              <Tag color="red">
+                {bloodTypeMap[selectedCertificate.bloodType] ||
+                  selectedCertificate.bloodType}
+              </Tag>
             </Descriptions.Item>
             <Descriptions.Item label="Lượng máu hiến">
               <Text strong>{selectedCertificate.amount} ml</Text>
@@ -321,4 +342,4 @@ const CertificatesComponent = () => {
   );
 };
 
-export default CertificatesComponent; 
+export default CertificatesComponent;
