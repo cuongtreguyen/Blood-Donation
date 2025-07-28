@@ -1,13 +1,13 @@
 /**
  * Trang Lịch Sử Hiến Máu
- * 
+ *
  * Chức năng:
  * - Hiển thị danh sách người hiến máu và lịch sử hiến máu của họ
  * - Xem chi tiết lịch sử hiến máu của từng người hiến
  * - Tạo giấy chứng nhận hiến máu
  * - Tìm kiếm người hiến máu theo tên, số điện thoại, email
  * - Lọc người hiến máu theo nhóm máu
- * 
+ *
  * Giúp bác sĩ/nhân viên y tế:
  * - Theo dõi lịch sử hiến máu của từng người hiến
  * - Kiểm tra số lần hiến máu thực tế của người hiến
@@ -50,8 +50,10 @@ import {
   getAllDonors,
   getDonationHistoryByUserId,
 } from "../../../services/donorsService";
+// import { createCertificate } from "../../../services/certificateService";
+// import { createCertificateOnly } from "../../../components/CertificateGenerator";
 import { createCertificate } from "../../../services/certificateService";
-import { createCertificateOnly } from "../../../components/CertificateGenerator";
+
 import moment from "moment";
 import { useSelector } from "react-redux";
 
@@ -606,7 +608,7 @@ const DonationHistoryPage = () => {
                 htmlType="submit"
                 loading={certificateLoading}
               >
-                Tạo và tải giấy chứng nhận
+                Tạo giấy chứng nhận
               </Button>
               <Button onClick={() => setCertificateModalOpen(false)}>
                 Hủy

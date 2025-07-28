@@ -1,6 +1,6 @@
 /**
  * Trang Danh Sách Nhận Máu (Quản lý yêu cầu nhận máu)
- * 
+ *
  * Chức năng:
  * - Hiển thị danh sách yêu cầu nhận máu
  * - Tạo mới yêu cầu nhận máu
@@ -8,7 +8,7 @@
  * - Hoàn thành quy trình nhận máu (xác nhận đã cấp máu)
  * - Xem lịch sử nhận máu
  * - Lọc danh sách theo trạng thái và tìm kiếm
- * 
+ *
  * Giúp bác sĩ/nhân viên y tế:
  * - Quản lý quy trình cấp máu cho bệnh nhân
  * - Theo dõi trạng thái của các yêu cầu nhận máu
@@ -206,7 +206,7 @@ const BloodReceivePage = () => {
       const values = await completeForm.validateFields();
       setCompleteLoading(true);
       await setCompleteBloodReceive({
-        bloodID: selectedRecord.id,
+        bloodId: selectedRecord.id,
         implementationDate: values.implementationDate.format("YYYY-MM-DD"),
         unit: values.unit,
       });
@@ -603,15 +603,15 @@ const BloodReceivePage = () => {
               {bloodTypeMap[selectedRecord?.bloodType] ||
                 selectedRecord?.bloodType}
             </Descriptions.Item>
-            <Descriptions.Item label="Số lượng">
+            {/* <Descriptions.Item label="Số lượng">
               {selectedRecord.unit ? `${selectedRecord.unit} ml` : "Chưa rõ"}
-            </Descriptions.Item>
+            </Descriptions.Item> */}
             <Descriptions.Item label="Mức độ khẩn cấp" span={2}>
               {selectedRecord.emergency ? "CÓ" : "KHÔNG"}
             </Descriptions.Item>
-            <Descriptions.Item label="Địa chỉ" span={2}>
+            {/* <Descriptions.Item label="Địa chỉ" span={2}>
               {selectedRecord.address || "Chưa cung cấp"}
-            </Descriptions.Item>
+            </Descriptions.Item> */}
           </Descriptions>
         )}
       </Modal>

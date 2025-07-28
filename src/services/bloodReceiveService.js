@@ -79,9 +79,9 @@ export const updateBloodReceiveStatus = async (id, status) => {
  * @param {number} params.unit - Số đơn vị máu đã nhận
  * @returns {Object} Kết quả hoàn thành yêu cầu nhận máu
  */
-export const setCompleteBloodReceive = async ({  bloodID , implementationDate, unit }) => {
+export const setCompleteBloodReceive = async ({  bloodId , implementationDate, unit }) => {
   const response = await api.post("/blood-receive/set-complete", {
-    bloodID ,
+    bloodId ,
     implementationDate,
     unit,
   });
