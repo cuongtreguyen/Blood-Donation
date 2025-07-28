@@ -103,7 +103,6 @@ const ProfileComponent = () => {
   const genderOptions = [
     { label: "Nam", value: "MALE" }, 
     { label: "Nữ", value: "FEMALE" }, 
-    { label: "Khác", value: "OTHER" },
   ];
 
   const getLabel = (options, value) => options.find(o => o.value === value)?.label || "Chưa có thông tin";
