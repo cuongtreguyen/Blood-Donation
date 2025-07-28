@@ -708,14 +708,14 @@ const Header = () => {
                                     }
                                     className="text-blue-500"
                                   >
-                                    Đánh dấu đã đọc
+                                    Đánh dấu đã đọc  |
                                   </button>
                                 )}
                                 <button
                                   onClick={() => deleteNotification(notif.id)}
                                   className="text-red-500"
                                 >
-                                  Xóa
+                                  | Xóa
                                 </button>
                               </div>
                             </div>
