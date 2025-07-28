@@ -247,10 +247,10 @@ const AdminStatisticsPage = () => {
       {/* Thẻ tổng hợp số liệu nhanh */}
       <Row gutter={[16, 16]} className="mb-6">
         <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Space direction="horizontal" size="large" align="start">
+          <Card style={{ height: '100%' }}>
+            <Space direction="horizontal" size="large" align="start" style={{ width: '100%' }}>
               <UserOutlined style={{ fontSize: '30px', color: '#1890ff' }} />
-              <div>
+              <div style={{ flex: 1 }}>
                 <Text type="secondary">Tổng số người dùng</Text>
                 <Title level={4} style={{ margin: 0 }}>{loading ? '...' : stats.totalUsers}</Title>
               </div>
@@ -258,33 +258,33 @@ const AdminStatisticsPage = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Space direction="horizontal" size="large" align="start">
+          <Card style={{ height: '100%' }}>
+            <Space direction="horizontal" size="large" align="start" style={{ width: '100%' }}>
               <HeartOutlined style={{ fontSize: '30px', color: '#f5222d' }} />
-              <div>
-                <Text type="secondary">Tổng số người hiến máu</Text>
+              <div style={{ flex: 1 }}>
+                <Text type="secondary">Tổng người hiến máu</Text>
                 <Title level={4} style={{ margin: 0 }}>{loading ? '...' : stats.totalDonors}</Title>
               </div>
             </Space>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Space direction="horizontal" size="large" align="start">
+          <Card style={{ height: '100%' }}>
+            <Space direction="horizontal" size="large" align="start" style={{ width: '100%' }}>
               <BarChartOutlined style={{ fontSize: '30px', color: '#fa8c16' }} />
-              <div>
-                <Text type="secondary">Tổng số đơn hiến máu</Text>
+              <div style={{ flex: 1 }}>
+                <Text type="secondary">Tổng đơn hiến máu</Text>
                 <Title level={4} style={{ margin: 0 }}>{loading ? '...' : totalYearlyDonations}</Title>
               </div>
             </Space>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Space direction="horizontal" size="large" align="start">
+          <Card style={{ height: '100%' }}>
+            <Space direction="horizontal" size="large" align="start" style={{ width: '100%' }}>
               <BarChartOutlined style={{ fontSize: '30px', color: '#52c41a' }} />
-              <div>
-                <Text type="secondary">Tổng số đơn nhận máu</Text>
+              <div style={{ flex: 1 }}>
+                <Text type="secondary">Tổng đơn nhận máu</Text>
                 <Title level={4} style={{ margin: 0 }}>{loading ? '...' : totalYearlyReceives}</Title>
               </div>
             </Space>
@@ -309,11 +309,19 @@ const AdminStatisticsPage = () => {
                 })}
               </Select>
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={monthlyData}>
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={monthlyData} margin={{ bottom: 80, left: 20, right: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" interval={0} />
-                <YAxis tickFormatter={(value) => Math.round(value)} />
+                <XAxis 
+                  dataKey="month" 
+                  interval={0}
+                  height={80}
+                  tick={{ fontSize: 10 }}
+                />
+                <YAxis 
+                  tickFormatter={(value) => Math.round(value)}
+                  domain={[0, 'dataMax + 1']}
+                />
                 <Tooltip formatter={(value) => [Math.round(value), '']} />
                 <Legend />
                 <Line type="monotone" dataKey="donations" stroke="#fa8c16" strokeWidth={3} name="Đơn hiến máu" />

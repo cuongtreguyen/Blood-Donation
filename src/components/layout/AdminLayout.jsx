@@ -401,16 +401,16 @@ function AdminLayout() {
       icon: <FileTextOutlined />,
       label: 'Quản lý bài viết',
     },
-    {
-      key: '/admin/notifications',
-      icon: <NotificationOutlined />,
-      label: 'Thông báo',
-    },
-    {
-      key: '/admin/settings',
-      icon: <SettingOutlined />,
-      label: 'Cài đặt',
-    },
+    // {
+    //   key: '/admin/notifications',
+    //   icon: <NotificationOutlined />,
+    //   label: 'Thông báo',
+    // },
+    // {
+    //   key: '/admin/settings',
+    //   icon: <SettingOutlined />,
+    //   label: 'Cài đặt',
+    // },
   ];
 
   // Map icon cho từng menu item
