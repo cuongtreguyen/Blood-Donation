@@ -536,7 +536,7 @@ const HistoryComponent = ({ userId: propUserId }) => {
           <FaHistory className="text-red-600 text-2xl" />
         </div>
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
-          Lịch sử hiến máu và nhận máu
+          Lịch sử 
         </h2>
       </div>
       {renderContent()}
