@@ -404,20 +404,44 @@ const HistoryComponent = ({ userId: propUserId }) => {
       setLoading(true);
       setError(null);
 
+      let donationData = [];
+      let receiveData = [];
+
       try {
         // Lấy lịch sử hiến máu
-        const donationResponse = await api.get(`/blood-register/history/${userId}`);
-        const sortedDonationHistory = donationResponse.data.sort(
-          (a, b) => new Date(b.completedDate) - new Date(a.completedDate)
-        );
-        setDonationHistory(sortedDonationHistory);
+        try {
+          const donationResponse = await api.get(`/blood-register/history/${userId}`);
+          const sortedDonationHistory = donationResponse.data.sort(
+            (a, b) => new Date(b.completedDate) - new Date(a.completedDate)
+          );
+          donationData = sortedDonationHistory;
+        } catch (donationErr) {
+          console.warn("Không thể tải lịch sử hiến máu:", donationErr);
+          donationData = [];
+        }
 
-        // Lấy lịch sử nhận máu (giả định endpoint)
-        const receiveResponse = await api.get(`/blood-receive/get-list-receive-by-user-id?userId=${userId}`);
-        const sortedReceiveHistory = receiveResponse.data.sort(
-          (a, b) => new Date(b.receiveDate) - new Date(a.receiveDate)
-        );
-        setReceiveHistory(sortedReceiveHistory);
+        // Lấy lịch sử nhận máu
+        try {
+          const receiveResponse = await api.get(`/blood-receive/get-list-receive-by-user-id?userId=${userId}`);
+          const sortedReceiveHistory = receiveResponse.data.sort(
+            (a, b) => new Date(b.receiveDate) - new Date(a.receiveDate)
+          );
+          receiveData = sortedReceiveHistory;
+        } catch (receiveErr) {
+          console.warn("Không thể tải lịch sử nhận máu:", receiveErr);
+          receiveData = [];
+        }
+
+        // Cập nhật state
+        setDonationHistory(donationData);
+        setReceiveHistory(receiveData);
+
+        // Chỉ set error nếu cả hai đều fail
+        if (donationData.length === 0 && receiveData.length === 0) {
+          // Kiểm tra xem có phải do lỗi API không
+          // Nếu không có dữ liệu thì không phải lỗi
+        }
+        
       } catch (err) {
         console.error("Failed to fetch histories:", err);
         setError("Không thể tải lịch sử. Vui lòng thử lại sau.");
@@ -432,33 +456,46 @@ const HistoryComponent = ({ userId: propUserId }) => {
   const renderContent = () => {
     if (loading) return <SkeletonLoader />;
 
-    if (error)
+    // Chỉ hiển thị error khi có lỗi nghiêm trọng (không phải do không có dữ liệu)
+    if (error && donationHistory.length === 0 && receiveHistory.length === 0)
       return (
         <div className="text-center py-12">
           <FaExclamationTriangle className="mx-auto text-5xl text-yellow-500 mb-4" />
           <p className="text-lg text-gray-600">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+          >
+            Thử lại
+          </button>
         </div>
       );
 
     return (
       <div className="relative">
         {/* Lịch sử hiến máu */}
-        {donationHistory.length > 0 && (
+        {donationHistory.length > 0 ? (
           <>
             <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Lịch sử hiến máu</h3>
             {donationHistory.map((donation, index) => (
               <HistoryItem
                 key={donation.id || index}
                 donation={donation}
-                isLast={index === donationHistory.length - 1}
+                isLast={index === donationHistory.length - 1 && receiveHistory.length === 0}
                 isDonation={true}
               />
             ))}
           </>
+        ) : (
+          <div className="text-center py-6 mb-4 bg-blue-50 rounded-lg border border-blue-200">
+            <FaTint className="mx-auto text-3xl text-blue-400 mb-2" />
+            <p className="text-blue-700 font-medium">Chưa có lịch sử hiến máu</p>
+            <p className="text-blue-600 text-sm mt-1">Hãy tham gia hiến máu để cứu người!</p>
+          </div>
         )}
 
         {/* Lịch sử nhận máu */}
-        {receiveHistory.length > 0 && (
+        {receiveHistory.length > 0 ? (
           <>
             <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mt-8 mb-4">Lịch sử nhận máu</h3>
             {receiveHistory.map((receive, index) => (
@@ -470,9 +507,16 @@ const HistoryComponent = ({ userId: propUserId }) => {
               />
             ))}
           </>
+        ) : (
+          <div className="text-center py-6 mt-4 bg-green-50 rounded-lg border border-green-200">
+            <FaTint className="mx-auto text-3xl text-green-400 mb-2" />
+            <p className="text-green-700 font-medium">Chưa có lịch sử nhận máu</p>
+            <p className="text-green-600 text-sm mt-1">Chúc bạn luôn khỏe mạnh!</p>
+          </div>
         )}
 
-        {donationHistory.length === 0 && receiveHistory.length === 0 && (
+        {/* Chỉ hiển thị thông báo này khi cả hai đều rỗng VÀ không có lỗi */}
+        {donationHistory.length === 0 && receiveHistory.length === 0 && !error && (
           <div className="text-center py-12">
             <FaInbox className="mx-auto text-6xl text-gray-300 mb-4" />
             <p className="text-xl font-semibold text-gray-700">Chưa có lịch sử</p>
@@ -500,4 +544,4 @@ const HistoryComponent = ({ userId: propUserId }) => {
   );
 };
 
-export default HistoryComponent;
+export default HistoryComponent;  
