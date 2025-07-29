@@ -54,13 +54,16 @@ import {
   updateBloodInventory,
   deleteBloodInventory,
 } from "../../../services/bloodInventoryService";
-import moment from "moment"; // Cần import moment để xử lý ngày tháng
+import moment from "moment";
 
 const { Option } = Select;
 
 // Một hình ảnh minh họa đẹp
 const bloodDonationImageUrl =
   "https://www.redcross.org/content/dam/redcross/about-us/news/2020/blood-donors-needed-2-2020-1200x630.jpg";
+
+// Hằng số để chuyển đổi giữa ml và đơn vị
+const ML_PER_UNIT = 250;
 
 const BloodInventoryPage = () => {
   const [inventory, setInventory] = useState([]);
@@ -81,21 +84,34 @@ const BloodInventoryPage = () => {
   const [searchText, setSearchText] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
+  const getStatus = (quantityInUnits) => {
+    if (quantityInUnits === 0) return "empty";
+    if (quantityInUnits > 0 && quantityInUnits <= lowThreshold / 2) return "low";
+    if (quantityInUnits > 0 && quantityInUnits <= lowThreshold) return "medium";
+    return "normal";
+  };
+
   const fetchInventory = async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await getAllBloodInventory();
-      const updatedInventory = data.map((item) => ({
-        id: item.inventoryId,
-        bloodType: item.bloodType,
-        totalUnitsAvailable: item.total,
-        backendStatus: item.status,
-        status: getStatus(item.total),
-        expirationDate: item.expirationDate
-          ? moment(item.expirationDate)
-          : null,
-      }));
+      // Chuyển đổi dữ liệu từ ml sang đơn vị (1 đơn vị = 250ml)
+      const updatedInventory = data.map((item) => {
+        const totalInMl = item.total || 0;
+        const units = totalInMl / ML_PER_UNIT;
+        return {
+          id: item.inventoryId,
+          bloodType: item.bloodType,
+          totalInMl: totalInMl, // Giữ lại giá trị gốc (ml)
+          totalUnitsAvailable: units, // Giá trị đã chuyển đổi sang đơn vị
+          backendStatus: item.status,
+          status: getStatus(units),
+          expirationDate: item.expirationDate
+            ? moment(item.expirationDate)
+            : null,
+        };
+      });
       setInventory(updatedInventory);
     } catch (err) {
       setError("Không thể tải dữ liệu kho máu.");
@@ -120,19 +136,14 @@ const BloodInventoryPage = () => {
     }
   }, [lowThreshold]);
 
-  const getStatus = (quantity) => {
-    if (quantity === 0) return "critical";
-    if (quantity <= lowThreshold / 2) return "critical";
-    if (quantity <= lowThreshold) return "low";
-    return "normal";
-  };
-
   const getStatusTag = (status) => {
     switch (status) {
-      case "critical":
-        return <Tag color="#f5222d">Cực kỳ thấp</Tag>;
+      case "empty":
+        return <Tag color="black">Trống</Tag>;
       case "low":
-        return <Tag color="#faad14">Sắp hết</Tag>;
+        return <Tag color="orange">Thấp</Tag>;
+      case "medium":
+        return <Tag color="gold">Trung bình</Tag>;
       default:
         return <Tag color="#52c41a">Đủ dùng</Tag>;
     }
@@ -140,8 +151,8 @@ const BloodInventoryPage = () => {
 
   const handleEdit = async (record) => {
     try {
-      // Dùng dữ liệu đã có để modal hiện lên nhanh hơn, sau đó fetch lại nếu cần
       setEditingRecord(record);
+      // Hiển thị giá trị theo đơn vị trong form
       form.setFieldsValue({
         ...record,
         type: record.bloodType,
@@ -152,15 +163,18 @@ const BloodInventoryPage = () => {
       });
       setIsModalVisible(true);
 
-      // Fetch dữ liệu mới nhất từ server
       const fetchedRecord = await getBloodInventoryById(record.id);
-      setEditingRecord(fetchedRecord);
+      const units = (fetchedRecord.total || 0) / ML_PER_UNIT;
+      const fullRecord = {
+          ...fetchedRecord,
+          totalUnitsAvailable: units
+      }
+      setEditingRecord(fullRecord);
       form.setFieldsValue({
-        ...fetchedRecord,
-        type: fetchedRecord.bloodType,
-        unitsAvailable: fetchedRecord.unitsAvailable,
-        expirationDate: fetchedRecord.expirationDate
-          ? moment(fetchedRecord.expirationDate)
+        type: fullRecord.bloodType,
+        unitsAvailable: fullRecord.totalUnitsAvailable,
+        expirationDate: fullRecord.expirationDate
+          ? moment(fullRecord.expirationDate)
           : null,
       });
     } catch (error) {
@@ -177,18 +191,24 @@ const BloodInventoryPage = () => {
 
   const handleSubmit = async (values) => {
     try {
-      const commonData = {
+      // Chuyển đổi "đơn vị" từ form thành "ml" để gửi lên server
+      const unitsFromForm = values.unitsAvailable;
+      const mlToSend = unitsFromForm * ML_PER_UNIT;
+
+      const apiData = {
         bloodType: values.type,
-        unitsAvailable: values.unitsAvailable,
+        // Giả sử API mong muốn nhận trường `total` hoặc `unitsAvailable` dưới dạng ml
+        total: mlToSend,
         expirationDate: values.expirationDate
           ? values.expirationDate.toISOString()
           : null,
       };
+
       if (editingRecord && editingRecord.id) {
-        await updateBloodInventory(editingRecord.id, commonData);
+        await updateBloodInventory(editingRecord.id, apiData);
         message.success("Cập nhật kho máu thành công!");
       } else {
-        await createBloodInventory(commonData);
+        await createBloodInventory(apiData);
         message.success("Thêm nhóm máu mới thành công!");
       }
       fetchInventory();
@@ -218,10 +238,10 @@ const BloodInventoryPage = () => {
     (sum, item) => sum + item.totalUnitsAvailable,
     0
   );
-  const criticalTypes = inventory.filter(
-    (item) => item.status === "critical"
+  const emptyTypes = inventory.filter((item) => item.status === "empty").length;
+  const warningTypes = inventory.filter(
+    (item) => item.status === "low" || item.status === "medium"
   ).length;
-  const lowTypes = inventory.filter((item) => item.status === "low").length;
 
   const filteredInventory = inventory.filter((item) => {
     if (item.backendStatus && item.backendStatus.toUpperCase() === "DELETED")
@@ -248,9 +268,9 @@ const BloodInventoryPage = () => {
   const displayBloodType = (type) => {
     const label = bloodTypeMap[type] || type || "-";
     if (label === "-") return label;
-    let color = "#1890ff"; // Default blue
-    if (["A+", "B+", "O+", "AB+"].includes(label)) color = "#cf1322"; // Red for Rh+
-    if (["O-", "AB-"].includes(label)) color = "#d4af37"; // Gold for universal donor/recipient
+    let color = "#1890ff";
+    if (["A+", "B+", "O+", "AB+"].includes(label)) color = "#cf1322";
+    if (["O-", "AB-"].includes(label)) color = "#d4af37";
     return <Tag color={color}>{label}</Tag>;
   };
 
@@ -266,8 +286,9 @@ const BloodInventoryPage = () => {
     yField: "value",
     seriesField: "status",
     color: ({ status }) => {
-      if (status === "critical") return "#f5222d";
-      if (status === "low") return "#faad14";
+      if (status === "empty") return "black";
+      if (status === "low") return "orange";
+      if (status === "medium") return "gold";
       return "#52c41a";
     },
     label: {
@@ -281,8 +302,9 @@ const BloodInventoryPage = () => {
       position: "top-right",
       itemName: {
         formatter: (text) => {
-          if (text === "critical") return "Cực kỳ thấp";
-          if (text === "low") return "Sắp hết";
+          if (text === "empty") return "Trống";
+          if (text === "low") return "Thấp";
+          if (text === "medium") return "Trung bình";
           return "Đủ dùng";
         },
       },
@@ -302,13 +324,8 @@ const BloodInventoryPage = () => {
       dataIndex: "totalUnitsAvailable",
       key: "totalUnitsAvailable",
       sorter: (a, b) => a.totalUnitsAvailable - b.totalUnitsAvailable,
-    },
-    {
-      title: "Ngày hết hạn",
-      dataIndex: "expirationDate",
-      key: "expirationDate",
-      render: (date) => (date ? date.format("DD/MM/YYYY") : "N/A"),
-      sorter: (a, b) => a.expirationDate - b.expirationDate,
+       // Hiển thị số nguyên hoặc số thập phân tùy bạn
+      render: (units) => parseFloat(units.toFixed(2)),
     },
     {
       title: "Trạng thái",
@@ -317,29 +334,30 @@ const BloodInventoryPage = () => {
       render: (status) => getStatusTag(status),
       filters: [
         { text: "Đủ dùng", value: "normal" },
-        { text: "Sắp hết", value: "low" },
-        { text: "Cực kỳ thấp", value: "critical" },
+        { text: "Trung bình", value: "medium" },
+        { text: "Thấp", value: "low" },
+        { text: "Trống", value: "empty" },
       ],
       onFilter: (value, record) => record.status === value,
     },
-    {
-      title: "Thao tác",
-      key: "action",
-      render: (_, record) => (
-        <Space>
-          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-          <Popconfirm
-            title="Bạn có chắc chắn muốn xóa?"
-            onConfirm={() => handleDelete(record)}
-            okText="Xóa"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
-          >
-            <Button danger icon={<DeleteOutlined />} loading={loadingDelete} />
-          </Popconfirm>
-        </Space>
-      ),
-    },
+    //   {
+    //     title: "Thao tác",
+    //     key: "action",
+    //     render: (_, record) => (
+    //       <Space>
+    //         <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+    //         <Popconfirm
+    //           title="Bạn có chắc chắn muốn xóa?"
+    //           onConfirm={() => handleDelete(record)}
+    //           okText="Xóa"
+    //           cancelText="Hủy"
+    //           okButtonProps={{ danger: true }}
+    //         >
+    //           <Button danger icon={<DeleteOutlined />} loading={loadingDelete} />
+    //         </Popconfirm>
+    //       </Space>
+    //     ),
+    //   },
   ];
 
   if (loading && inventory.length === 0) {
@@ -372,6 +390,7 @@ const BloodInventoryPage = () => {
 
   return (
     <div style={{ padding: "24px", background: "#f0f2f5" }}>
+      {/* Các phần JSX còn lại giữ nguyên */}
       <Row gutter={[24, 24]}>
         <Col xs={24} md={16}>
           <Card
@@ -435,6 +454,7 @@ const BloodInventoryPage = () => {
             <Statistic
               title="Tổng số đơn vị máu"
               value={totalUnits}
+              precision={2}
               suffix="đơn vị"
               valueStyle={{ color: "#1890ff" }}
             />
@@ -448,9 +468,9 @@ const BloodInventoryPage = () => {
             }}
           >
             <Statistic
-              title="Nhóm máu cực kỳ thấp"
-              value={criticalTypes}
-              valueStyle={{ color: "#f5222d" }}
+              title="Nhóm máu đã hết"
+              value={emptyTypes}
+              valueStyle={{ color: "#262626" }}
               prefix={<WarningOutlined />}
               suffix="nhóm"
             />
@@ -465,7 +485,7 @@ const BloodInventoryPage = () => {
           >
             <Statistic
               title="Nhóm máu sắp hết"
-              value={lowTypes}
+              value={warningTypes}
               valueStyle={{ color: "#faad14" }}
               suffix="nhóm"
             />
@@ -523,8 +543,9 @@ const BloodInventoryPage = () => {
             >
               <Option value="all">Tất cả trạng thái</Option>
               <Option value="normal">Đủ dùng</Option>
-              <Option value="low">Sắp hết</Option>
-              <Option value="critical">Cực kỳ thấp</Option>
+              <Option value="medium">Trung bình</Option>
+              <Option value="low">Thấp</Option>
+              <Option value="empty">Trống</Option>
             </Select>
           </Col>
         </Row>
@@ -564,7 +585,7 @@ const BloodInventoryPage = () => {
           </Form.Item>
           <Form.Item
             name="unitsAvailable"
-            label="Số lượng (đơn vị)"
+            label="Số lượng (đơn vị, 1 đơn vị = 250ml)"
             rules={[{ required: true, message: "Vui lòng nhập số lượng" }]}
           >
             <InputNumber
@@ -576,7 +597,6 @@ const BloodInventoryPage = () => {
           <Form.Item
             name="expirationDate"
             label="Ngày hết hạn"
-            rules={[{ required: true, message: "Vui lòng chọn ngày hết hạn" }]}
           >
             <DatePicker
               style={{ width: "100%" }}

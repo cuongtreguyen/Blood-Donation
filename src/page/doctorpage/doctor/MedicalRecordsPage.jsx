@@ -1,6 +1,6 @@
 /**
  * Trang Hồ Sơ Y Tế (Quản lý phiếu khám sức khỏe)
- * 
+ *
  * Chức năng:
  * - Hiển thị danh sách phiếu khám sức khỏe của người hiến máu
  * - Tạo mới phiếu khám sức khỏe
@@ -8,7 +8,7 @@
  * - Xem chi tiết phiếu khám sức khỏe
  * - Xuất phiếu khám sức khỏe dưới dạng PDF
  * - Lọc và tìm kiếm phiếu khám sức khỏe
- * 
+ *
  * Giúp bác sĩ/nhân viên y tế:
  * - Quản lý thông tin sức khỏe của người hiến máu
  * - Đánh giá tình trạng sức khỏe và quyết định khả năng hiến máu
@@ -477,6 +477,7 @@ function MedicalRecordsPage() {
               >
                 <Select
                   placeholder="Chọn nhóm máu"
+                  disabled={!!editingRecord}
                   options={Object.entries(bloodTypeMap).map(([k, v]) => ({
                     value: k,
                     label: v,
