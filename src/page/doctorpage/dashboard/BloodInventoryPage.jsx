@@ -86,7 +86,8 @@ const BloodInventoryPage = () => {
 
   const getStatus = (quantityInUnits) => {
     if (quantityInUnits === 0) return "empty";
-    if (quantityInUnits > 0 && quantityInUnits <= lowThreshold / 2) return "low";
+    if (quantityInUnits > 0 && quantityInUnits <= lowThreshold / 2)
+      return "low";
     if (quantityInUnits > 0 && quantityInUnits <= lowThreshold) return "medium";
     return "normal";
   };
@@ -139,9 +140,9 @@ const BloodInventoryPage = () => {
   const getStatusTag = (status) => {
     switch (status) {
       case "empty":
-        return <Tag color="black">Trống</Tag>;
+        return <Tag color="grey">Trống</Tag>;
       case "low":
-        return <Tag color="orange">Thấp</Tag>;
+        return <Tag color="red">Thấp</Tag>;
       case "medium":
         return <Tag color="gold">Trung bình</Tag>;
       default:
@@ -166,9 +167,9 @@ const BloodInventoryPage = () => {
       const fetchedRecord = await getBloodInventoryById(record.id);
       const units = (fetchedRecord.total || 0) / ML_PER_UNIT;
       const fullRecord = {
-          ...fetchedRecord,
-          totalUnitsAvailable: units
-      }
+        ...fetchedRecord,
+        totalUnitsAvailable: units,
+      };
       setEditingRecord(fullRecord);
       form.setFieldsValue({
         type: fullRecord.bloodType,
@@ -324,7 +325,7 @@ const BloodInventoryPage = () => {
       dataIndex: "totalUnitsAvailable",
       key: "totalUnitsAvailable",
       sorter: (a, b) => a.totalUnitsAvailable - b.totalUnitsAvailable,
-       // Hiển thị số nguyên hoặc số thập phân tùy bạn
+      // Hiển thị số nguyên hoặc số thập phân tùy bạn
       render: (units) => parseFloat(units.toFixed(2)),
     },
     {
@@ -594,10 +595,7 @@ const BloodInventoryPage = () => {
               placeholder="Nhập số lượng đơn vị máu"
             />
           </Form.Item>
-          <Form.Item
-            name="expirationDate"
-            label="Ngày hết hạn"
-          >
+          <Form.Item name="expirationDate" label="Ngày hết hạn">
             <DatePicker
               style={{ width: "100%" }}
               format="DD/MM/YYYY"
