@@ -727,9 +727,6 @@ const Header = () => {
                     <Menu.Item onClick={markAllNotificationsAsRead}>
                       Đánh dấu tất cả đã đọc
                     </Menu.Item>
-                    <Menu.Item>
-                      <Link to="/notifications">Xem tất cả thông báo</Link>
-                    </Menu.Item>
                   </Menu>
                 }
                 trigger={["click"]}
