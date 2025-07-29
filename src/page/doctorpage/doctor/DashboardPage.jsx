@@ -178,7 +178,7 @@ const DashboardPage = () => {
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
             >
               <Statistic
-                title="Tổng người nhận máu"
+                title="Tổng đơn nhận máu"
                 value={totalRecipients}
                 prefix={<HeartOutlined />}
                 valueStyle={{ color: "#52c41a" }}
