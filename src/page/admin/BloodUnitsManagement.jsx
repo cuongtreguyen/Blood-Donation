@@ -315,7 +315,7 @@ const BloodUnitsManagement = () => {
                   value={count.toLocaleString()}
                   valueStyle={{ color: '#cf1322' }}
                   prefix={<WarningOutlined />}
-                  suffix="ml"
+                  suffix="đơn vị"
                 />
               </Col>
             )

@@ -564,8 +564,8 @@ function BlogPage() {
     }
   };
 
-  // Xóa một blog (chuyển trạng thái sang DELETED)
-  const deleteBlog = async (id) => {
+  // Ẩn một blog (chuyển trạng thái sang DELETED)
+  const hideBlog = async (id) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -575,10 +575,10 @@ function BlogPage() {
       await api.delete(`/blogs/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Xóa bài viết thành công!');
+      toast.success('Ẩn bài viết thành công!');
       return true;
     } catch (error) {
-      toast.error('Xóa bài viết thất bại!');
+      toast.error('Ẩn bài viết thất bại!');
       console.log(error);
       return false;
     }
@@ -692,11 +692,11 @@ function BlogPage() {
     });
   };
 
-  // Xóa bài viết (gọi API DELETE)
-  const handleDelete = async (id) => {
-    const result = await deleteBlog(id);
+  // Ẩn bài viết (gọi API DELETE)
+  const handleHide = async (id) => {
+    const result = await hideBlog(id);
     if (result) {
-      fetchAdminBlogs(); // Reload lại danh sách ngay sau khi xóa thành công
+      fetchAdminBlogs(); // Reload lại danh sách ngay sau khi ẩn thành công
     }
   };
 
@@ -734,17 +734,19 @@ function BlogPage() {
           <Button icon={<EditOutlined />} size="small" style={{ color: '#d32f2f', borderColor: '#d32f2f', background: '#fff' }} onClick={() => handleEdit(record)}>
             Sửa
           </Button>
-          <Popconfirm
-            title="Bạn có chắc chắn muốn xóa bài viết này?"
-            okText="Xóa"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
-            onConfirm={() => handleDelete(record.id || record.key)}
-          >
-            <Button icon={<DeleteOutlined />} size="small" danger>
-              Xóa
-            </Button>
-          </Popconfirm>
+          {record.status !== 'DELETED' && (
+            <Popconfirm
+              title="Bạn có chắc chắn muốn ẩn bài viết này?"
+              okText="Ẩn"
+              cancelText="Hủy"
+              okButtonProps={{ danger: true }}
+              onConfirm={() => handleHide(record.id || record.key)}
+            >
+              <Button icon={<DeleteOutlined />} size="small" danger>
+                Ẩn
+              </Button>
+            </Popconfirm>
+          )}
           {record.status === 'DELETED' && (
             <Button
               type="primary"
