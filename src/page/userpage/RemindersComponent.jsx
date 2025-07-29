@@ -42,13 +42,11 @@ const RemindersComponent = () => {
         Nhắc nhở hiến máu
       </h3>
       <div className="space-y-4">
-        <p className="text-gray-600">
+        <p className="text-green-600 font-medium">
           Thời gian phù hợp tiếp theo:{" "}
-          <strong>{getNextDonationDate(userData.lastDonation)}</strong>
+          {/* <strong>{getNextDonationDate(userData.lastDonation)}</strong> */}
+          <strong>{reminderMessage}</strong>
         </p>
-        {reminderMessage && (
-          <p className="text-green-600 font-medium">{reminderMessage}</p>
-        )}
         <button
           className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 flex items-center"
           onClick={handleReminderClick}
