@@ -1,12 +1,13 @@
+
 /**
  * Trang Tổng Quan (Dashboard) cho bác sĩ/nhân viên y tế
- * 
+ *
  * Chức năng:
  * - Hiển thị thông tin tổng quan về hệ thống hiến máu
  * - Thống kê số lượng người hiến máu, người nhận máu, đơn vị máu có sẵn
  * - Hiển thị danh sách người hiến máu mới nhất
  * - Hiển thị biểu đồ tồn kho máu theo nhóm máu
- * 
+ *
  * Giúp bác sĩ/nhân viên y tế:
  * - Nắm bắt nhanh tình hình hoạt động của hệ thống
  * - Theo dõi số lượng người hiến máu và người nhận máu
@@ -28,17 +29,19 @@ import {
   Progress,
 } from "antd";
 import {
-  UserOutlined,
-  MedicineBoxOutlined,
   UsergroupAddOutlined,
   HeartOutlined,
   BankOutlined,
+  MedicineBoxOutlined,
 } from "@ant-design/icons";
 import { getAllDonors } from "../../../services/donorsService";
 import { getBloodReceiveHistory } from "../../../services/bloodReceiveService";
 import { getAllBloodInventory } from "../../../services/bloodInventoryService";
 
 const { Title, Text } = Typography;
+
+// THAY ĐỔI: Thêm hằng số để code dễ đọc và dễ bảo trì
+const ML_PER_UNIT = 250;
 
 const bloodTypeMap = {
   A_POSITIVE: "A+",
@@ -58,6 +61,8 @@ const DashboardPage = () => {
   const [totalBloodUnits, setTotalBloodUnits] = useState(0);
   const [latestUsers, setLatestUsers] = useState([]);
   const [bloodInventory, setBloodInventory] = useState([]);
+  // THAY ĐỔI: Thêm state để lưu trữ lượng máu tối đa, dùng cho thanh Progress
+  const [maxBloodMl, setMaxBloodMl] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,16 +73,14 @@ const DashboardPage = () => {
             getAllDonors(),
             getBloodReceiveHistory(),
             getAllBloodInventory(),
-            // Bỏ lời gọi api.get("/user/get-user-by-role")
           ]);
 
         if (donorsResult.status === "fulfilled") {
           const donors = donorsResult.value || [];
           setTotalDonors(donors.length);
 
-          // Lấy 5 người hiến máu mới nhất từ danh sách donor
           const sortedDonors = donors
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Sắp xếp theo ngày tạo
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             .slice(0, 5);
           setLatestUsers(sortedDonors);
         } else {
@@ -94,16 +97,23 @@ const DashboardPage = () => {
         if (inventoryResult.status === "fulfilled") {
           const inventory = inventoryResult.value || [];
           setBloodInventory(inventory);
+
+          // THAY ĐỔI: Tính tổng số đơn vị máu bằng cách chia mỗi item cho 250
           const totalUnits = inventory.reduce(
-            (sum, item) => sum + (item.total || 0),
+            (sum, item) => sum + (item.total || 0) / ML_PER_UNIT,
             0
           );
           setTotalBloodUnits(totalUnits);
+
+          // THAY ĐỔI: Tìm lượng máu (ml) lớn nhất để tính toán thanh Progress cho chính xác
+          const maxMl = Math.max(
+            ...inventory.map((item) => item.total || 0),
+            0
+          );
+          setMaxBloodMl(maxMl);
         } else {
           console.error("Error fetching inventory:", inventoryResult.reason);
         }
-
-        // Bỏ logic xử lý usersResult
       } catch (error) {
         message.error("Đã có lỗi xảy ra khi tải dữ liệu tổng quan!");
         console.error("Dashboard data fetch error:", error);
@@ -118,12 +128,12 @@ const DashboardPage = () => {
   const userColumns = [
     {
       title: "Tên",
-      dataIndex: "fullName", // Dùng fullName từ dữ liệu donor
+      dataIndex: "fullName",
       key: "name",
     },
     {
       title: "Email",
-      dataIndex: "email", // Dùng email từ dữ liệu donor
+      dataIndex: "email",
       key: "email",
     },
     {
@@ -132,7 +142,6 @@ const DashboardPage = () => {
       key: "bloodType",
       render: (type) => bloodTypeMap[type] || type,
     },
-    // Cột "Vai trò" đã được lược bỏ theo yêu cầu
   ];
 
   return (
@@ -159,7 +168,7 @@ const DashboardPage = () => {
 
       <Spin spinning={loading} tip="Đang tải dữ liệu...">
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          <Col xs={24} sm={12} lg={6}>
+          <Col xs={24} sm={12} lg={8}>
             <Card
               bordered={false}
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
@@ -172,7 +181,7 @@ const DashboardPage = () => {
               />
             </Card>
           </Col>
-          <Col xs={24} sm={12} lg={6}>
+          <Col xs={24} sm={12} lg={8}>
             <Card
               bordered={false}
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
@@ -185,7 +194,7 @@ const DashboardPage = () => {
               />
             </Card>
           </Col>
-          <Col xs={24} sm={12} lg={6}>
+          <Col xs={24} sm={12} lg={8}>
             <Card
               bordered={false}
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
@@ -193,6 +202,8 @@ const DashboardPage = () => {
               <Statistic
                 title="Kho máu (đơn vị)"
                 value={totalBloodUnits}
+                // THAY ĐỔI: Thêm precision để hiển thị số thập phân (ví dụ: 10.5 đơn vị)
+                precision={2}
                 prefix={<BankOutlined />}
                 valueStyle={{ color: "#ffc107" }}
               />
@@ -203,14 +214,14 @@ const DashboardPage = () => {
         <Row gutter={[16, 16]}>
           <Col xs={24} lg={12}>
             <Card
-              title="Người dùng mới nhất"
+              title="Người hiến máu mới nhất"
               bordered={false}
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
             >
               <Table
                 columns={userColumns}
                 dataSource={latestUsers}
-                rowKey="id"
+                rowKey="donorId"
                 pagination={false}
               />
             </Card>
@@ -221,21 +232,31 @@ const DashboardPage = () => {
               bordered={false}
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.09)" }}
             >
-              {bloodInventory.map((item) => (
-                <div key={item.bloodType} style={{ marginBottom: "10px" }}>
-                  <Text strong>{`Nhóm máu ${
-                    bloodTypeMap[item.bloodType] || item.bloodType
-                  }`}</Text>
-                  <Text
-                    style={{ float: "right" }}
-                  >{`${item.total} đơn vị`}</Text>
-                  <Progress
-                    percent={(item.total / 100) * 100} // Assuming max 100 units for visualisation
-                    showInfo={false}
-                    status={item.total < 10 ? "exception" : "success"}
-                  />
-                </div>
-              ))}
+              {bloodInventory.map((item) => {
+                // THAY ĐỔI: Tính toán số đơn vị cho từng nhóm máu
+                const units = (item.total || 0) / ML_PER_UNIT;
+
+                return (
+                  <div key={item.bloodType} style={{ marginBottom: "10px" }}>
+                    <Text strong>{`Nhóm máu ${
+                      bloodTypeMap[item.bloodType] || item.bloodType
+                    }`}</Text>
+                    <Text style={{ float: "right" }}>
+                      {/* THAY ĐỔI: Hiển thị số đơn vị đã tính, làm tròn 2 chữ số thập phân */}
+                      {`${units.toFixed(2)} đơn vị`}
+                    </Text>
+                    <Progress
+                      // THAY ĐỔI: Tính phần trăm dựa trên lượng máu lớn nhất trong kho
+                      percent={
+                        maxBloodMl > 0 ? (item.total / maxBloodMl) * 100 : 0
+                      }
+                      showInfo={false}
+                      // THAY ĐỔI: Đặt trạng thái dựa trên số "đơn vị", ví dụ dưới 10 đơn vị là "exception"
+                      status={units < 10 ? "exception" : "success"}
+                    />
+                  </div>
+                );
+              })}
             </Card>
           </Col>
         </Row>
