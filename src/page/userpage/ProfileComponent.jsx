@@ -1,4 +1,3 @@
-
 // import React, { useState, useEffect } from "react";
 // import {
 //   FaEdit,
@@ -57,7 +56,7 @@
 //   </div>
 // );
 
-// const FormInput = ({ id, label, value, onChange, required = false, type = "text", children, ...props }) => (
+// const FormInput = ({ id, label, value, onChange, required = false, type = "text", disabled = false, children, ...props }) => (
 //   <div>
 //     <label htmlFor={id} className="block text-sm font-medium text-gray-700">
 //       {label} {required && <span className="text-red-500">*</span>}
@@ -72,7 +71,8 @@
 //           value={value || ""}
 //           onChange={onChange}
 //           required={required}
-//           className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+//           disabled={disabled}
+//           className={`block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
 //           {...props}
 //         />
 //       )}
@@ -119,7 +119,7 @@
 //   const validateAge = (birthdate) => {
 //     if (!birthdate) return false;
 //     const birthDate = new Date(birthdate);
-//     const today = new Date("2025-07-27");
+//     const today = new Date("2025-07-29");
 //     let age = today.getFullYear() - birthDate.getFullYear();
 //     const monthDiff = today.getMonth() - birthDate.getMonth();
 //     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
@@ -135,7 +135,7 @@
 //   const validateNumeric = (value, min = 0) => {
 //     if (!value) return true; // Optional but valid if empty
 //     const num = parseFloat(value);
-//     return !isNaN(num) && num > min; // Changed to > min for positive values
+//     return !isNaN(num) && num > min;
 //   };
 
 //   // --- Hàm cập nhật user data đồng bộ ---
@@ -244,12 +244,16 @@
 //         birthdate: formData.birthdate ? formatDate(formData.birthdate, 'api') : null,
 //         height: formData.height ? parseFloat(formData.height) : null,
 //         weight: formData.weight ? parseFloat(formData.weight) : null,
-//         lastDonation: formData.lastDonation ? formatDate(formData.lastDonation, 'api') : null,
 //         medicalHistory: formData.medicalHistory || null,
 //         emergencyName: formData.emergencyName || null,
 //         emergencyPhone: formData.emergencyPhone || null,
 //         bloodType: formData.bloodType || null,
 //       };
+
+//       // Chỉ thêm lastDonation vào payload nếu nó chưa có giá trị
+//       if (!formData.lastDonation) {
+//         payload.lastDonation = formData.lastDonation ? formatDate(formData.lastDonation, 'api') : null;
+//       }
       
 //       console.log("Updating profile with payload:", payload);
       
@@ -524,6 +528,7 @@
 //                   type="date"
 //                   value={formatDate(formData.lastDonation)}
 //                   onChange={e => setFormData({...formData, lastDonation: e.target.value})}
+//                   disabled={!!formData.lastDonation} // Khóa nếu đã có giá trị
 //                 />
 //                 <div className="md:col-span-2">
 //                   <FormInput id="medicalHistory" label="Tiền sử bệnh án">
@@ -691,6 +696,12 @@
 
 
 
+
+
+
+
+
+
 import React, { useState, useEffect } from "react";
 import {
   FaEdit,
@@ -711,7 +722,6 @@ import {
   FaHistory,
   FaUserShield,
 } from "react-icons/fa";
-import { toast } from "react-toastify";
 import api from "../../config/api";
 import { useSelector, useDispatch } from "react-redux";
 import { login } from "../../redux/features/userSlice";
@@ -723,7 +733,6 @@ const getUserData = (reduxUser) => {
     return reduxUser;
   }
   
-  // Fallback từ localStorage
   try {
     const localUser = localStorage.getItem("user");
     if (localUser) {
@@ -749,7 +758,7 @@ const InfoField = ({ icon, label, value, isPlaceholder = false }) => (
   </div>
 );
 
-const FormInput = ({ id, label, value, onChange, required = false, type = "text", disabled = false, children, ...props }) => (
+const FormInput = ({ id, label, value, onChange, required = false, type = "text", disabled = false, error, children, ...props }) => (
   <div>
     <label htmlFor={id} className="block text-sm font-medium text-gray-700">
       {label} {required && <span className="text-red-500">*</span>}
@@ -765,11 +774,12 @@ const FormInput = ({ id, label, value, onChange, required = false, type = "text"
           onChange={onChange}
           required={required}
           disabled={disabled}
-          className={`block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+          className={`block w-full px-3 py-2 bg-white border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
           {...props}
         />
       )}
     </div>
+    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
   </div>
 );
 
@@ -780,6 +790,7 @@ const ProfileComponent = () => {
   const [imageStatus, setImageStatus] = useState("loaded");
   const [donationEligibility, setDonationEligibility] = useState(null);
   const [isCheckingEligibility, setIsCheckingEligibility] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const dispatch = useDispatch();
   const reduxUser = useSelector((state) => state.user);
@@ -809,6 +820,43 @@ const ProfileComponent = () => {
   };
 
   // --- Validation Functions ---
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.fullName) {
+      newErrors.fullName = "Họ và tên là bắt buộc!";
+    }
+
+    if (!formData.birthdate) {
+      newErrors.birthdate = "Ngày sinh là bắt buộc!";
+    } else if (!validateAge(formData.birthdate)) {
+      newErrors.birthdate = "Tuổi phải từ 18 đến 65!";
+    }
+
+    if (!formData.height) {
+      newErrors.height = "Chiều cao là bắt buộc!";
+    } else if (!validateNumeric(formData.height, 139)) {
+      newErrors.height = "Chiều cao phải phải từ 140cm trở lên!";
+    }
+
+    if (!formData.weight) {
+      newErrors.weight = "Cân nặng là bắt buộc!";
+    } else if (!validateNumeric(formData.weight, 39)) {
+      newErrors.weight = "Cân nặng phải phải từ 40kg trở lên!";
+    }
+
+    if (formData.phone && !validatePhone(formData.phone)) {
+      newErrors.phone = "Số điện thoại không hợp lệ! Phải bắt đầu bằng 0 và có 10-11 chữ số.";
+    }
+
+    if (formData.emergencyPhone && !validatePhone(formData.emergencyPhone)) {
+      newErrors.emergencyPhone = "Số điện thoại người liên hệ không hợp lệ! Phải bắt đầu bằng 0 và có 10-11 chữ số.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const validateAge = (birthdate) => {
     if (!birthdate) return false;
     const birthDate = new Date(birthdate);
@@ -820,13 +868,13 @@ const ProfileComponent = () => {
   };
 
   const validatePhone = (phone) => {
-    if (!phone) return true; // Optional but valid if empty
+    if (!phone) return true;
     const phoneRegex = /^0[3-9][0-9]{8,9}$/;
     return phoneRegex.test(phone);
   };
 
-  const validateNumeric = (value, min = 0) => {
-    if (!value) return true; // Optional but valid if empty
+  const validateNumeric = (value, min) => {
+    if (!value) return false;
     const num = parseFloat(value);
     return !isNaN(num) && num > min;
   };
@@ -864,7 +912,7 @@ const ProfileComponent = () => {
         message: response.data.message 
       });
     } catch (err) {
-      const message = err.response?.data?.message || "không đủ điều kiện hiến máu";
+      const message = err.response?.data?.message || "Không đủ điều kiện hiến máu";
       setDonationEligibility({ 
         status: 'error', 
         message 
@@ -874,7 +922,6 @@ const ProfileComponent = () => {
     }
   };
 
-  // --- useEffect với dependency chính xác ---
   useEffect(() => {
     if (userData && Object.keys(userData).length > 0) {
       setFormData(userData);
@@ -890,40 +937,9 @@ const ProfileComponent = () => {
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrors({});
 
-    // Validation
-    if (!formData.fullName) {
-      toast.error("Họ và tên là bắt buộc!");
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.birthdate && !validateAge(formData.birthdate)) {
-      toast.error("Tuổi phải từ 18 đến 65!");
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.phone && !validatePhone(formData.phone)) {
-      toast.error("Số điện thoại không hợp lệ! Phải bắt đầu bằng 0 và có 10-11 chữ số.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.height && !validateNumeric(formData.height)) {
-      toast.error("Chiều cao phải là số dương!");
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.weight && !validateNumeric(formData.weight)) {
-      toast.error("Cân nặng phải là số dương!");
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.emergencyPhone && !validatePhone(formData.emergencyPhone)) {
-      toast.error("Số điện thoại người liên hệ không hợp lệ! Phải bắt đầu bằng 0 và có 10-11 chữ số.");
+    if (!validateForm()) {
       setIsLoading(false);
       return;
     }
@@ -943,7 +959,6 @@ const ProfileComponent = () => {
         bloodType: formData.bloodType || null,
       };
 
-      // Chỉ thêm lastDonation vào payload nếu nó chưa có giá trị
       if (!formData.lastDonation) {
         payload.lastDonation = formData.lastDonation ? formatDate(formData.lastDonation, 'api') : null;
       }
@@ -958,7 +973,7 @@ const ProfileComponent = () => {
       
       updateUserData(response.data);
       
-      toast.success("Cập nhật thông tin thành công!");
+      setErrors({});
       setIsEditing(false);
       
       setTimeout(() => {
@@ -967,7 +982,7 @@ const ProfileComponent = () => {
       
     } catch (err) {
       console.error("Update profile error:", err);
-      toast.error(err.response?.data?.message || "Cập nhật thất bại. Vui lòng thử lại!");
+      setErrors({ api: err.response?.data?.message || "Cập nhật thất bại. Vui lòng thử lại!" });
     } finally {
       setIsLoading(false);
     }
@@ -978,7 +993,7 @@ const ProfileComponent = () => {
     if (!file) return;
     
     if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
-      toast.error("Vui lòng chọn ảnh dưới 5MB!");
+      setErrors({ image: "Vui lòng chọn ảnh dưới 5MB!" });
       return;
     }
     
@@ -999,11 +1014,11 @@ const ProfileComponent = () => {
       updateUserData({ profileImage: response.data.profileImage });
       
       setImageStatus("loaded");
-      toast.success("Cập nhật ảnh đại diện thành công!");
+      setErrors(prev => ({ ...prev, image: null }));
     } catch (err) {
       console.error("Upload image error:", err);
       setImageStatus("error");
-      toast.error("Cập nhật ảnh đại diện thất bại!");
+      setErrors(prev => ({ ...prev, image: "Cập nhật ảnh đại diện thất bại!" }));
     } finally {
       setIsLoading(false);
     }
@@ -1012,9 +1027,9 @@ const ProfileComponent = () => {
   const handleCancelEdit = () => {
     setIsEditing(false);
     setFormData(userData);
+    setErrors({});
   };
 
-  // --- JSX Rendering ---
   const renderEligibilityStatus = () => {
     if (isCheckingEligibility) {
       return {
@@ -1089,6 +1104,7 @@ const ProfileComponent = () => {
                 />
                 <FaCamera className="text-gray-600 text-lg" />
               </label>
+              {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image}</p>}
             </div>
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
@@ -1120,11 +1136,15 @@ const ProfileComponent = () => {
           )}
         </div>
 
+        {errors.api && (
+          <div className="mt-4 p-3 bg-red-50 text-red-800 rounded-md">
+            {errors.api}
+          </div>
+        )}
+
         {/* Body */}
         {isEditing ? (
-          // Edit Mode
           <form onSubmit={handleProfileUpdate} className="mt-6 space-y-8">
-            {/* Personal Info */}
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <FaUser className="mr-2 text-red-500" />
@@ -1137,6 +1157,7 @@ const ProfileComponent = () => {
                   value={formData.fullName}
                   onChange={e => setFormData({...formData, fullName: e.target.value})}
                   required
+                  error={errors.fullName}
                 />
                 <FormInput
                   id="phone"
@@ -1144,6 +1165,7 @@ const ProfileComponent = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={e => setFormData({...formData, phone: e.target.value})}
+                  error={errors.phone}
                 />
                 <FormInput
                   id="birthdate"
@@ -1152,13 +1174,14 @@ const ProfileComponent = () => {
                   value={formatDate(formData.birthdate)}
                   onChange={e => setFormData({...formData, birthdate: e.target.value})}
                   required
+                  error={errors.birthdate}
                 />
-                <FormInput id="gender" label="Giới tính">
+                <FormInput id="gender" label="Giới tính" error={errors.gender}>
                   <select
                     id="gender"
                     value={formData.gender || ""}
                     onChange={e => setFormData({...formData, gender: e.target.value})}
-                    className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                    className={`block w-full px-3 py-2 bg-white border ${errors.gender ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm`}
                   >
                     <option value="">Chọn giới tính</option>
                     {genderOptions.map(o => (
@@ -1172,12 +1195,12 @@ const ProfileComponent = () => {
                     label="Địa chỉ"
                     value={formData.address}
                     onChange={e => setFormData({...formData, address: e.target.value})}
+                    error={errors.address}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Medical Info */}
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <FaBookMedical className="mr-2 text-red-500" />
@@ -1192,6 +1215,8 @@ const ProfileComponent = () => {
                   value={formData.height}
                   onWheel={(e) => e.target.blur()}
                   onChange={e => setFormData({...formData, height: e.target.value})}
+                  required
+                  error={errors.height}
                 />
                 <FormInput
                   id="weight"
@@ -1201,13 +1226,15 @@ const ProfileComponent = () => {
                   value={formData.weight}
                   onWheel={(e) => e.target.blur()}
                   onChange={e => setFormData({...formData, weight: e.target.value})}
+                  required
+                  error={errors.weight}
                 />
-                <FormInput id="bloodType" label="Nhóm máu">
+                <FormInput id="bloodType" label="Nhóm máu" error={errors.bloodType}>
                   <select
                     id="bloodType"
                     value={formData.bloodType || ""}
                     onChange={e => setFormData({...formData, bloodType: e.target.value})}
-                    className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                    className={`block w-full px-3 py-2 bg-white border ${errors.bloodType ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm`}
                   >
                     <option value="">Chọn nhóm máu</option>
                     {bloodGroups.map(g => (
@@ -1221,23 +1248,23 @@ const ProfileComponent = () => {
                   type="date"
                   value={formatDate(formData.lastDonation)}
                   onChange={e => setFormData({...formData, lastDonation: e.target.value})}
-                  disabled={!!formData.lastDonation} // Khóa nếu đã có giá trị
+                  disabled={!!formData.lastDonation}
+                  error={errors.lastDonation}
                 />
                 <div className="md:col-span-2">
-                  <FormInput id="medicalHistory" label="Tiền sử bệnh án">
+                  <FormInput id="medicalHistory" label="Tiền sử bệnh án" error={errors.medicalHistory}>
                     <textarea
                       id="medicalHistory"
                       rows="3"
                       value={formData.medicalHistory || ""}
                       onChange={e => setFormData({...formData, medicalHistory: e.target.value})}
-                      className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm resize-none"
+                      className={`block w-full px-3 py-2 bg-white border ${errors.medicalHistory ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm resize-none`}
                     />
                   </FormInput>
                 </div>
               </div>
             </div>
 
-            {/* Emergency Contact */}
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <FaUserShield className="mr-2 text-red-500" />
@@ -1249,6 +1276,7 @@ const ProfileComponent = () => {
                   label="Họ tên người liên hệ"
                   value={formData.emergencyName}
                   onChange={e => setFormData({...formData, emergencyName: e.target.value})}
+                  error={errors.emergencyName}
                 />
                 <FormInput
                   id="emergencyPhone"
@@ -1256,11 +1284,11 @@ const ProfileComponent = () => {
                   type="tel"
                   value={formData.emergencyPhone}
                   onChange={e => setFormData({...formData, emergencyPhone: e.target.value})}
+                  error={errors.emergencyPhone}
                 />
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
@@ -1281,7 +1309,6 @@ const ProfileComponent = () => {
             </div>
           </form>
         ) : (
-          // View Mode
           <div className="mt-8">
             <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
               <InfoField
@@ -1353,7 +1380,6 @@ const ProfileComponent = () => {
           </div>
         )}
 
-        {/* Eligibility Status */}
         <div className={`mt-8 p-4 rounded-lg flex items-center justify-between ${eligibility.bgColor}`}>
           <div className="flex items-center">
             <span className="text-xl">{eligibility.icon}</span>
