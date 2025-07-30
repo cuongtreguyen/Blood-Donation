@@ -53,7 +53,7 @@ const LoginPage = () => {
       } else if (error.response?.status === 401) {
         toast.error("Email hoặc mật khẩu không đúng!");
       } else if (error.message) {
-        toast.error(error.message);
+        toast.error("Sai Mật Khẩu!");
       } else {
         toast.error("Đăng nhập thất bại. Vui lòng thử lại!");
       }
