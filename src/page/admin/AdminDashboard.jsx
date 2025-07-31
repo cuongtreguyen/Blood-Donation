@@ -596,7 +596,7 @@ function AdminDashboard() {
   // Function to convert ml to units (1 unit = 250 ml)
   const convertMlToUnits = (ml) => {
     if (!ml && ml !== 0) return 0;
-    return Math.round(ml / 250);
+    return (ml / 250);
   };
 
   // Statistics
