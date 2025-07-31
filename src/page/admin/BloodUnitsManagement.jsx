@@ -413,7 +413,7 @@ const BloodUnitsManagement = () => {
   // Hàm convert từ ml sang đơn vị (1 đơn vị = 250ml)
   const convertMlToUnits = (ml) => {
     if (!ml && ml !== 0) return 0;
-    return Math.round(ml / 250);
+    return (ml / 250);
   };
 
   const fetchBloodInventory = async () => {
