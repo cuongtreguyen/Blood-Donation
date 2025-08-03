@@ -152,7 +152,6 @@ const HealthCheckForm = ({ donorInfo, onSuccess }) => {
                 {
                   type: "number",
                   min: 35,
-                  max: 42,
                   message: "Nhiệt độ phải từ 35-42°C",
                 },
               ]}
