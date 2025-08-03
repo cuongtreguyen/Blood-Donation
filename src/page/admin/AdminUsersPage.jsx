@@ -371,7 +371,7 @@ function AdminUsersPage() {
                     backgroundColor: record.status === 'ACTIVE' ? '#f6ffed' : '#fff',
                     color: record.status === 'ACTIVE' ? '#52c41a' : '#666',
                     fontWeight: record.status === 'ACTIVE' ? 600 : 400,
-                    border: record.status === 'ACTIVE' ? '1px solid #b7eb8f' : '1px solid transparent'
+                    border: record.status === 'ACTIVE' ? '1px solid #b7eb8f' : '1px solid transparent',
                   }}
                   onClick={() => handleStatusChange(record, 'ACTIVE')}
                 >
@@ -387,7 +387,7 @@ function AdminUsersPage() {
                     color: record.status === 'INACTIVE' ? '#ff4d4f' : '#666',
                     fontWeight: record.status === 'INACTIVE' ? 600 : 400,
                     border: record.status === 'INACTIVE' ? '1px solid #ffccc7' : '1px solid transparent',
-                    marginTop: 4
+                    marginTop: 4,
                   }}
                   onClick={() => handleStatusChange(record, 'INACTIVE')}
                 >
@@ -404,7 +404,7 @@ function AdminUsersPage() {
                 background: '#faad14',
                 borderColor: '#faad14',
                 color: '#fff',
-                fontWeight: 500
+                fontWeight: 500,
               }}
             >
               Đổi trạng thái
@@ -486,7 +486,7 @@ function AdminUsersPage() {
                   rules={[
                     { required: true, message: 'Vui lòng nhập tên người dùng!' },
                     { min: 3, message: 'Tên người dùng phải có ít nhất 3 ký tự!' },
-                    { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' }
+                    { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' },
                   ]}
                 >
                   <Input prefix={<UserOutlined />} placeholder="Nhập tên người dùng" size="large" />
@@ -496,7 +496,7 @@ function AdminUsersPage() {
                   label={<b>Email</b>}
                   rules={[
                     { required: true, message: 'Vui lòng nhập email!' },
-                    { type: 'email', message: 'Email không hợp lệ!' }
+                    { type: 'email', message: 'Email không hợp lệ!' },
                   ]}
                 >
                   <Input prefix={<MailOutlined />} placeholder="Nhập email" size="large" />
@@ -506,12 +506,20 @@ function AdminUsersPage() {
                   label={<b>Số điện thoại</b>}
                   rules={[
                     { required: true, message: 'Vui lòng nhập số điện thoại!' },
-                    { pattern: /^[0-9+]{10,15}$/, message: 'Số điện thoại phải hợp lệ!' }
+                    { pattern: /^[0-9+]{10,15}$/, message: 'Số điện thoại phải hợp lệ!' },
                   ]}
                 >
                   <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" size="large" />
                 </Form.Item>
-                <Form.Item name="address" label={<b>Địa chỉ</b>}>
+                <Form.Item 
+                  name="address" 
+                  label={<b>Địa chỉ</b>}
+                  rules={[
+                    { required: true, message: 'Vui lòng nhập địa chỉ!' },
+                    { min: 5, message: 'Địa chỉ phải có ít nhất 5 ký tự!' },
+                    { max: 200, message: 'Địa chỉ không được vượt quá 200 ký tự!' },
+                  ]}
+                >
                   <Input placeholder="Nhập địa chỉ" size="large" />
                 </Form.Item>
               </div>
@@ -533,18 +541,23 @@ function AdminUsersPage() {
                   label={<b>Mật khẩu</b>}
                   rules={[
                     { required: true, message: 'Vui lòng nhập mật khẩu!' },
-                    { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
-                    { max: 50, message: 'Mật khẩu không được vượt quá 50 ký tự!' }
+                    { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
+                    { max: 20, message: 'Mật khẩu không được vượt quá 20 ký tự!' },
+                    {
+                      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+                      message: 'Mật khẩu phải chứa chữ hoa, chữ thường, số và ký tự đặc biệt!',
+                    },
                   ]}
                 >
                   <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" size="large" />
                 </Form.Item>
-                <Form.Item name="role" label={<b>Vai trò</b>} rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}> 
+                {/* Ẩn mục vai trò trong form thêm người dùng */}
+                {/* <Form.Item name="role" label={<b>Vai trò</b>} rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}> 
                   <Select placeholder="Chọn vai trò" size="large">
                     <Option value="donor">Người hiến máu</Option>
                     <Option value="staff">Nhân viên</Option>
                   </Select>
-                </Form.Item>
+                </Form.Item> */}
               </div>
             </>
           ) : (
@@ -557,7 +570,7 @@ function AdminUsersPage() {
                   rules={[
                     { required: true, message: 'Vui lòng nhập tên người dùng!' },
                     { min: 3, message: 'Tên người dùng phải có ít nhất 3 ký tự!' },
-                    { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' }
+                    { max: 100, message: 'Tên người dùng không được vượt quá 100 ký tự!' },
                   ]}
                 >
                   <Input prefix={<UserOutlined />} placeholder="Nhập tên người dùng" size="large" disabled />
@@ -568,7 +581,7 @@ function AdminUsersPage() {
                   style={{ display: 'none' }}
                   rules={[
                     { required: true, message: 'Vui lòng nhập email!' },
-                    { type: 'email', message: 'Email không hợp lệ!' }
+                    { type: 'email', message: 'Email không hợp lệ!' },
                   ]}
                 >
                   <Input prefix={<MailOutlined />} placeholder="Nhập email" size="large" />
@@ -578,7 +591,7 @@ function AdminUsersPage() {
                   label={<b>Số điện thoại</b>}
                   rules={[
                     { required: true, message: 'Vui lòng nhập số điện thoại!' },
-                    { pattern: /^[0-9+]{10,15}$/, message: 'Số điện thoại phải hợp lệ!' }
+                    { pattern: /^[0-9+]{10,15}$/, message: 'Số điện thoại phải hợp lệ!' },
                   ]}
                 >
                   <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" size="large" disabled />
