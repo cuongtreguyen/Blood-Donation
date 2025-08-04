@@ -55,14 +55,14 @@
 //             padding: 0;
 //             box-sizing: border-box;
 //         }
-        
+
 //         body {
 //             font-family: 'Lato', sans-serif;
 //             background: #f1f1f1;
 //             padding: 40px 20px;
 //             color: var(--text-dark);
 //         }
-        
+
 //         .certificate-container {
 //             max-width: 840px;
 //             min-height: 594px;
@@ -86,7 +86,7 @@
 //             border: 2px solid var(--accent-gold);
 //             pointer-events: none;
 //         }
-        
+
 //         .certificate-container::after {
 //             content: '';
 //             position: absolute;
@@ -102,7 +102,7 @@
 //             text-align: center;
 //             margin-bottom: 20px;
 //         }
-        
+
 //         .header-logo {
 //             width: 80px;
 //             height: 80px;
@@ -145,7 +145,7 @@
 //             color: var(--text-light);
 //             margin: 20px 0;
 //         }
-        
+
 //         .donor-name {
 //             font-family: 'Merriweather', serif;
 //             font-size: 36px;
@@ -156,7 +156,7 @@
 //             border-bottom: 2px solid var(--accent-gold);
 //             display: inline-block;
 //         }
-        
+
 //         .donation-details {
 //             width: 80%;
 //             margin: 30px auto;
@@ -174,7 +174,7 @@
 //             color: var(--primary-red);
 //             text-align: left;
 //         }
-        
+
 //         .donation-details .detail-value {
 //             text-align: right;
 //             font-weight: 400;
@@ -186,12 +186,12 @@
 //             justify-content: space-around;
 //             margin-top: 40px;
 //         }
-        
+
 //         .signature-block {
 //             text-align: center;
 //             width: 40%;
 //         }
-        
+
 //         .signature-title {
 //             font-family: 'Merriweather', serif;
 //             font-size: 16px;
@@ -199,14 +199,14 @@
 //             color: var(--text-dark);
 //             margin-bottom: 50px;
 //         }
-        
+
 //         .signature-line {
 //             border-top: 1px dotted var(--text-dark);
 //             padding-top: 8px;
 //             font-size: 16px;
 //             font-weight: 700;
 //         }
-        
+
 //         .certificate-footer {
 //             text-align: center;
 //             margin-top: 30px;
@@ -236,16 +236,16 @@
 //             <h1 class="main-title">Chứng Nhận Hiến Máu Tình Nguyện</h1>
 //             <p class="subtitle">Certificate of Voluntary Blood Donation</p>
 //         </header>
-        
+
 //         <main class="certificate-body">
 //             <p class="acknowledgement-text">Trân trọng chứng nhận và ghi nhận nghĩa cử cao đẹp của:</p>
-            
+
 //             <div class="donor-name">${certificateData.donorName}</div>
-            
+
 //             <p class="acknowledgement-text">
 //                 Đã tình nguyện hiến máu cứu người, một hành động nhân văn sâu sắc.
 //             </p>
-            
+
 //             <table class="donation-details">
 //                 <tbody>
 //                     <tr>
@@ -263,7 +263,7 @@
 //                 </tbody>
 //             </table>
 //         </main>
-        
+
 //         <div class="signatures">
 //             <div class="signature-block">
 //                 <div class="signature-title">Người Hiến Máu</div>
@@ -291,9 +291,9 @@
 //       try {
 //         const response = await api.get(`/certificates/get-certificate-by-id/${donation.certificateId}`);
 //         const certificateData = response.data;
-        
+
 //         const htmlContent = createCertificateHTML(certificateData, donation);
-        
+
 //         // Create a temporary container for the HTML content
 //         const element = document.createElement('div');
 //         element.innerHTML = htmlContent;
@@ -310,7 +310,7 @@
 
 //         // Generate and download PDF
 //         await html2pdf().from(element).set(opt).save();
-        
+
 //         // Clean up
 //         document.body.removeChild(element);
 //       } catch (error) {
@@ -441,7 +441,7 @@
 //           // Kiểm tra xem có phải do lỗi API không
 //           // Nếu không có dữ liệu thì không phải lỗi
 //         }
-        
+
 //       } catch (err) {
 //         console.error("Failed to fetch histories:", err);
 //         setError("Không thể tải lịch sử. Vui lòng thử lại sau.");
@@ -462,8 +462,8 @@
 //         <div className="text-center py-12">
 //           <FaExclamationTriangle className="mx-auto text-5xl text-yellow-500 mb-4" />
 //           <p className="text-lg text-gray-600">{error}</p>
-//           <button 
-//             onClick={() => window.location.reload()} 
+//           <button
+//             onClick={() => window.location.reload()}
 //             className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
 //           >
 //             Thử lại
@@ -536,7 +536,7 @@
 //           <FaHistory className="text-red-600 text-2xl" />
 //         </div>
 //         <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
-//           Lịch sử 
+//           Lịch sử
 //         </h2>
 //       </div>
 //       {renderContent()}
@@ -544,17 +544,7 @@
 //   );
 // };
 
-// export default HistoryComponent; 
-
-
-
-
-
-
-
-
-
-
+// export default HistoryComponent;
 
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -570,6 +560,7 @@ import {
 } from "react-icons/fa";
 import api from "../../config/api";
 import html2pdf from "html2pdf.js";
+import { toast } from "react-toastify";
 
 // ⚙️ Hàm định dạng ngày tháng theo chuẩn Việt Nam
 const formatDate = (dateString) => {
@@ -811,7 +802,9 @@ const createCertificateHTML = (certificateData, donationData) => {
                 <tbody>
                     <tr>
                         <td class="detail-label">Ngày hiến máu:</td>
-                        <td class="detail-value">${formatDate(donationData.completedDate)}</td>
+                        <td class="detail-value">${formatDate(
+                          donationData.completedDate
+                        )}</td>
                     </tr>
                     <tr>
                         <td class="detail-label">Lượng máu đã hiến:</td>
@@ -819,7 +812,9 @@ const createCertificateHTML = (certificateData, donationData) => {
                     </tr>
                     <tr>
                         <td class="detail-label">Ngày cấp chứng nhận:</td>
-                        <td class="detail-value">${formatDate(certificateData.issueDate)}</td>
+                        <td class="detail-value">${formatDate(
+                          certificateData.issueDate
+                        )}</td>
                     </tr>
                 </tbody>
             </table>
@@ -850,13 +845,15 @@ const HistoryItem = ({ donation, isLast, isDonation = true }) => {
   const handleDownload = async () => {
     if (isDonation) {
       try {
-        const response = await api.get(`/certificates/get-certificate-by-id/${donation.certificateId}`);
+        const response = await api.get(
+          `/certificates/get-certificate-by-id/${donation.certificateId}`
+        );
         const certificateData = response.data;
-        
+
         const htmlContent = createCertificateHTML(certificateData, donation);
-        
+
         // Create a temporary container for the HTML content
-        const element = document.createElement('div');
+        const element = document.createElement("div");
         element.innerHTML = htmlContent;
         document.body.appendChild(element);
 
@@ -864,18 +861,21 @@ const HistoryItem = ({ donation, isLast, isDonation = true }) => {
         const opt = {
           margin: 0,
           filename: `ChungNhanHienMau-${donation.certificateId}-${certificateData.donorName}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
+          image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         };
 
         // Generate and download PDF
         await html2pdf().from(element).set(opt).save();
-        
+
         // Clean up
         document.body.removeChild(element);
       } catch (error) {
-        alert("Không thể tải chứng nhận hiến máu. Đơn có thể không tồn tại.");
+        // alert("Không thể tải chứng nhận hiến máu. Đơn có thể không tồn tại.");
+        toast.error(
+          "Không thể tải chứng nhận hiến máu. Chứng Chỉ Chưa được Cấp."
+        );
         console.error("Lỗi khi tải chứng nhận:", error);
       }
     }
@@ -905,8 +905,14 @@ const HistoryItem = ({ donation, isLast, isDonation = true }) => {
       {/* Content card with modern design */}
       <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:border-red-200">
         {/* Background gradient overlay */}
-        <div className={`absolute inset-0 bg-gradient-to-r ${isDonation ? 'from-red-50 to-pink-50' : 'from-green-50 to-emerald-50'} opacity-60`}></div>
-        
+        <div
+          className={`absolute inset-0 bg-gradient-to-r ${
+            isDonation
+              ? "from-red-50 to-pink-50"
+              : "from-green-50 to-emerald-50"
+          } opacity-60`}
+        ></div>
+
         {/* Content */}
         <div className="relative p-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -914,8 +920,16 @@ const HistoryItem = ({ donation, isLast, isDonation = true }) => {
             <div className="flex-1">
               {/* Date with icon */}
               <div className="flex items-center gap-3 mb-3">
-                <div className={`p-2 rounded-lg ${isDonation ? 'bg-red-100' : 'bg-green-100'}`}>
-                  <FaCalendarAlt className={`h-4 w-4 ${isDonation ? 'text-red-600' : 'text-green-600'}`} />
+                <div
+                  className={`p-2 rounded-lg ${
+                    isDonation ? "bg-red-100" : "bg-green-100"
+                  }`}
+                >
+                  <FaCalendarAlt
+                    className={`h-4 w-4 ${
+                      isDonation ? "text-red-600" : "text-green-600"
+                    }`}
+                  />
                 </div>
                 <span className="text-sm font-medium text-gray-600">
                   {formatDate(getDate())}
@@ -929,16 +943,16 @@ const HistoryItem = ({ donation, isLast, isDonation = true }) => {
 
               {/* Type indicator */}
               <div className="flex items-center gap-2">
-                <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  isDonation 
-                    ? 'bg-red-100 text-red-700' 
-                    : 'bg-green-100 text-green-700'
-                }`}>
-                  {isDonation ? 'Hiến máu' : 'Nhận máu'}
+                <div
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    isDonation
+                      ? "bg-red-100 text-red-700"
+                      : "bg-green-100 text-green-700"
+                  }`}
+                >
+                  {isDonation ? "Hiến máu" : "Nhận máu"}
                 </div>
-                {isDonation && (
-                  <FaHeart className="h-3 w-3 text-red-500" />
-                )}
+                {isDonation && <FaHeart className="h-3 w-3 text-red-500" />}
               </div>
             </div>
 
@@ -946,12 +960,16 @@ const HistoryItem = ({ donation, isLast, isDonation = true }) => {
             <div className="text-right lg:text-right">
               {/* Blood amount */}
               <div className="mb-4">
-                <p className={`text-3xl font-bold ${isDonation ? 'text-red-600' : 'text-green-600'}`}>
+                <p
+                  className={`text-3xl font-bold ${
+                    isDonation ? "text-red-600" : "text-green-600"
+                  }`}
+                >
                   {donation.unit}
                   <span className="text-lg font-medium ml-1">ml</span>
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {isDonation ? 'Đã hiến' : 'Đã nhận'}
+                  {isDonation ? "Đã hiến" : "Đã nhận"}
                 </p>
               </div>
 
@@ -970,9 +988,13 @@ const HistoryItem = ({ donation, isLast, isDonation = true }) => {
         </div>
 
         {/* Decorative element */}
-        <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${
-          isDonation ? 'from-red-200 to-red-300' : 'from-green-200 to-green-300'
-        } opacity-20 rounded-bl-full`}></div>
+        <div
+          className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${
+            isDonation
+              ? "from-red-200 to-red-300"
+              : "from-green-200 to-green-300"
+          } opacity-20 rounded-bl-full`}
+        ></div>
       </div>
     </div>
   );
@@ -1026,7 +1048,9 @@ const HistoryComponent = ({ userId: propUserId }) => {
       try {
         // Lấy lịch sử hiến máu
         try {
-          const donationResponse = await api.get(`/blood-register/history/${userId}`);
+          const donationResponse = await api.get(
+            `/blood-register/history/${userId}`
+          );
           const sortedDonationHistory = donationResponse.data.sort(
             (a, b) => new Date(b.completedDate) - new Date(a.completedDate)
           );
@@ -1038,7 +1062,9 @@ const HistoryComponent = ({ userId: propUserId }) => {
 
         // Lấy lịch sử nhận máu
         try {
-          const receiveResponse = await api.get(`/blood-receive/get-list-receive-by-user-id?userId=${userId}`);
+          const receiveResponse = await api.get(
+            `/blood-receive/get-list-receive-by-user-id?userId=${userId}`
+          );
           const sortedReceiveHistory = receiveResponse.data.sort(
             (a, b) => new Date(b.receiveDate) - new Date(a.receiveDate)
           );
@@ -1057,7 +1083,6 @@ const HistoryComponent = ({ userId: propUserId }) => {
           // Kiểm tra xem có phải do lỗi API không
           // Nếu không có dữ liệu thì không phải lỗi
         }
-        
       } catch (err) {
         console.error("Failed to fetch histories:", err);
         setError("Không thể tải lịch sử. Vui lòng thử lại sau.");
@@ -1079,10 +1104,12 @@ const HistoryComponent = ({ userId: propUserId }) => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-100 mb-6">
             <FaExclamationTriangle className="text-2xl text-yellow-600" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Có lỗi xảy ra</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Có lỗi xảy ra
+          </h3>
           <p className="text-gray-600 mb-6">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="px-6 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors duration-300 shadow-md hover:shadow-lg"
           >
             Thử lại
@@ -1097,9 +1124,12 @@ const HistoryComponent = ({ userId: propUserId }) => {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 mb-6">
             <FaInbox className="text-3xl text-gray-400" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Chưa có lịch sử</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            Chưa có lịch sử
+          </h3>
           <p className="text-gray-600 text-lg max-w-md mx-auto leading-relaxed">
-            Mỗi lần hiến máu của bạn là một món quà vô giá dành cho những người cần sự giúp đỡ.
+            Mỗi lần hiến máu của bạn là một món quà vô giá dành cho những người
+            cần sự giúp đỡ.
           </p>
         </div>
       );
@@ -1115,17 +1145,24 @@ const HistoryComponent = ({ userId: propUserId }) => {
                 <FaTint className="text-red-600 text-xl" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">Lịch sử hiến máu</h3>
-                <p className="text-gray-600">Những lần bạn đã chia sẻ tình yêu thương</p>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Lịch sử hiến máu
+                </h3>
+                <p className="text-gray-600">
+                  Những lần bạn đã chia sẻ tình yêu thương
+                </p>
               </div>
             </div>
-            
+
             <div className="space-y-6">
               {donationHistory.map((donation, index) => (
                 <HistoryItem
                   key={donation.id || index}
                   donation={donation}
-                  isLast={index === donationHistory.length - 1 && receiveHistory.length === 0}
+                  isLast={
+                    index === donationHistory.length - 1 &&
+                    receiveHistory.length === 0
+                  }
                   isDonation={true}
                 />
               ))}
@@ -1141,11 +1178,15 @@ const HistoryComponent = ({ userId: propUserId }) => {
                 <FaHeart className="text-green-600 text-xl" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">Lịch sử nhận máu</h3>
-                <p className="text-gray-600">Những lần bạn được nhận sự hỗ trợ</p>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Lịch sử nhận máu
+                </h3>
+                <p className="text-gray-600">
+                  Những lần bạn được nhận sự hỗ trợ
+                </p>
               </div>
             </div>
-            
+
             <div className="space-y-6">
               {receiveHistory.map((receive, index) => (
                 <HistoryItem
@@ -1182,9 +1223,7 @@ const HistoryComponent = ({ userId: propUserId }) => {
       </div>
 
       {/* Content */}
-      <div className="p-8 lg:p-10">
-        {renderContent()}
-      </div>
+      <div className="p-8 lg:p-10">{renderContent()}</div>
     </div>
   );
 };
