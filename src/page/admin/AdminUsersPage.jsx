@@ -146,40 +146,7 @@ function AdminUsersPage() {
     form.resetFields();
   };
 
-  // Khi bấm nút xóa, đổi trạng thái thành không hoạt động
-  // const handleDelete = async (key) => {
-  //   try {
-  //     const userToDelete = users.find(user => user.key === key);
-  //     if (!userToDelete) {
-  //       toast.error('Không tìm thấy người dùng!');
-  //       return;
-  //     }
-  //     // Gọi API đổi trạng thái
-  //     const ok = await updateUserStatus(userToDelete.id, 'INACTIVE');
-  //     if (ok) {
-  //       // Refresh lại dữ liệu từ API
-  //       await refreshUsersData();
-  //       toast.success('Đã chuyển trạng thái người dùng sang không hoạt động!');
-  //     }
-  //   } catch (error) {
-  //     console.error('Lỗi khi đổi trạng thái người dùng:', error);
-  //     toast.error('Chuyển trạng thái người dùng thất bại. Vui lòng thử lại sau!');
-  //   }
-  // };
-
-  // Thêm hàm xử lý đổi trạng thái
-  // const handleToggleStatus = async (user) => {
-  //   try {
-  //     const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-  //     const ok = await updateUserStatus(user.id, newStatus);
-  //     if (ok) {
-  //       refreshUsersData(); // Reload lại danh sách ngay sau khi đổi trạng thái thành công
-  //     }
-  //   } catch (error) {
-  //     console.error('Lỗi khi đổi trạng thái người dùng:', error);
-  //     toast.error('Chuyển trạng thái người dùng thất bại. Vui lòng thử lại sau!');
-  //   }
-  // };
+  
 
   // Hàm xử lý thay đổi trạng thái từ dropdown
   const handleStatusChange = async (user, newStatus) => {
